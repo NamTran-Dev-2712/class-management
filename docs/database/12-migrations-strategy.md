@@ -1,0 +1,410 @@
+# 12 — Migration Strategy
+
+> Cross-cutting: hướng dẫn quản lý database migrations xuyên suốt dự án.
+
+---
+
+## 1. Tool Choice
+
+### EF Core Migrations (Primary)
+
+**Lý do chọn**: Stack là .NET, EF Core Code-First là standard approach. Raw SQL có thể nhúng qua `migrationBuilder.Sql()`.
+
+```bash
+# Tạo migration mới
+dotnet ef migrations add <MigrationName> --project <Infrastructure> --startup-project <API>
+
+# Apply lên database
+dotnet ef database update --project <Infrastructure> --startup-project <API>
+
+# Generate SQL script (không apply)
+dotnet ef migrations script --idempotent -o migrations.sql
+```
+
+### Escape Hatch cho Raw SQL
+
+Khi EF Core không support (complex triggers, GIN indexes, stored functions):
+
+```csharp
+// Trong migration file
+protected override void Up(MigrationBuilder migrationBuilder)
+{
+    // EF Core normal migration
+    migrationBuilder.CreateTable(...);
+
+    // Raw SQL escape hatch
+    migrationBuilder.Sql(@"
+        CREATE INDEX CONCURRENTLY idx_questions_content_search
+        ON questions USING GIN (content_search);
+    ");
+
+    migrationBuilder.Sql(@"
+        CREATE OR REPLACE FUNCTION set_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
+        $$ LANGUAGE plpgsql;
+    ");
+}
+```
+
+---
+
+## 2. Naming Convention
+
+### Migration File Names
+
+```
+Format: {YYYYMMDDHHmm}_{verb}_{noun_or_description}
+
+Examples:
+  202601150900_create_extensions_and_functions
+  202601150910_create_users_roles_tables
+  202601150920_create_subjects_table
+  202601160900_create_classes_table
+  202601160910_create_class_memberships_table
+  202601170900_create_questions_tables
+  ...
+  202602010900_add_email_verification_to_users    -- Feature addition
+  202602010910_add_idx_questions_content_search   -- Index addition
+  202602050900_fix_snapshot_questions_fk          -- Bug fix
+```
+
+### Verb Guide
+
+| Verb | Dùng khi |
+|---|---|
+| `create` | Tạo table/index mới |
+| `add` | Thêm column, index, constraint vào table hiện có |
+| `alter` | Đổi type, rename column (cẩn thận) |
+| `drop` | Xóa column, table, index |
+| `fix` | Bug fix trong schema |
+| `seed` | Data migration |
+| `backfill` | Backfill data cho column mới |
+
+---
+
+## 3. Migration Order (theo MVP)
+
+### MVP-1: Core Foundation
+
+```
+202601150900_create_extensions              -- citext, pgcrypto, pg_stat_statements
+202601150910_create_updated_at_function     -- Shared trigger function
+202601150920_create_roles_table             -- Seed roles
+202601150930_create_users_table             -- + triggers + indexes
+202601150940_create_user_roles_table
+202601150950_create_refresh_tokens_table
+202601151000_create_password_reset_tokens_table
+202601151010_create_subjects_table          -- + seed data
+```
+
+### MVP-2: Classroom
+
+```
+202601220900_create_classes_table           -- + triggers + indexes
+202601220910_create_class_memberships_table
+```
+
+### MVP-3: Question Bank
+
+```
+202601290900_create_questions_table         -- + triggers + tsvector column
+202601290910_create_question_options_table
+202601290920_create_question_tags_table
+202601290930_create_gin_index_questions     -- GIN index (CONCURRENTLY trong prod)
+```
+
+### MVP-4: Exam Builder
+
+```
+202602050900_create_exams_table             -- + triggers
+202602050910_create_exam_questions_table    -- + sync trigger
+```
+
+### MVP-5: Assignment & Testing
+
+```
+202602120900_create_assignments_table       -- + triggers
+202602120910_create_assignment_snapshots_table
+202602120920_create_snapshot_questions_table
+202602120930_create_snapshot_options_table
+202602120940_create_attempts_table          -- + triggers
+202602120950_create_attempt_answers_table   -- + triggers
+```
+
+### MVP-6: Grading
+
+```
+202602190900_create_manual_grades_table     -- + triggers + grading completion trigger
+202602190910_create_assignment_grade_releases_table
+```
+
+### MVP-7: Admin
+
+```
+202602260900_create_audit_logs_table        -- + indexes + REVOKE UPDATE/DELETE
+202602260910_create_reports_table           -- + triggers
+202602260920_create_notifications_table     -- + idempotency index
+202602260930_create_system_settings_table   -- + seed data
+```
+
+### MVP-8: Payment
+
+```
+202603050900_create_plans_table             -- + seed Free/Pro plans
+202603050910_create_subscriptions_table
+202603050920_create_payments_table
+202603050930_create_invoices_table
+202603050940_seed_free_subscriptions        -- Data migration: existing teachers
+```
+
+---
+
+## 4. Down Migrations (Rollback)
+
+**Nguyên tắc**: Mọi migration phải có `Down()` viết đầy đủ.
+
+```csharp
+protected override void Down(MigrationBuilder migrationBuilder)
+{
+    // Đảo ngược CHÍNH XÁC những gì Up() đã làm
+    // Theo thứ tự ngược lại
+
+    // Xóa triggers trước
+    migrationBuilder.Sql("DROP TRIGGER IF EXISTS trg_users_updated_at ON users;");
+
+    // Xóa indexes
+    migrationBuilder.DropIndex("uq_users_email_active", "users");
+
+    // Xóa tables (theo thứ tự FK)
+    migrationBuilder.DropTable("user_roles");
+    migrationBuilder.DropTable("users");
+}
+```
+
+### Production Rollback Policy
+
+> **Quan trọng**: Production dùng **forward-only** mindset. Down migration chỉ dùng trong development/staging.
+
+| Environment | Rollback approach |
+|---|---|
+| Development | `dotnet ef database update <PreviousMigration>` |
+| Staging | Down migration hoặc restore from backup |
+| **Production** | **Forward-only**: deploy hotfix migration thay vì rollback |
+
+---
+
+## 5. Zero-Downtime Migrations
+
+Áp dụng khi table có nhiều data hoặc production traffic cao.
+
+### Pattern 1: Add nullable column (safe, zero-downtime)
+
+```
+Step 1: Add column nullable
+  ALTER TABLE users ADD COLUMN email_verified_at TIMESTAMPTZ NULL;
+  → Instant, no downtime
+
+Step 2 (optional): Backfill
+  UPDATE users SET email_verified_at = created_at WHERE email_verified_at IS NULL;
+  → Batch update, có thể chạy online
+
+Step 3 (optional): Set NOT NULL nếu cần
+  ALTER TABLE users ALTER COLUMN email_verified_at SET NOT NULL;
+  → Chỉ sau khi backfill hoàn thành
+```
+
+### Pattern 2: Add index (zero-downtime)
+
+```sql
+-- CONCURRENTLY: build index mà không lock table
+CREATE INDEX CONCURRENTLY idx_questions_new ON questions (subject_id, type);
+
+-- EF Core: dùng migrationBuilder.Sql()
+-- Không dùng migrationBuilder.CreateIndex() vì không hỗ trợ CONCURRENTLY
+```
+
+> **Warning**: `CREATE INDEX CONCURRENTLY` không thể chạy trong transaction. Phải là standalone migration, không wrap trong BEGIN/COMMIT.
+
+### Pattern 3: Rename column (4-step, zero-downtime)
+
+```
+Step 1: Add new column (nullable)
+  ALTER TABLE users ADD COLUMN display_name_new TEXT;
+
+Step 2: Dual-write in app
+  // App writes to BOTH old and new column
+
+Step 3: Backfill
+  UPDATE users SET display_name_new = display_name WHERE display_name_new IS NULL;
+
+Step 4: Switch app to read from new column, drop old
+  // After deploy: drop old column
+  ALTER TABLE users DROP COLUMN display_name;
+  ALTER TABLE users RENAME COLUMN display_name_new TO display_name;
+```
+
+### Pattern 4: Drop column (safe 2-step)
+
+```
+Step 1: Remove from application code (stop reading/writing to column)
+  → Deploy app without using the column
+
+Step 2: Drop column from DB
+  ALTER TABLE users DROP COLUMN obsolete_column;
+  → Now safe to drop, no app code references it
+```
+
+---
+
+## 6. Long-Running Migration Safety
+
+### Batch Updates
+
+Tránh `UPDATE table SET ... WHERE 1=1` trên table lớn — lock table quá lâu.
+
+```sql
+-- Batch update với loop
+DO $$
+DECLARE
+  batch_size INT := 1000;
+  updated INT;
+BEGIN
+  LOOP
+    UPDATE attempt_answers
+    SET submitted_at = (SELECT submitted_at FROM attempts WHERE id = attempt_id)
+    WHERE submitted_at IS NULL
+    LIMIT batch_size;
+
+    GET DIAGNOSTICS updated = ROW_COUNT;
+    EXIT WHEN updated < batch_size;
+
+    PERFORM pg_sleep(0.1);  -- Brief pause between batches
+  END LOOP;
+END $$;
+```
+
+### Statement Timeout
+
+```sql
+-- Set timeout cho long-running migration (không bị hang forever)
+SET statement_timeout = '30s';
+ALTER TABLE ... ;
+RESET statement_timeout;
+```
+
+---
+
+## 7. Migration Safety Checklist
+
+Trước khi apply migration lên production:
+
+**Code Review**
+- [ ] Migration có `Down()` method viết đầy đủ
+- [ ] Không có `DROP TABLE` hay `DROP COLUMN` mà không có 2-step process
+- [ ] Không có UPDATE/DELETE trên large table mà không batch
+- [ ] `CREATE INDEX` dùng `CONCURRENTLY` (nếu table có data)
+
+**Testing**
+- [ ] Migration chạy thành công trên dev database
+- [ ] `Down()` rollback chạy thành công (test trên dev)
+- [ ] Migration chạy thành công trên staging environment với data tương tự production
+
+**Pre-deployment**
+- [ ] Backup production database xong
+- [ ] Migration script được review bởi ít nhất 1 người khác
+- [ ] Estimate runtime (test trên staging với production-size data nếu có)
+- [ ] Maintenance window allocated nếu migration có downtime risk
+
+**Post-deployment**
+- [ ] Verify: query key tables sau migration, data còn đúng
+- [ ] Monitor: error rate, slow queries trong 15 phút đầu
+- [ ] Rollback plan ready (restore từ backup nếu cần)
+
+---
+
+## 8. Seed Data Management
+
+### Idempotent Seeding
+
+```csharp
+// Trong seed migration (hoặc Program.cs startup)
+public static async Task SeedAsync(ApplicationDbContext context)
+{
+    // Idempotent: chỉ insert nếu chưa có
+    if (!await context.Roles.AnyAsync())
+    {
+        context.Roles.AddRange(
+            new Role { Name = "Student" },
+            new Role { Name = "Teacher" },
+            new Role { Name = "Admin" }
+        );
+        await context.SaveChangesAsync();
+    }
+
+    if (!await context.SystemSettings.AnyAsync(s => s.Key == "max_classes_per_teacher"))
+    {
+        context.SystemSettings.Add(new SystemSetting
+        {
+            Key = "max_classes_per_teacher",
+            Value = JsonDocument.Parse("10"),
+            ValueType = "integer",
+            Description = "Free plan: max classes per teacher"
+        });
+        await context.SaveChangesAsync();
+    }
+}
+```
+
+### Seed Data Files
+
+Seed data quan trọng nên có migration file riêng (không trộn với schema migration):
+
+```
+202601150920_create_subjects_table.cs     -- Schema
+202601151010_seed_roles.cs                -- Seed
+202601151020_seed_subjects.cs             -- Seed
+202603050900_create_plans_table.cs        -- Schema
+202603050910_seed_plans.cs                -- Seed
+202603050920_seed_system_settings.cs      -- Seed
+```
+
+---
+
+## 9. CI/CD Integration
+
+### GitHub Actions / Azure DevOps Pipeline
+
+```yaml
+# migration-check.yml
+- name: Validate migrations
+  run: |
+    # Generate migration script
+    dotnet ef migrations script --idempotent -o /tmp/migration.sql
+    
+    # Syntax check (PostgreSQL client)
+    psql $CI_DB_URL --command "\i /tmp/migration.sql" --dry-run
+
+- name: Apply migrations (staging)
+  run: |
+    dotnet ef database update --connection "$STAGING_DB_CONNECTION"
+
+- name: Run smoke tests
+  run: dotnet test --filter Category=Database
+```
+
+### Rollback on Failure
+
+```yaml
+- name: Apply migrations with rollback on failure
+  run: |
+    # Save current migration state
+    CURRENT=$(dotnet ef migrations list | tail -1)
+    
+    # Try to apply
+    if ! dotnet ef database update; then
+      echo "Migration failed, rolling back to $CURRENT"
+      dotnet ef database update $CURRENT
+      exit 1
+    fi
+```
