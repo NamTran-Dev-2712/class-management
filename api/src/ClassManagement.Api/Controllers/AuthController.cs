@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 
 [ApiController]
@@ -38,10 +39,15 @@ public class AuthController : BaseApiController
             result.RefreshTokenExpiresAt
         );
 
-        var response = new LoginResponse();
-        response.FromAuthResult(result);
+        return ApiOk(ToProfileDto(result), "Login successful.");
+    }
 
-        return ApiOk(response, "Login successful.");
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetProfile(CancellationToken cancellationToken)
+    {
+        var profile = await _mediator.Send(new GetProfileQuery(), cancellationToken);
+        return ApiOk(profile);
     }
 
     private void SetAuthCookies(
@@ -77,4 +83,17 @@ public class AuthController : BaseApiController
             }
         );
     }
+
+    private static UserProfileDto ToProfileDto(AuthResult r) =>
+        new(
+            PublicId: r.PublicId,
+            DisplayName: r.DisplayName,
+            Email: r.Email,
+            EmailConfirmed: r.EmailConfirmed,
+            AvatarUrl: r.AvatarUrl,
+            Bio: r.Bio,
+            LastLoginAt: r.LastLoginAt,
+            CreatedAt: r.CreatedAt,
+            Roles: r.Roles
+        );
 }

@@ -61,12 +61,16 @@ public class AuthRepository : IAuthRepository
             PublicId: user.PublicId.ToString(),
             DisplayName: user.DisplayName,
             Email: user.Email ?? string.Empty,
+            EmailConfirmed: user.EmailConfirmed,
+            AvatarUrl: user.AvatarUrl,
+            Bio: user.Bio,
+            LastLoginAt: user.LastLoginAt,
+            CreatedAt: user.CreatedAt,
             AccessToken: tokenResult.AccessToken,
             RefreshToken: tokenResult.RefreshToken,
             ExpiresAt: tokenResult.AccessTokenExpiry,
             RefreshTokenExpiresAt: tokenResult.RefreshTokenExpiry,
-            Roles: [.. roles],
-            EmailConfirmed: user.EmailConfirmed
+            Roles: [.. roles]
         );
     }
 
@@ -101,5 +105,29 @@ public class AuthRepository : IAuthRepository
         }
 
         return user.Id;
+    }
+
+    public async Task<UserProfileDto> GetProfileAsync(
+        long userId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var user =
+            await _userManager.FindByIdAsync(userId.ToString())
+            ?? throw new NotFoundException("User not found.");
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return new UserProfileDto(
+            PublicId: user.PublicId.ToString(),
+            DisplayName: user.DisplayName,
+            Email: user.Email ?? string.Empty,
+            EmailConfirmed: user.EmailConfirmed,
+            AvatarUrl: user.AvatarUrl,
+            Bio: user.Bio,
+            LastLoginAt: user.LastLoginAt,
+            CreatedAt: user.CreatedAt,
+            Roles: [.. roles]
+        );
     }
 }

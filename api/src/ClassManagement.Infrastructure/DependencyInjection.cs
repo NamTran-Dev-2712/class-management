@@ -91,6 +91,17 @@ public static class DependencyInjection
                     ),
                     ClockSkew = TimeSpan.Zero,
                 };
+
+                // Read access token from cookie when Authorization header is absent
+                opts.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = ctx =>
+                    {
+                        if (string.IsNullOrEmpty(ctx.Token))
+                            ctx.Token = ctx.Request.Cookies["access_token"];
+                        return Task.CompletedTask;
+                    },
+                };
             });
         services.AddAuthorization();
 

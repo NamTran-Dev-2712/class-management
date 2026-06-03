@@ -11,4 +11,9 @@ public interface IAuthRepository
         string role = ApplicationRoles.Student,
         CancellationToken cancellationToken = default
     );
+
+    Task<UserProfileDto> GetProfileAsync(
+        long userId,
+        CancellationToken cancellationToken = default
+    );
 }

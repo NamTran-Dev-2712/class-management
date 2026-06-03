@@ -1,4 +1,4 @@
-public record AuthResult(
+public record UserProfileDto(
     string PublicId,
     string DisplayName,
     string Email,
@@ -7,9 +7,5 @@ public record AuthResult(
     string? Bio,
     DateTime? LastLoginAt,
     DateTime CreatedAt,
-    string AccessToken,
-    string RefreshToken,
-    DateTime ExpiresAt,
-    DateTime RefreshTokenExpiresAt,
     IReadOnlyList<string> Roles
 );
