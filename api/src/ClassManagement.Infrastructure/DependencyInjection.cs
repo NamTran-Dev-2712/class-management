@@ -71,6 +71,9 @@ public static class DependencyInjection
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        // repositories for specific modules
+        services.AddScoped<IAuthRepository, AuthRepository>();
+
         // Current user from HTTP context
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();

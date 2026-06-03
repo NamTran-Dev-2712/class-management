@@ -44,6 +44,18 @@ app.MapHealthChecks(
     }
 );
 
+// log url on startup
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+var url = app.Configuration["ASPNETCORE_URLS"] ?? "http://localhost:5000";
+logger.LogInformation("Starting API at {Url}", url);
+logger.LogInformation(
+    "Health endpoints: {Url}/health, {Url}/health/ready, {Url}/health/live",
+    url,
+    url,
+    url
+);
+logger.LogInformation("API documentation available at {Url}/scalar/v1", url);
+
 // Apply pending migrations + seed reference data
 await DatabaseSeeder.SeedAsync(app.Services);
 
