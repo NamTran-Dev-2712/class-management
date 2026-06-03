@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
 namespace ClassManagement.Infrastructure.Identity;
@@ -13,6 +14,7 @@ public sealed class ApplicationUser
     public string DisplayName { get; set; } = string.Empty;
     public string? AvatarUrl { get; set; }
     public string? Bio { get; set; }
+    public bool IsActive { get; set; } = true;
     public bool IsLocked { get; set; }
     public DateTime? LockedAt { get; set; }
     public long? LockedBy { get; set; }
@@ -22,4 +24,7 @@ public sealed class ApplicationUser
     public DateTime? DeletedAt { get; set; }
     public long? CreatedBy { get; set; }
     public long? UpdatedBy { get; set; }
+
+    [NotMapped]
+    public bool IsDeleted => DeletedAt.HasValue;
 }

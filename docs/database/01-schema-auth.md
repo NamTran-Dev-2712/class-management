@@ -70,6 +70,7 @@
 | `display_name` | `TEXT` | NO | — | CHECK length 2–100 |
 | `avatar_url` | `TEXT` | YES | NULL | CHECK `^https?://` |
 | `bio` | `TEXT` | YES | NULL | CHECK length ≤ 500 |
+| `is_active` | `BOOLEAN` | NO | `true` | `false` = tài khoản bị vô hiệu hóa bởi admin |
 | `is_locked` | `BOOLEAN` | NO | `false` | **Admin-initiated lockout** (khác Identity lockout) |
 | `locked_at` | `TIMESTAMPTZ` | YES | NULL | Thời điểm admin khóa |
 | `locked_by` | `BIGINT` | YES | NULL | FK → users(id) SET NULL — admin đã khóa |
@@ -87,8 +88,12 @@ uq_users_email_active       UNIQUE (email) WHERE deleted_at IS NULL    ← parti
 EmailIndex                  (normalized_email)                          ← từ Identity
 UserNameIndex               UNIQUE (normalized_user_name)              ← từ Identity
 idx_users_deleted_at        (deleted_at)
+idx_users_is_active         (is_active) WHERE is_active = false        ← partial, chỉ index user bị disable
 idx_users_is_locked         (is_locked) WHERE is_locked = true
 ```
+
+> **`is_active` vs `deleted_at`:** `deleted_at IS NOT NULL` = xóa mềm (không thể phục hồi qua UI bình thường); `is_active = false` = tạm vô hiệu hóa (có thể bật lại). Đây là 2 cơ chế độc lập.
+> **`IsDeleted`** là computed property trên C# entity (`DeletedAt.HasValue`), **không** có cột DB tương ứng.
 
 ### Lockout Strategy (2 cơ chế coexist)
 | Cơ chế | Column | Kích hoạt bởi |

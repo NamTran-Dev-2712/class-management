@@ -1,3 +1,4 @@
+using System.Text;
 using ClassManagement.Infrastructure.Persistence;
 using ClassManagement.Infrastructure.Persistence.Cache;
 using ClassManagement.Infrastructure.Persistence.DbContext;
@@ -5,9 +6,11 @@ using ClassManagement.Infrastructure.Persistence.Interceptors;
 using ClassManagement.Infrastructure.Security;
 using ClassManagement.Infrastructure.Services.Cache;
 using ClassManagement.Infrastructure.Services.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ClassManagement.Infrastructure;
 
@@ -64,14 +67,41 @@ public static class DependencyInjection
         });
         services.AddScoped<ICacheService, RedisCacheService>();
 
-        // JWT options (skeleton — full wiring added when auth module is implemented)
+        // JWT Bearer authentication
+        var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()!;
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services
+            .AddAuthentication(opts =>
+            {
+                opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(opts =>
+            {
+                opts.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtOptions.SecretKey)
+                    ),
+                    ClockSkew = TimeSpan.Zero,
+                };
+            });
+        services.AddAuthorization();
 
         // Generic repository + Unit of Work
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // repositories for specific modules
+        // Auth services
+        services.AddScoped<ITokenHasher, TokenHasher>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IAuthRepository, AuthRepository>();
 
         // Current user from HTTP context
