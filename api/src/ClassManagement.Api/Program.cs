@@ -60,3 +60,6 @@ logger.LogInformation("API documentation available at {Url}/scalar/v1", url);
 await DatabaseSeeder.SeedAsync(app.Services);
 
 app.Run();
+
+// Required for WebApplicationFactory in integration tests
+public partial class Program { }

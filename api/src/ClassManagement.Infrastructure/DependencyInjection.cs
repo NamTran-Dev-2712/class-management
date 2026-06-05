@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ClassManagement.Infrastructure;
@@ -68,7 +69,6 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, RedisCacheService>();
 
         // JWT Bearer authentication
-        var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()!;
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services
             .AddAuthentication(opts =>
@@ -76,33 +76,42 @@ public static class DependencyInjection
                 opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(opts =>
-            {
-                opts.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtOptions.Issuer,
-                    ValidAudience = jwtOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtOptions.SecretKey)
-                    ),
-                    ClockSkew = TimeSpan.Zero,
-                };
+            .AddJwtBearer();
 
-                // Read access token from cookie when Authorization header is absent
-                opts.Events = new JwtBearerEvents
+        // Bind JwtBearerOptions lazily from IOptions<JwtOptions> so the validation key is the
+        // exact same one JwtTokenService signs with (single source of truth, no eager capture).
+        services
+            .AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<JwtOptions>>(
+                (bearer, jwt) =>
                 {
-                    OnMessageReceived = ctx =>
+                    var o = jwt.Value;
+                    bearer.TokenValidationParameters = new TokenValidationParameters
                     {
-                        if (string.IsNullOrEmpty(ctx.Token))
-                            ctx.Token = ctx.Request.Cookies["access_token"];
-                        return Task.CompletedTask;
-                    },
-                };
-            });
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = o.Issuer,
+                        ValidAudience = o.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(o.SecretKey)
+                        ),
+                        ClockSkew = TimeSpan.Zero,
+                    };
+
+                    // Read access token from cookie when Authorization header is absent
+                    bearer.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = ctx =>
+                        {
+                            if (string.IsNullOrEmpty(ctx.Token))
+                                ctx.Token = ctx.Request.Cookies["access_token"];
+                            return Task.CompletedTask;
+                        },
+                    };
+                }
+            );
         services.AddAuthorization();
 
         // Generic repository + Unit of Work

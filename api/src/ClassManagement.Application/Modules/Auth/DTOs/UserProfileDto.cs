@@ -1,6 +1,7 @@
 public record UserProfileDto(
     string PublicId,
     string DisplayName,
+    string? PhoneNumber,
     string Email,
     bool EmailConfirmed,
     string? AvatarUrl,

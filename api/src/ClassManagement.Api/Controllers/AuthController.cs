@@ -1,6 +1,8 @@
+using ClassManagement.Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -16,6 +18,7 @@ public class AuthController : BaseApiController
     }
 
     [HttpPost("register")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Register)]
     public async Task<IActionResult> Register(RegisterCommand command)
     {
         var userId = await _mediator.Send(command);
@@ -28,9 +31,35 @@ public class AuthController : BaseApiController
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Login)]
     public async Task<IActionResult> Login(LoginCommand command)
     {
         var result = await _mediator.Send(command);
+        SetAuthCookies(
+            result.AccessToken,
+            result.ExpiresAt,
+            result.RefreshToken,
+            result.RefreshTokenExpiresAt
+        );
+        return ApiOk(ToProfileDto(result), "Login successful.");
+    }
+
+    [HttpPost("refresh")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Refresh)]
+    public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
+    {
+        var rawToken = Request.Cookies["refresh_token"];
+        if (string.IsNullOrEmpty(rawToken))
+            return ApiUnauthorized("Refresh token is missing.");
+
+        var result = await _mediator.Send(
+            new RefreshTokenCommand(
+                rawToken,
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                Request.Headers.UserAgent.ToString()
+            ),
+            cancellationToken
+        );
 
         SetAuthCookies(
             result.AccessToken,
@@ -38,8 +67,7 @@ public class AuthController : BaseApiController
             result.RefreshToken,
             result.RefreshTokenExpiresAt
         );
-
-        return ApiOk(ToProfileDto(result), "Login successful.");
+        return ApiOk(ToProfileDto(result));
     }
 
     [Authorize]
@@ -48,6 +76,40 @@ public class AuthController : BaseApiController
     {
         var profile = await _mediator.Send(new GetProfileQuery(), cancellationToken);
         return ApiOk(profile);
+    }
+
+    [Authorize]
+    [HttpPatch("profile")]
+    [EnableRateLimiting(RateLimitOptions.Policies.UpdateProfile)]
+    public async Task<IActionResult> UpdateProfile(
+        UpdateProfileCommand command,
+        CancellationToken cancellationToken
+    )
+    {
+        var profile = await _mediator.Send(command, cancellationToken);
+        return ApiOk(profile);
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    [EnableRateLimiting(RateLimitOptions.Policies.ChangePassword)]
+    public async Task<IActionResult> ChangePassword(
+        ChangePasswordCommand command,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(command, cancellationToken);
+        DeleteAuthCookies();
+        return ApiOk("Password changed successfully. Please log in again.");
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    {
+        var rawToken = Request.Cookies["refresh_token"];
+        await _mediator.Send(new LogoutCommand(rawToken), cancellationToken);
+        DeleteAuthCookies();
+        return ApiOk("Logged out successfully.");
     }
 
     private void SetAuthCookies(
@@ -84,10 +146,18 @@ public class AuthController : BaseApiController
         );
     }
 
+    private void DeleteAuthCookies()
+    {
+        var opts = new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Lax };
+        Response.Cookies.Delete("access_token", opts);
+        Response.Cookies.Delete("refresh_token", opts);
+    }
+
     private static UserProfileDto ToProfileDto(AuthResult r) =>
         new(
             PublicId: r.PublicId,
             DisplayName: r.DisplayName,
+            PhoneNumber: r.PhoneNumber,
             Email: r.Email,
             EmailConfirmed: r.EmailConfirmed,
             AvatarUrl: r.AvatarUrl,

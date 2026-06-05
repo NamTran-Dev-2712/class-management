@@ -5,6 +5,7 @@ public record AuthResult(
     bool EmailConfirmed,
     string? AvatarUrl,
     string? Bio,
+    string? PhoneNumber,
     DateTime? LastLoginAt,
     DateTime CreatedAt,
     string AccessToken,

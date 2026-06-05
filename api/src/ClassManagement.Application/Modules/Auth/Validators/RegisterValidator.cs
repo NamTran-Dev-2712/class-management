@@ -11,8 +11,10 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
         RuleFor(x => x.DisplayName)
             .NotEmpty()
             .WithMessage("Display name is required.")
-            .MaximumLength(50)
-            .WithMessage("Display name must not exceed 50 characters.")
+            .MinimumLength(2)
+            .WithMessage("Display name must be at least 2 characters.")
+            .MaximumLength(100)
+            .WithMessage("Display name must not exceed 100 characters.")
             .Must(NotContainDangerousCharacters)
             .WithMessage("Display name contains invalid characters.");
 
@@ -23,14 +25,6 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
             .WithMessage("Email must not exceed 256 characters.")
             .EmailAddress()
             .WithMessage("Invalid email format.");
-
-        RuleFor(x => x.UserName)
-            .NotEmpty()
-            .WithMessage("Username is required.")
-            .Length(3, 30)
-            .WithMessage("Username must be between 3 and 30 characters.")
-            .Matches(@"^[a-zA-Z0-9_]+$")
-            .WithMessage("Username can only contain letters, numbers, and underscores.");
 
         RuleFor(x => x.Password)
             .NotEmpty()

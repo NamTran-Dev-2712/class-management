@@ -1,4 +1,8 @@
+using System.Threading.RateLimiting;
+using ClassManagement.Api.Contracts.Common;
 using ClassManagement.Api.Contracts.Exceptions;
+using ClassManagement.Infrastructure.Security;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
 
@@ -65,6 +69,51 @@ public static class DependencyInjection
             )
         );
 
+        // Rate limiting — all limits configured from appsettings (no hardcoded values)
+        var rl =
+            configuration.GetSection(RateLimitOptions.SectionName).Get<RateLimitOptions>()
+            ?? new RateLimitOptions();
+
+        services.AddRateLimiter(opts =>
+        {
+            opts.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            opts.OnRejected = async (ctx, ct) =>
+            {
+                ctx.HttpContext.Response.ContentType = "application/json";
+                await ctx.HttpContext.Response.WriteAsJsonAsync(
+                    ApiResponse<object?>.Fail(
+                        429,
+                        "Too many requests. Please slow down.",
+                        null,
+                        ctx.HttpContext.TraceIdentifier
+                    ),
+                    ct
+                );
+            };
+
+            void AddIpFixedWindow(string name, RateLimitPolicyOptions policy) =>
+                opts.AddPolicy(
+                    name,
+                    ctx =>
+                        RateLimitPartition.GetFixedWindowLimiter(
+                            partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                            factory: _ => new FixedWindowRateLimiterOptions
+                            {
+                                PermitLimit = policy.PermitLimit,
+                                Window = TimeSpan.FromSeconds(policy.WindowSeconds),
+                                QueueLimit = 0,
+                            }
+                        )
+                );
+
+            AddIpFixedWindow(RateLimitOptions.Policies.Login, rl.Login);
+            AddIpFixedWindow(RateLimitOptions.Policies.Register, rl.Register);
+            AddIpFixedWindow(RateLimitOptions.Policies.Refresh, rl.Refresh);
+            AddIpFixedWindow(RateLimitOptions.Policies.ChangePassword, rl.ChangePassword);
+            AddIpFixedWindow(RateLimitOptions.Policies.UpdateProfile, rl.UpdateProfile);
+        });
+
         return services;
     }
 
@@ -84,7 +133,9 @@ public static class DependencyInjection
 
         app.UseExceptionHandler();
         app.UseCors();
-        app.UseHttpsRedirection();
+        app.UseRateLimiter();
+        if (!app.Environment.IsDevelopment())
+            app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
 
