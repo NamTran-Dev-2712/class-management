@@ -39,4 +39,14 @@ public interface IAuthRepository
         string newPassword,
         CancellationToken cancellationToken = default
     );
+
+    // Always succeeds silently regardless of whether the email exists (no account enumeration).
+    Task ForgotPasswordAsync(string email, CancellationToken cancellationToken = default);
+
+    Task ResetPasswordAsync(
+        string email,
+        string otp,
+        string newPassword,
+        CancellationToken cancellationToken = default
+    );
 }

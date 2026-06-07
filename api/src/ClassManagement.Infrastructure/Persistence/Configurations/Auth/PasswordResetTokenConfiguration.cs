@@ -14,6 +14,8 @@ public sealed class PasswordResetTokenConfiguration : IEntityTypeConfiguration<P
         builder.Property(prt => prt.TokenHash).IsRequired();
         builder.HasIndex(prt => prt.TokenHash).HasDatabaseName("uq_password_reset_hash").IsUnique();
 
+        builder.Property(prt => prt.AttemptCount).HasDefaultValue(0);
+
         builder.Property(prt => prt.CreatedAt).HasDefaultValueSql("now()");
 
         builder

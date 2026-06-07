@@ -112,6 +112,9 @@ public static class DependencyInjection
             AddIpFixedWindow(RateLimitOptions.Policies.Refresh, rl.Refresh);
             AddIpFixedWindow(RateLimitOptions.Policies.ChangePassword, rl.ChangePassword);
             AddIpFixedWindow(RateLimitOptions.Policies.UpdateProfile, rl.UpdateProfile);
+            AddIpFixedWindow(RateLimitOptions.Policies.ForgotPassword, rl.ForgotPassword);
+            AddIpFixedWindow(RateLimitOptions.Policies.ResetPassword, rl.ResetPassword);
+            AddIpFixedWindow(RateLimitOptions.Policies.Logout, rl.Logout);
         });
 
         return services;

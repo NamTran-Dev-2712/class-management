@@ -26,6 +26,27 @@ public static class AuthHelper
         string password
     ) => client.PostAsJsonAsync("/api/auth/login", new { email, password });
 
+    public static Task<HttpResponseMessage> ForgotPasswordAsync(HttpClient client, string email) =>
+        client.PostAsJsonAsync("/api/auth/forgot-password", new { email });
+
+    public static Task<HttpResponseMessage> ResetPasswordAsync(
+        HttpClient client,
+        string email,
+        string otp,
+        string newPassword,
+        string confirmNewPassword
+    ) =>
+        client.PostAsJsonAsync(
+            "/api/auth/reset-password",
+            new
+            {
+                email,
+                otp,
+                newPassword,
+                confirmNewPassword,
+            }
+        );
+
     // Register + login in one step, returns an authenticated client
     public static async Task<HttpClient> CreateAuthenticatedClientAsync(
         ApiFactory factory,

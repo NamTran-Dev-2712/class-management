@@ -441,3 +441,4 @@ sketch
 # End of https://www.toptal.com/developers/gitignore/api/dotenv,react,node,remix,aspnetcore,dotnetcore
 appsettings.*.json
 .claude
+CLAUDE.md

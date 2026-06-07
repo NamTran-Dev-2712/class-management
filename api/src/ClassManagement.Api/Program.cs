@@ -1,7 +1,10 @@
 using ClassManagement.Api;
+using ClassManagement.Api.Security;
 using ClassManagement.Application;
 using ClassManagement.Infrastructure;
+using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Persistence.DbContext;
+using Hangfire;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
@@ -16,6 +19,18 @@ var app = builder.Build();
 
 app.UseApiMiddleware();
 app.MapControllers();
+
+// Hangfire dashboard — Admin-only (gated by config; authentication runs in UseApiMiddleware)
+var hangfireOptions =
+    app.Configuration.GetSection(HangfireOptions.SectionName).Get<HangfireOptions>()
+    ?? new HangfireOptions();
+if (hangfireOptions.Enabled)
+{
+    app.MapHangfireDashboard(
+        hangfireOptions.DashboardPath,
+        new DashboardOptions { Authorization = [new HangfireAdminAuthorizationFilter()] }
+    );
+}
 
 // Health check endpoints:
 // GET /health        — all checks, JSON (HealthChecks.UI format)

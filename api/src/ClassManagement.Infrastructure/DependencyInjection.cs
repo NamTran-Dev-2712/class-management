@@ -1,17 +1,23 @@
 using System.Text;
+using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Persistence;
 using ClassManagement.Infrastructure.Persistence.Cache;
 using ClassManagement.Infrastructure.Persistence.DbContext;
 using ClassManagement.Infrastructure.Persistence.Interceptors;
 using ClassManagement.Infrastructure.Security;
 using ClassManagement.Infrastructure.Services.Cache;
+using ClassManagement.Infrastructure.Services.Email;
 using ClassManagement.Infrastructure.Services.Identity;
+using ClassManagement.Infrastructure.Services.Messaging;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Resend;
 
 namespace ClassManagement.Infrastructure;
 
@@ -122,7 +128,52 @@ public static class DependencyInjection
         services.AddScoped<ITokenHasher, TokenHasher>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IAuthRepository, AuthRepository>();
+
+        // Password-reset / email / client-app options
+        services.Configure<PasswordResetOptions>(
+            configuration.GetSection(PasswordResetOptions.SectionName)
+        );
+        services.Configure<ResendOptions>(configuration.GetSection(ResendOptions.SectionName));
+        services.Configure<ClientAppOptions>(
+            configuration.GetSection(ClientAppOptions.SectionName)
+        );
+
+        // Email transport (Resend) + background email queue
+        services.Configure<ResendClientOptions>(o =>
+            o.ApiToken = configuration[$"{ResendOptions.SectionName}:ApiKey"] ?? string.Empty
+        );
+        services.AddHttpClient<ResendClient>();
+        services.AddTransient<IResend, ResendClient>();
+        services.AddScoped<IEmailService, ResendEmailService>();
+        services.AddScoped<IEmailQueueService, HangfireEmailQueueService>();
+
+        // Hangfire — durable background jobs on PostgreSQL (gated by config so tests can opt out)
+        var hangfire =
+            configuration.GetSection(HangfireOptions.SectionName).Get<HangfireOptions>()
+            ?? new HangfireOptions();
+
+        if (hangfire.Enabled)
+        {
+            services.AddHangfire(cfg =>
+                cfg.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UsePostgreSqlStorage(pg =>
+                        pg.UseNpgsqlConnection(
+                            configuration.GetConnectionString("DefaultConnection")
+                        )
+                    )
+            );
+
+            if (hangfire.EnableServer)
+                services.AddHangfireServer(opts =>
+                {
+                    if (hangfire.WorkerCount > 0)
+                        opts.WorkerCount = hangfire.WorkerCount;
+                });
+        }
 
         // Current user from HTTP context
         services.AddHttpContextAccessor();

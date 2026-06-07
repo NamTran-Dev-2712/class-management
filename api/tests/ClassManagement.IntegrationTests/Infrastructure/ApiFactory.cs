@@ -1,7 +1,10 @@
+using ClassManagement.Application.Interfaces.Messaging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
 
@@ -9,6 +12,32 @@ namespace ClassManagement.IntegrationTests.Infrastructure;
 
 public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    // Some options are bound at service-registration time (Hangfire gating, rate-limit policies),
+    // which runs before ConfigureAppConfiguration is applied. Only environment variables and lazily
+    // bound options (e.g. connection strings, JwtOptions) reflect those overrides that early — so
+    // set the build-time-sensitive test values here.
+    static ApiFactory()
+    {
+        Environment.SetEnvironmentVariable("Hangfire__Enabled", "false");
+
+        string[] policies =
+        [
+            "Login",
+            "Register",
+            "Refresh",
+            "ChangePassword",
+            "UpdateProfile",
+            "ForgotPassword",
+            "ResetPassword",
+            "Logout",
+        ];
+        foreach (var policy in policies)
+        {
+            Environment.SetEnvironmentVariable($"RateLimit__{policy}__PermitLimit", "100000");
+            Environment.SetEnvironmentVariable($"RateLimit__{policy}__WindowSeconds", "60");
+        }
+    }
+
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()
         .WithDatabase("classmanagement_test")
         .WithUsername("test_user")
@@ -16,6 +45,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         .Build();
 
     private readonly RedisContainer _redis = new RedisBuilder().Build();
+
+    // Captures password-reset OTPs so tests can drive the reset-password flow.
+    public FakeEmailQueueService EmailQueue { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -39,21 +71,31 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
                         ["Seed:AdminPassword"] = "Admin@123456",
                         ["Seed:AdminDisplayName"] = "Test Admin",
 
-                        // Very lenient rate limits — prevent test failures due to rate limiting
-                        ["RateLimit:Login:PermitLimit"] = "1000",
-                        ["RateLimit:Login:WindowSeconds"] = "60",
-                        ["RateLimit:Register:PermitLimit"] = "1000",
-                        ["RateLimit:Register:WindowSeconds"] = "60",
-                        ["RateLimit:Refresh:PermitLimit"] = "1000",
-                        ["RateLimit:Refresh:WindowSeconds"] = "60",
-                        ["RateLimit:ChangePassword:PermitLimit"] = "1000",
-                        ["RateLimit:ChangePassword:WindowSeconds"] = "60",
-                        ["RateLimit:UpdateProfile:PermitLimit"] = "1000",
-                        ["RateLimit:UpdateProfile:WindowSeconds"] = "60",
+                        // Hangfire off in tests — email delivery is faked (see EmailQueue)
+                        ["Hangfire:Enabled"] = "false",
+
+                        // Deterministic client app base for building reset links
+                        ["ClientApp:BaseUrl"] = "http://localhost:5173",
+                        ["ClientApp:ResetPasswordPath"] = "/reset-password",
+
+                        // Resend is never called in tests, but config must bind
+                        ["Resend:ApiKey"] = "test-resend-key",
+                        ["Resend:FromEmail"] = "no-reply@test.local",
+                        ["Resend:FromName"] = "Class Management Test",
+
+                        // Rate limits are made lenient via environment variables in the static
+                        // constructor (they're bound at registration time, before this applies).
                     }
                 );
             }
         );
+
+        // Replace the Hangfire-backed email queue with an in-memory capture.
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IEmailQueueService>();
+            services.AddSingleton<IEmailQueueService>(EmailQueue);
+        });
     }
 
     // Returns an HttpClient that automatically manages cookies across requests

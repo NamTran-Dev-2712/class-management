@@ -103,7 +103,32 @@ public class AuthController : BaseApiController
         return ApiOk("Password changed successfully. Please log in again.");
     }
 
+    [HttpPost("forgot-password")]
+    [EnableRateLimiting(RateLimitOptions.Policies.ForgotPassword)]
+    public async Task<IActionResult> ForgotPassword(
+        ForgotPasswordCommand command,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(command, cancellationToken);
+        // Always generic — never reveal whether the email exists.
+        return ApiOk("If an account exists for that email, a reset code has been sent.");
+    }
+
+    [HttpPost("reset-password")]
+    [EnableRateLimiting(RateLimitOptions.Policies.ResetPassword)]
+    public async Task<IActionResult> ResetPassword(
+        ResetPasswordCommand command,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(command, cancellationToken);
+        DeleteAuthCookies();
+        return ApiOk("Password reset successful. Please log in again.");
+    }
+
     [HttpPost("logout")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Logout)]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         var rawToken = Request.Cookies["refresh_token"];

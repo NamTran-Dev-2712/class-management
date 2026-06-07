@@ -185,24 +185,40 @@ idx_refresh_tokens_expires      (expires_at)
 
 **C# entity:** `ClassManagement.Domain.Modules.Auth.Entities.PasswordResetToken : BaseEntity`
 **EF config:** `PasswordResetTokenConfiguration`
-**Pattern:** Append-only — TTL 15 phút
+**Pattern:** Append-only — TTL 15 phút (`PasswordResetOptions.ExpiryMinutes`)
 
 ### Columns
 
-| Column | Type | Nullable | Notes |
-|---|---|---|---|
-| `id` | `BIGINT` | NO | PK |
-| `user_id` | `BIGINT` | NO | FK → users(id) CASCADE |
-| `token_hash` | `TEXT` | NO | SHA-256(raw_token) |
-| `expires_at` | `TIMESTAMPTZ` | NO | CHECK > created_at, NOW() + 15 min |
-| `used_at` | `TIMESTAMPTZ` | YES | NULL = chưa dùng |
-| `created_at` | `TIMESTAMPTZ` | NO | DEFAULT now() |
+| Column | Type | Nullable | Default | Notes |
+|---|---|---|---|---|
+| `id` | `BIGINT` | NO | identity | PK |
+| `user_id` | `BIGINT` | NO | — | FK → users(id) CASCADE |
+| `token_hash` | `TEXT` | NO | — | SHA-256(`{user_id}:{otp}`) — xem ghi chú OTP bên dưới |
+| `expires_at` | `TIMESTAMPTZ` | NO | — | CHECK > created_at, NOW() + 15 min |
+| `used_at` | `TIMESTAMPTZ` | YES | NULL | NULL = chưa dùng (one-time use) |
+| `attempt_count` | `INT` | NO | `0` | Số lần nhập OTP sai — khoá token khi ≥ `MaxAttempts` |
+| `created_at` | `TIMESTAMPTZ` | NO | `now()` | |
 
 ### Indexes
 ```
 uq_password_reset_hash    UNIQUE (token_hash)
-idx_prt_user_active       (user_id) WHERE used_at IS NULL AND expires_at > NOW()
+idx_prt_user_active       (user_id) WHERE used_at IS NULL     ← partial; expires_at kiểm tra ở query time
 ```
+
+> **NOW() không IMMUTABLE** nên không thể đưa `expires_at > NOW()` vào predicate của partial index;
+> filter chỉ trên `used_at IS NULL`, còn hạn dùng được kiểm tra trong câu truy vấn.
+
+### Forgot/Reset password — thiết kế OTP (MVP-1)
+
+> Luồng: `POST /api/auth/forgot-password` → tạo **OTP 6 số** (sinh bằng `RandomNumberGenerator`),
+> lưu `token_hash = SHA-256("{user_id}:{otp}")` (salt bằng `user_id` để hash không phải digest trần của 1 số 6 chữ số),
+> gửi email **OTP + link** (`{ClientApp.BaseUrl}{ResetPasswordPath}?email=..&otp=..`) **bất đồng bộ qua Hangfire + Resend**.
+> `POST /api/auth/reset-password` (email + otp + mật khẩu mới) verify hash; mỗi lần sai tăng `attempt_count`,
+> đạt `MaxAttempts` thì khoá token. Reset thành công → `used_at = now()` + thu hồi toàn bộ refresh token của user.
+>
+> Tham số cấu hình (không hardcode): `PasswordReset.OtpLength` (6), `ExpiryMinutes` (15), `MaxAttempts` (5).
+> Forgot-password luôn trả `200` (kể cả email không tồn tại) để chống account enumeration.
+> Migration: `20260605160014_add_attempt_count_to_password_reset_tokens`.
 
 ---
 
