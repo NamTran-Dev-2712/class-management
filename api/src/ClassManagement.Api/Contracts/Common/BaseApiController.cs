@@ -1,3 +1,5 @@
+using ClassManagement.Application.Interfaces.Localization;
+
 namespace ClassManagement.Api.Contracts.Common;
 
 [ApiController]
@@ -5,11 +7,15 @@ namespace ClassManagement.Api.Contracts.Common;
 [Produces("application/json")]
 public abstract class BaseApiController : ControllerBase
 {
+    // Resolve message keys (e.g. "Auth.LoginSuccess") to the current request culture.
+    private string L(string key) =>
+        HttpContext.RequestServices.GetRequiredService<ILocalizationService>().Translate(key);
+
     protected IActionResult ApiOk<T>(T data, string message = "Response.Success") =>
-        base.Ok(ApiResponse<T>.Ok(data, HttpContext.TraceIdentifier, message));
+        base.Ok(ApiResponse<T>.Ok(data, HttpContext.TraceIdentifier, L(message)));
 
     protected IActionResult ApiOk(string message = "Response.Success") =>
-        base.Ok(ApiResponse<object?>.Ok(null, HttpContext.TraceIdentifier, message));
+        base.Ok(ApiResponse<object?>.Ok(null, HttpContext.TraceIdentifier, L(message)));
 
     protected IActionResult ApiCreated<T>(
         string? routeName,
@@ -21,7 +27,7 @@ public abstract class BaseApiController : ControllerBase
         var response = ApiResponse<T>.Ok(
             data,
             HttpContext.TraceIdentifier,
-            message,
+            L(message),
             StatusCodes.Status201Created
         );
         return routeName is not null
@@ -30,13 +36,15 @@ public abstract class BaseApiController : ControllerBase
     }
 
     protected IActionResult ApiNoContent() =>
-        base.Ok(ApiResponse<object?>.Ok(null, HttpContext.TraceIdentifier, "Response.NoContent"));
+        base.Ok(
+            ApiResponse<object?>.Ok(null, HttpContext.TraceIdentifier, L("Response.NoContent"))
+        );
 
     protected IActionResult ApiBadRequest(string message, IEnumerable<string>? errors = null) =>
         base.BadRequest(
             ApiResponse<object?>.Fail(
                 StatusCodes.Status400BadRequest,
-                message,
+                L(message),
                 errors,
                 HttpContext.TraceIdentifier
             )
@@ -46,7 +54,7 @@ public abstract class BaseApiController : ControllerBase
         base.NotFound(
             ApiResponse<object?>.Fail(
                 StatusCodes.Status404NotFound,
-                message,
+                L(message),
                 null,
                 HttpContext.TraceIdentifier
             )
@@ -57,7 +65,7 @@ public abstract class BaseApiController : ControllerBase
             StatusCodes.Status403Forbidden,
             ApiResponse<object?>.Fail(
                 StatusCodes.Status403Forbidden,
-                message,
+                L(message),
                 null,
                 HttpContext.TraceIdentifier
             )
@@ -67,7 +75,7 @@ public abstract class BaseApiController : ControllerBase
         base.Unauthorized(
             ApiResponse<object?>.Fail(
                 StatusCodes.Status401Unauthorized,
-                message,
+                L(message),
                 null,
                 HttpContext.TraceIdentifier
             )

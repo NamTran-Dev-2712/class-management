@@ -6,14 +6,14 @@ public class LoginValidator : AbstractValidator<LoginCommand>
     {
         RuleFor(x => x.Email)
             .NotEmpty()
-            .WithMessage("Email is required.")
+            .WithMessage("Validation.Email.Required")
             .EmailAddress()
-            .WithMessage("Invalid email format.");
+            .WithMessage("Validation.Email.Invalid");
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .WithMessage("Password is required.")
+            .WithMessage("Validation.Password.Required")
             .MinimumLength(8)
-            .WithMessage("Password must be at least 8 characters long.");
+            .WithMessage("Validation.Password.MinLength");
     }
 }

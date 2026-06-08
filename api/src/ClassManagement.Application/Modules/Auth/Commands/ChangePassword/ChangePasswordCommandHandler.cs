@@ -16,7 +16,8 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
 
     public async Task Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
-        var userId = _currentUser.UserId ?? throw new UnauthorizedException("Not authenticated.");
+        var userId =
+            _currentUser.UserId ?? throw new UnauthorizedException("Auth.NotAuthenticated");
 
         await _authRepository.ChangePasswordAsync(
             userId,

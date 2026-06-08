@@ -1,7 +1,11 @@
+using System.Globalization;
 using System.Threading.RateLimiting;
 using ClassManagement.Api.Contracts.Common;
 using ClassManagement.Api.Contracts.Exceptions;
+using ClassManagement.Application.Interfaces.Localization;
+using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Security;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
@@ -80,11 +84,13 @@ public static class DependencyInjection
 
             opts.OnRejected = async (ctx, ct) =>
             {
+                var localizer =
+                    ctx.HttpContext.RequestServices.GetRequiredService<ILocalizationService>();
                 ctx.HttpContext.Response.ContentType = "application/json";
                 await ctx.HttpContext.Response.WriteAsJsonAsync(
                     ApiResponse<object?>.Fail(
                         429,
-                        "Too many requests. Please slow down.",
+                        localizer["Error.TooManyRequests"],
                         null,
                         ctx.HttpContext.TraceIdentifier
                     ),
@@ -133,6 +139,22 @@ public static class DependencyInjection
                     .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
             );
         }
+
+        // Request culture (Accept-Language) must be set before the exception handler so
+        // error responses are localized; registered first to stay outer in the pipeline.
+        var loc =
+            app.Configuration.GetSection(LocalizationOptions.SectionName).Get<LocalizationOptions>()
+            ?? new LocalizationOptions();
+        var cultures = loc.SupportedCultures.Select(c => new CultureInfo(c)).ToList();
+        app.UseRequestLocalization(
+            new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(loc.DefaultCulture),
+                SupportedCultures = cultures,
+                SupportedUICultures = cultures,
+                ApplyCurrentCultureToResponseHeaders = true,
+            }
+        );
 
         app.UseExceptionHandler();
         app.UseCors();

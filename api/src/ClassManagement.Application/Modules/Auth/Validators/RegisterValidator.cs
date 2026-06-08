@@ -10,43 +10,43 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
 
         RuleFor(x => x.DisplayName)
             .NotEmpty()
-            .WithMessage("Display name is required.")
+            .WithMessage("Validation.DisplayName.Required")
             .MinimumLength(2)
-            .WithMessage("Display name must be at least 2 characters.")
+            .WithMessage("Validation.DisplayName.MinLength")
             .MaximumLength(100)
-            .WithMessage("Display name must not exceed 100 characters.")
+            .WithMessage("Validation.DisplayName.MaxLength")
             .Must(NotContainDangerousCharacters)
-            .WithMessage("Display name contains invalid characters.");
+            .WithMessage("Validation.DisplayName.Invalid");
 
         RuleFor(x => x.Email)
             .NotEmpty()
-            .WithMessage("Email is required.")
+            .WithMessage("Validation.Email.Required")
             .MaximumLength(256)
-            .WithMessage("Email must not exceed 256 characters.")
+            .WithMessage("Validation.Email.MaxLength")
             .EmailAddress()
-            .WithMessage("Invalid email format.");
+            .WithMessage("Validation.Email.Invalid");
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .WithMessage("Password is required.")
+            .WithMessage("Validation.Password.Required")
             .MinimumLength(8)
-            .WithMessage("Password must be at least 8 characters long.")
+            .WithMessage("Validation.Password.MinLength")
             .MaximumLength(100)
-            .WithMessage("Password is too long.")
+            .WithMessage("Validation.Password.MaxLength")
             .Matches(@"[A-Z]")
-            .WithMessage("Password must contain at least one uppercase letter.")
+            .WithMessage("Validation.Password.Uppercase")
             .Matches(@"[a-z]")
-            .WithMessage("Password must contain at least one lowercase letter.")
+            .WithMessage("Validation.Password.Lowercase")
             .Matches(@"[0-9]")
-            .WithMessage("Password must contain at least one number.")
+            .WithMessage("Validation.Password.Number")
             .Matches(@"[^a-zA-Z0-9]")
-            .WithMessage("Password must contain at least one special character.");
+            .WithMessage("Validation.Password.Special");
 
         RuleFor(x => x.Role)
             .NotEmpty()
-            .WithMessage("Role is required.")
+            .WithMessage("Validation.Role.Required")
             .Must(BeAnAllowedRole)
-            .WithMessage("Invalid role specified.");
+            .WithMessage("Validation.Role.Invalid");
     }
 
     private bool NotContainDangerousCharacters(string displayName)

@@ -27,6 +27,12 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Localization resources are embedded so they load via the assembly manifest
+         (works at runtime and in tests, independent of output-copy behavior). -->
+    <EmbeddedResource Include="Resources\*.json" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

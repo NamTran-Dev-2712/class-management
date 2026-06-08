@@ -4,10 +4,10 @@ public class ForgotPasswordValidator : AbstractValidator<ForgotPasswordCommand>
     {
         RuleFor(x => x.Email)
             .NotEmpty()
-            .WithMessage("Email is required.")
+            .WithMessage("Validation.Email.Required")
             .MaximumLength(256)
-            .WithMessage("Email must not exceed 256 characters.")
+            .WithMessage("Validation.Email.MaxLength")
             .EmailAddress()
-            .WithMessage("Invalid email format.");
+            .WithMessage("Validation.Email.Invalid");
     }
 }

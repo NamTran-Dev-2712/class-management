@@ -4,36 +4,36 @@ public class ResetPasswordValidator : AbstractValidator<ResetPasswordCommand>
     {
         RuleFor(x => x.Email)
             .NotEmpty()
-            .WithMessage("Email is required.")
+            .WithMessage("Validation.Email.Required")
             .EmailAddress()
-            .WithMessage("Invalid email format.");
+            .WithMessage("Validation.Email.Invalid");
 
         RuleFor(x => x.Otp)
             .NotEmpty()
-            .WithMessage("Verification code is required.")
+            .WithMessage("Validation.Otp.Required")
             .Matches("^[0-9]{6}$")
-            .WithMessage("Verification code must be 6 digits.");
+            .WithMessage("Validation.Otp.Format");
 
         RuleFor(x => x.NewPassword)
             .NotEmpty()
-            .WithMessage("New password is required.")
+            .WithMessage("Validation.Password.NewRequired")
             .MinimumLength(8)
-            .WithMessage("Password must be at least 8 characters.")
+            .WithMessage("Validation.Password.MinLength")
             .MaximumLength(100)
-            .WithMessage("Password must not exceed 100 characters.")
+            .WithMessage("Validation.Password.MaxLength")
             .Matches("[A-Z]")
-            .WithMessage("Password must contain at least one uppercase letter.")
+            .WithMessage("Validation.Password.Uppercase")
             .Matches("[a-z]")
-            .WithMessage("Password must contain at least one lowercase letter.")
+            .WithMessage("Validation.Password.Lowercase")
             .Matches("[0-9]")
-            .WithMessage("Password must contain at least one number.")
+            .WithMessage("Validation.Password.Number")
             .Matches("[^a-zA-Z0-9]")
-            .WithMessage("Password must contain at least one special character.");
+            .WithMessage("Validation.Password.Special");
 
         RuleFor(x => x.ConfirmNewPassword)
             .NotEmpty()
-            .WithMessage("Please confirm your new password.")
+            .WithMessage("Validation.Password.ConfirmRequired")
             .Equal(x => x.NewPassword)
-            .WithMessage("Passwords do not match.");
+            .WithMessage("Validation.Password.Mismatch");
     }
 }

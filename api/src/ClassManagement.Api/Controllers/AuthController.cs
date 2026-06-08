@@ -26,7 +26,7 @@ public class AuthController : BaseApiController
             routeName: null,
             routeValues: null,
             data: new { UserId = userId },
-            message: "User registered successfully."
+            message: "Auth.RegisterSuccess"
         );
     }
 
@@ -41,7 +41,7 @@ public class AuthController : BaseApiController
             result.RefreshToken,
             result.RefreshTokenExpiresAt
         );
-        return ApiOk(ToProfileDto(result), "Login successful.");
+        return ApiOk(ToProfileDto(result), "Auth.LoginSuccess");
     }
 
     [HttpPost("refresh")]
@@ -50,7 +50,7 @@ public class AuthController : BaseApiController
     {
         var rawToken = Request.Cookies["refresh_token"];
         if (string.IsNullOrEmpty(rawToken))
-            return ApiUnauthorized("Refresh token is missing.");
+            return ApiUnauthorized("Auth.RefreshTokenMissing");
 
         var result = await _mediator.Send(
             new RefreshTokenCommand(
@@ -100,7 +100,7 @@ public class AuthController : BaseApiController
     {
         await _mediator.Send(command, cancellationToken);
         DeleteAuthCookies();
-        return ApiOk("Password changed successfully. Please log in again.");
+        return ApiOk("Auth.PasswordChanged");
     }
 
     [HttpPost("forgot-password")]
@@ -112,7 +112,7 @@ public class AuthController : BaseApiController
     {
         await _mediator.Send(command, cancellationToken);
         // Always generic — never reveal whether the email exists.
-        return ApiOk("If an account exists for that email, a reset code has been sent.");
+        return ApiOk("Auth.ForgotPasswordSent");
     }
 
     [HttpPost("reset-password")]
@@ -124,7 +124,7 @@ public class AuthController : BaseApiController
     {
         await _mediator.Send(command, cancellationToken);
         DeleteAuthCookies();
-        return ApiOk("Password reset successful. Please log in again.");
+        return ApiOk("Auth.PasswordResetSuccess");
     }
 
     [HttpPost("logout")]
@@ -134,7 +134,7 @@ public class AuthController : BaseApiController
         var rawToken = Request.Cookies["refresh_token"];
         await _mediator.Send(new LogoutCommand(rawToken), cancellationToken);
         DeleteAuthCookies();
-        return ApiOk("Logged out successfully.");
+        return ApiOk("Auth.LogoutSuccess");
     }
 
     private void SetAuthCookies(

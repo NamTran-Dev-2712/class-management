@@ -1,0 +1,11 @@
+node_modules
+build
+.react-router
+.git
+.gitignore
+Dockerfile
+.dockerignore
+*.log
+.env
+.env.*
+README.md

@@ -23,7 +23,8 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, UserProfi
         CancellationToken cancellationToken
     )
     {
-        var userId = _currentUser.UserId ?? throw new UnauthorizedException("Not authenticated.");
+        var userId =
+            _currentUser.UserId ?? throw new UnauthorizedException("Auth.NotAuthenticated");
 
         var cacheKey = CacheKeys.UserProfile(userId);
 

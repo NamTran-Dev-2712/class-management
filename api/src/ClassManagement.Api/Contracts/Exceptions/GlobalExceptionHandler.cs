@@ -1,3 +1,4 @@
+using ClassManagement.Application.Interfaces.Localization;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace ClassManagement.Api.Contracts.Exceptions;
@@ -6,10 +7,15 @@ namespace ClassManagement.Api.Contracts.Exceptions;
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<GlobalExceptionHandler> _logger;
+    private readonly ILocalizationService _localizer;
 
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
+    public GlobalExceptionHandler(
+        ILogger<GlobalExceptionHandler> logger,
+        ILocalizationService localizer
+    )
     {
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async ValueTask<bool> TryHandleAsync(
@@ -18,7 +24,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         CancellationToken ct
     )
     {
-        var (statusCode, message, errors) = exception switch
+        var (statusCode, messageKey, errorKeys) = exception switch
         {
             // ValidationException must precede BadException (it's a subclass)
             ValidationException vex => (
@@ -31,13 +37,22 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             ConflictException cex => (StatusCodes.Status409Conflict, cex.Message, null),
             ForbiddenException fex => (StatusCodes.Status403Forbidden, fex.Message, null),
             UnauthorizedException uex => (StatusCodes.Status401Unauthorized, uex.Message, null),
-            _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.", null),
+            _ => (StatusCodes.Status500InternalServerError, "Error.Unexpected", null),
         };
+
+        // Exception messages and validation errors carry message keys — localize them
+        // for the request culture. Unknown keys pass through unchanged.
+        var message = _localizer[messageKey];
+        var errors = errorKeys?.Select(key => _localizer[key]);
 
         if (statusCode >= 500)
             _logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
         else
-            _logger.LogWarning("Handled exception [{StatusCode}]: {Message}", statusCode, message);
+            _logger.LogWarning(
+                "Handled exception [{StatusCode}]: {MessageKey}",
+                statusCode,
+                messageKey
+            );
 
         httpContext.Response.StatusCode = statusCode;
         httpContext.Response.ContentType = "application/json";

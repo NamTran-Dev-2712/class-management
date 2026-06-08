@@ -1,0 +1,13 @@
+{
+  "appName": "Class Management",
+  "language": "Language",
+  "nav": {
+    "home": "Home",
+    "login": "Sign in"
+  },
+  "actions": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "loading": "Loading…"
+  }
+}

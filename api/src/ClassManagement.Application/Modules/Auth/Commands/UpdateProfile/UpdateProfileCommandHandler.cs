@@ -23,7 +23,8 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
         CancellationToken cancellationToken
     )
     {
-        var userId = _currentUser.UserId ?? throw new UnauthorizedException("Not authenticated.");
+        var userId =
+            _currentUser.UserId ?? throw new UnauthorizedException("Auth.NotAuthenticated");
 
         var profile = await _authRepository.UpdateProfileAsync(
             userId,

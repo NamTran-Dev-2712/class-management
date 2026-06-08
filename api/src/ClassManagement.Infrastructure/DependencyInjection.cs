@@ -1,4 +1,5 @@
 using System.Text;
+using ClassManagement.Application.Interfaces.Localization;
 using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Persistence;
 using ClassManagement.Infrastructure.Persistence.Cache;
@@ -8,6 +9,7 @@ using ClassManagement.Infrastructure.Security;
 using ClassManagement.Infrastructure.Services.Cache;
 using ClassManagement.Infrastructure.Services.Email;
 using ClassManagement.Infrastructure.Services.Identity;
+using ClassManagement.Infrastructure.Services.Localization;
 using ClassManagement.Infrastructure.Services.Messaging;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -174,6 +176,12 @@ public static class DependencyInjection
                         opts.WorkerCount = hangfire.WorkerCount;
                 });
         }
+
+        // Localization — JSON-backed message resolver driven by the request culture
+        services.Configure<LocalizationOptions>(
+            configuration.GetSection(LocalizationOptions.SectionName)
+        );
+        services.AddSingleton<ILocalizationService, JsonLocalizationService>();
 
         // Current user from HTTP context
         services.AddHttpContextAccessor();

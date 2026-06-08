@@ -42,19 +42,19 @@ public class AuthRepository : IAuthRepository
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
-            throw new UnauthorizedException("Invalid credentials.");
+            throw new UnauthorizedException("Auth.InvalidCredentials");
 
         var passwordValid = await _userManager.CheckPasswordAsync(user, password);
         if (!passwordValid)
-            throw new UnauthorizedException("Invalid credentials.");
+            throw new UnauthorizedException("Auth.InvalidCredentials");
 
         // Account-state gate — checked only after password is verified
         if (user.IsDeleted)
-            throw new UnauthorizedException("Account has been deleted.");
+            throw new UnauthorizedException("Auth.AccountDeleted");
         if (!user.IsActive)
-            throw new UnauthorizedException("Account is disabled.");
+            throw new UnauthorizedException("Auth.AccountDisabled");
         if (user.IsLocked)
-            throw new UnauthorizedException("Account is locked.");
+            throw new UnauthorizedException("Auth.AccountLocked");
 
         var roles = await _userManager.GetRolesAsync(user);
         var tokenResult = await _tokenService.GenerateTokensAsync(
@@ -90,15 +90,15 @@ public class AuthRepository : IAuthRepository
 
         var token =
             await _refreshTokenRepository.FindActiveByHashAsync(hash, cancellationToken)
-            ?? throw new UnauthorizedException("Invalid or expired refresh token.");
+            ?? throw new UnauthorizedException("Auth.RefreshTokenInvalid");
 
         var user =
             await _userManager.FindByIdAsync(token.UserId.ToString())
-            ?? throw new UnauthorizedException("Invalid or expired refresh token.");
+            ?? throw new UnauthorizedException("Auth.RefreshTokenInvalid");
 
         // Account-state checks — same generic message to avoid info leak
         if (user.IsDeleted || !user.IsActive || user.IsLocked)
-            throw new UnauthorizedException("Invalid or expired refresh token.");
+            throw new UnauthorizedException("Auth.RefreshTokenInvalid");
 
         var roles = await _userManager.GetRolesAsync(user);
         var tokenResult = await _tokenService.GenerateTokensAsync(
@@ -134,7 +134,7 @@ public class AuthRepository : IAuthRepository
     {
         var existingByEmail = await _userManager.FindByEmailAsync(email);
         if (existingByEmail is not null)
-            throw new ConflictException("Email is already registered.");
+            throw new ConflictException("Auth.EmailAlreadyRegistered");
 
         var user = new ApplicationUser
         {
@@ -145,13 +145,13 @@ public class AuthRepository : IAuthRepository
 
         var createResult = await _userManager.CreateAsync(user, password);
         if (!createResult.Succeeded)
-            throw new BadException("Registration failed.");
+            throw new BadException("Auth.RegistrationFailed");
 
         var roleResult = await _userManager.AddToRoleAsync(user, role);
         if (!roleResult.Succeeded)
         {
             await _userManager.DeleteAsync(user);
-            throw new BadException("Failed to assign role.");
+            throw new BadException("Auth.RoleAssignFailed");
         }
 
         return user.Id;
@@ -164,7 +164,7 @@ public class AuthRepository : IAuthRepository
     {
         var user =
             await _userManager.FindByIdAsync(userId.ToString())
-            ?? throw new NotFoundException("User not found.");
+            ?? throw new NotFoundException("User.NotFound");
 
         var roles = await _userManager.GetRolesAsync(user);
         return ToProfileDto(user, roles);
@@ -181,7 +181,7 @@ public class AuthRepository : IAuthRepository
     {
         var user =
             await _userManager.FindByIdAsync(userId.ToString())
-            ?? throw new NotFoundException("User not found.");
+            ?? throw new NotFoundException("User.NotFound");
 
         user.DisplayName = displayName;
         user.Bio = bio;
@@ -205,11 +205,11 @@ public class AuthRepository : IAuthRepository
     {
         var user =
             await _userManager.FindByIdAsync(userId.ToString())
-            ?? throw new NotFoundException("User not found.");
+            ?? throw new NotFoundException("User.NotFound");
 
         var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
         if (!result.Succeeded)
-            throw new BadException("Current password is incorrect.");
+            throw new BadException("Auth.CurrentPasswordIncorrect");
 
         // Revoke all active refresh tokens — forces re-login on all devices
         await _refreshTokenRepository.RevokeAllForUserAsync(userId, cancellationToken);
@@ -250,8 +250,8 @@ public class AuthRepository : IAuthRepository
         CancellationToken cancellationToken = default
     )
     {
-        // Single generic message for every failure mode — avoids leaking which step failed.
-        const string genericError = "Invalid or expired reset code.";
+        // Single generic message key for every failure mode — avoids leaking which step failed.
+        const string genericError = "Auth.ResetCodeInvalid";
 
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null || user.IsDeleted || !user.IsActive || user.IsLocked)
@@ -281,7 +281,7 @@ public class AuthRepository : IAuthRepository
         var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
         if (!result.Succeeded)
             throw new BadException(
-                result.Errors.FirstOrDefault()?.Description ?? "Failed to reset password."
+                result.Errors.FirstOrDefault()?.Description ?? "Auth.ResetPasswordFailed"
             );
 
         await _passwordResetTokenRepository.MarkUsedAsync(token.Id, cancellationToken);

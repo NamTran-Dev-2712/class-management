@@ -1,0 +1,13 @@
+{
+  "appName": "Quản lý lớp học",
+  "language": "Ngôn ngữ",
+  "nav": {
+    "home": "Trang chủ",
+    "login": "Đăng nhập"
+  },
+  "actions": {
+    "submit": "Gửi",
+    "cancel": "Hủy",
+    "loading": "Đang tải…"
+  }
+}
