@@ -1,0 +1,18 @@
+{
+    "name": "class-management-monorepo",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "husky": "^9.1.7",
+        "lint-staged": "^15.5.2",
+        "prettier": "^3.4.2"
+    },
+    "lint-staged": {
+        "*.cs": "dotnet csharpier format",
+        "web/**/*.{ts,tsx,css,json,md}": "prettier --write --ignore-unknown"
+    },
+    "packageManager": "pnpm@11.0.9+sha512.34ce82e6780233cf9cad8685029a8f81d2e06196c5a9bad98879f7424940c6817c4e4524fb7d38b8553ceed48b9758b8ebaf1abd3600c232c4c8cf7366086f38"
+}

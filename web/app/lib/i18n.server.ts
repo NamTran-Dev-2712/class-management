@@ -1,8 +1,4 @@
-import {
-    DEFAULT_LANGUAGE,
-    LANGUAGE_COOKIE,
-    SUPPORTED_LANGUAGE_CODES,
-} from "@/config/languages";
+import { DEFAULT_LANGUAGE, LANGUAGE_COOKIE, SUPPORTED_LANGUAGE_CODES } from "@/config/languages";
 
 const isSupported = (lng: string | undefined): lng is string =>
     !!lng && (SUPPORTED_LANGUAGE_CODES as readonly string[]).includes(lng);
@@ -29,11 +25,7 @@ export function detectLocale(request: Request): string {
     const header = request.headers.get("Accept-Language");
     if (header) {
         for (const entry of header.split(",")) {
-            const code = entry
-                .split(";")[0]
-                ?.trim()
-                .split("-")[0]
-                ?.toLowerCase();
+            const code = entry.split(";")[0]?.trim().split("-")[0]?.toLowerCase();
             if (isSupported(code)) return code;
         }
     }

@@ -13,8 +13,7 @@ import { SUPPORTED_LANGUAGES } from "@/config/languages";
 export function LanguageSwitcher() {
     const { t, i18n } = useTranslation("common");
     const current =
-        SUPPORTED_LANGUAGES.find((l) => l.code === i18n.resolvedLanguage) ??
-        SUPPORTED_LANGUAGES[0];
+        SUPPORTED_LANGUAGES.find((l) => l.code === i18n.resolvedLanguage) ?? SUPPORTED_LANGUAGES[0];
 
     return (
         <DropdownMenu>

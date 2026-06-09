@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 
-import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
@@ -19,21 +20,20 @@ export default function LoginPage() {
     const { t } = useTranslation("auth");
 
     return (
-        <main className="bg-muted/40 flex min-h-screen items-center justify-center p-6">
-            <div className="absolute top-4 right-4">
-                <LanguageSwitcher />
-            </div>
-            <Card className="w-full max-w-sm">
-                <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">
-                        {t("login.title")}
-                    </CardTitle>
-                    <CardDescription>{t("login.subtitle")}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <LoginForm />
-                </CardContent>
-            </Card>
-        </main>
+        <Card className="w-full max-w-sm">
+            <CardHeader className="text-center">
+                <CardTitle className="text-2xl">{t("login.title")}</CardTitle>
+                <CardDescription>{t("login.subtitle")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <LoginForm />
+            </CardContent>
+            <CardFooter className="justify-center text-sm">
+                <span className="text-muted-foreground">{t("login.noAccount")}&nbsp;</span>
+                <Link to="/register" className="font-medium hover:underline">
+                    {t("login.signUp")}
+                </Link>
+            </CardFooter>
+        </Card>
     );
 }

@@ -1,22 +1,20 @@
 import { redirect } from "react-router";
 
-import { createServerApiClient } from "@/lib/axios.config";
 import type { ProfileResponse } from "@/services/auth/dtos/queries/profile/profile.response";
-import type { ApiResponse } from "@/types/global/api.response";
+
+/** Normalized request pathname (strips the v8_passThroughRequests `.data` suffix). */
+export function pathnameOf(request: Request): string {
+    return new URL(request.url).pathname.replace(/_?\.data$/, "");
+}
 
 /**
- * Loader guard: resolves the current user by calling the API with the request's
- * auth cookie. Throws a redirect to `/login` when unauthenticated. Use inside a
- * route `loader`: `const user = await requireAuth(request);`
+ * Require an authenticated user (resolved by the root middleware into context).
+ * Redirects to `/login?redirectTo=` when absent. Use inside a route `loader`:
+ * `const user = requireAuth(context.get(userContext), request);`
  */
-export async function requireAuth(request: Request): Promise<ProfileResponse> {
-    const api = createServerApiClient(request);
-    try {
-        const res = await api.get<ApiResponse<ProfileResponse>>("/auth/me");
-        if (!res.data.data) throw new Error("No profile");
-        return res.data.data;
-    } catch {
-        const redirectTo = new URL(request.url).pathname;
-        throw redirect(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
+export function requireAuth(user: ProfileResponse | null, request: Request): ProfileResponse {
+    if (!user) {
+        throw redirect(`/login?redirectTo=${encodeURIComponent(pathnameOf(request))}`);
     }
+    return user;
 }

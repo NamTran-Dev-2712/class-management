@@ -1,7 +1,151 @@
 {
-  "home": {
-    "title": "Class Management System",
-    "tagline": "Online classrooms, question banks, exams and grading — in one place.",
-    "cta": "Get started"
-  }
+    "nav": {
+        "home": "Home",
+        "about": "About",
+        "pricing": "Pricing",
+        "contact": "Contact"
+    },
+    "footer": {
+        "product": "Product",
+        "company": "Company",
+        "rights": "All rights reserved.",
+        "social": {
+            "github": "GitHub",
+            "twitter": "Twitter",
+            "linkedin": "LinkedIn"
+        }
+    },
+    "home": {
+        "badge": "Built for modern classrooms",
+        "title": "Class Management System",
+        "tagline": "Online classrooms, question banks, exams and grading — in one place.",
+        "cta": "Get started",
+        "signIn": "Sign in",
+        "features": {
+            "title": "Everything you need to run a class",
+            "subtitle": "From enrollment to grading, all on a single platform.",
+            "classrooms": {
+                "title": "Classrooms",
+                "desc": "Create classes, enroll students and manage members with ease."
+            },
+            "questionBank": {
+                "title": "Question bank",
+                "desc": "Build reusable questions, organized by topic and difficulty."
+            },
+            "exams": {
+                "title": "Exams",
+                "desc": "Compose exams from your bank and deliver them online."
+            },
+            "grading": {
+                "title": "Grading",
+                "desc": "Auto-grade objective questions and track results in real time."
+            }
+        },
+        "roles": {
+            "title": "Made for every role",
+            "subtitle": "Tailored experiences for admins, teachers and students.",
+            "admin": {
+                "title": "Admins",
+                "desc": "Oversee users, classrooms and platform settings."
+            },
+            "teacher": {
+                "title": "Teachers",
+                "desc": "Run classrooms, author exams and grade work."
+            },
+            "student": {
+                "title": "Students",
+                "desc": "Join classes, take exams and track your progress."
+            }
+        },
+        "ctaBand": {
+            "title": "Ready to get started?",
+            "subtitle": "Create your free account in under a minute."
+        }
+    },
+    "about": {
+        "title": "About us",
+        "subtitle": "We help teachers and schools teach better, online.",
+        "body": "Class Management is an all-in-one platform for online classrooms, question banks, exams, assignments and grading. We focus on a simple, reliable experience so educators can spend less time on logistics and more time teaching.",
+        "values": {
+            "mission": {
+                "title": "Our mission",
+                "desc": "Make quality education tools accessible to every classroom."
+            },
+            "quality": {
+                "title": "Quality first",
+                "desc": "We sweat the details so the everyday workflow just works."
+            },
+            "community": {
+                "title": "For the community",
+                "desc": "Built with feedback from real teachers and students."
+            }
+        }
+    },
+    "pricing": {
+        "title": "Simple, transparent pricing",
+        "subtitle": "Start free. Upgrade when you need more.",
+        "popular": "Most popular",
+        "cta": "Get started",
+        "free": {
+            "name": "Free",
+            "price": "$0",
+            "period": "/month",
+            "desc": "For individuals getting started.",
+            "features": ["1 classroom", "Up to 30 students", "Basic question bank", "Online exams"]
+        },
+        "pro": {
+            "name": "Pro",
+            "price": "$19",
+            "period": "/month",
+            "desc": "For active teachers who need more.",
+            "features": [
+                "Unlimited classrooms",
+                "Up to 500 students",
+                "Advanced question bank",
+                "Auto-grading & analytics",
+                "Priority support"
+            ]
+        },
+        "institution": {
+            "name": "Institution",
+            "price": "Custom",
+            "period": "",
+            "desc": "For schools and organizations.",
+            "features": [
+                "Everything in Pro",
+                "Unlimited students",
+                "SSO & roles",
+                "Dedicated support",
+                "Custom onboarding"
+            ]
+        }
+    },
+    "contact": {
+        "title": "Get in touch",
+        "subtitle": "Have a question? We'd love to hear from you.",
+        "success": "Thanks! Your message has been sent.",
+        "info": {
+            "email": { "label": "Email", "value": "support@classmanagement.local" },
+            "phone": { "label": "Phone", "value": "+84 28 1234 5678" },
+            "address": { "label": "Address", "value": "Ho Chi Minh City, Vietnam" }
+        },
+        "form": {
+            "name": "Name",
+            "namePlaceholder": "Your name",
+            "email": "Email",
+            "emailPlaceholder": "you@example.com",
+            "subject": "Subject",
+            "subjectPlaceholder": "How can we help?",
+            "message": "Message",
+            "messagePlaceholder": "Write your message…",
+            "submit": "Send message"
+        },
+        "validation": {
+            "nameRequired": "Please enter your name",
+            "emailRequired": "Email is required",
+            "emailInvalid": "Enter a valid email address",
+            "subjectRequired": "Please enter a subject",
+            "messageMin": "Message must be at least 10 characters"
+        }
+    }
 }

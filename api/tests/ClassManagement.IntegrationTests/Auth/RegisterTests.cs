@@ -73,4 +73,33 @@ public class RegisterTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task Register_AsTeacher_Returns201()
+    {
+        var response = await AuthHelper.RegisterAsync(
+            _client,
+            "Teacher User",
+            TestConstants.UniqueEmail(),
+            TestConstants.DefaultPassword,
+            role: "Teacher"
+        );
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task Register_AsAdmin_Returns400()
+    {
+        // Admin must not be self-registerable.
+        var response = await AuthHelper.RegisterAsync(
+            _client,
+            "Sneaky Admin",
+            TestConstants.UniqueEmail(),
+            TestConstants.DefaultPassword,
+            role: "Admin"
+        );
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
 }

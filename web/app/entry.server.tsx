@@ -39,8 +39,7 @@ export default async function handleRequest(
     return new Promise((resolvePromise, reject) => {
         let shellRendered = false;
         const userAgent = request.headers.get("user-agent");
-        const readyEvent =
-            userAgent && isbot(userAgent) ? "onAllReady" : "onShellReady";
+        const readyEvent = userAgent && isbot(userAgent) ? "onAllReady" : "onShellReady";
 
         const { pipe, abort } = renderToPipeableStream(
             <I18nextProvider i18n={i18n}>

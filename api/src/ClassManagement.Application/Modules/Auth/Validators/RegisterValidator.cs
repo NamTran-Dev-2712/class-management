@@ -45,9 +45,18 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
         RuleFor(x => x.Role)
             .NotEmpty()
             .WithMessage("Validation.Role.Required")
-            .Must(BeAnAllowedRole)
+            .Must(BeSelfRegisterable)
             .WithMessage("Validation.Role.Invalid");
     }
+
+    // Self-registration is limited to Student/Teacher — Admin is provisioned internally.
+    private static readonly string[] SelfRegisterableRoles =
+    [
+        ApplicationRoles.Student,
+        ApplicationRoles.Teacher,
+    ];
+
+    private bool BeSelfRegisterable(string role) => SelfRegisterableRoles.Contains(role);
 
     private bool NotContainDangerousCharacters(string displayName)
     {
@@ -57,10 +66,5 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
         return !displayName.Contains("<")
             && !displayName.Contains(">")
             && !displayName.Contains("&");
-    }
-
-    private bool BeAnAllowedRole(string role)
-    {
-        return ApplicationRoles.All.Contains(role);
     }
 }

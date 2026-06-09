@@ -1,0 +1,32 @@
+{
+    "openMenu": "Mở menu",
+    "toggleSidebar": "Thu gọn thanh bên",
+    "comingSoon": "Sắp có",
+    "nav": {
+        "dashboard": "Tổng quan",
+        "users": "Người dùng",
+        "classrooms": "Lớp học",
+        "payments": "Thanh toán",
+        "reports": "Báo cáo",
+        "questionBank": "Ngân hàng câu hỏi",
+        "exams": "Đề thi",
+        "assignments": "Bài tập",
+        "myClasses": "Lớp của tôi",
+        "grades": "Điểm số"
+    },
+    "admin": {
+        "title": "Quản trị",
+        "welcome": "Tổng quan quản trị",
+        "subtitle": "Quản lý người dùng, lớp học và cấu hình hệ thống."
+    },
+    "teacher": {
+        "title": "Giảng dạy",
+        "welcome": "Chào mừng trở lại",
+        "subtitle": "Quản lý lớp học, ngân hàng câu hỏi và đề thi của bạn."
+    },
+    "student": {
+        "title": "Học tập",
+        "welcome": "Chào mừng trở lại",
+        "subtitle": "Lớp học, đề thi và bài tập của bạn trong nháy mắt."
+    }
+}

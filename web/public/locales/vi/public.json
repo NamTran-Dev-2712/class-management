@@ -1,7 +1,156 @@
 {
-  "home": {
-    "title": "Hệ thống quản lý lớp học",
-    "tagline": "Lớp học trực tuyến, ngân hàng câu hỏi, đề thi và chấm điểm — trong một nơi.",
-    "cta": "Bắt đầu"
-  }
+    "nav": {
+        "home": "Trang chủ",
+        "about": "Giới thiệu",
+        "pricing": "Bảng giá",
+        "contact": "Liên hệ"
+    },
+    "footer": {
+        "product": "Sản phẩm",
+        "company": "Công ty",
+        "rights": "Bảo lưu mọi quyền.",
+        "social": {
+            "github": "GitHub",
+            "twitter": "Twitter",
+            "linkedin": "LinkedIn"
+        }
+    },
+    "home": {
+        "badge": "Dành cho lớp học hiện đại",
+        "title": "Hệ thống quản lý lớp học",
+        "tagline": "Lớp học trực tuyến, ngân hàng câu hỏi, đề thi và chấm điểm — trong một nơi.",
+        "cta": "Bắt đầu",
+        "signIn": "Đăng nhập",
+        "features": {
+            "title": "Mọi thứ bạn cần để vận hành lớp học",
+            "subtitle": "Từ ghi danh đến chấm điểm, tất cả trên một nền tảng.",
+            "classrooms": {
+                "title": "Lớp học",
+                "desc": "Tạo lớp, ghi danh học viên và quản lý thành viên dễ dàng."
+            },
+            "questionBank": {
+                "title": "Ngân hàng câu hỏi",
+                "desc": "Xây dựng câu hỏi tái sử dụng, phân loại theo chủ đề và độ khó."
+            },
+            "exams": {
+                "title": "Đề thi",
+                "desc": "Soạn đề từ ngân hàng câu hỏi và tổ chức thi trực tuyến."
+            },
+            "grading": {
+                "title": "Chấm điểm",
+                "desc": "Tự động chấm câu hỏi khách quan và theo dõi kết quả tức thì."
+            }
+        },
+        "roles": {
+            "title": "Phù hợp với mọi vai trò",
+            "subtitle": "Trải nghiệm riêng cho quản trị viên, giảng viên và học viên.",
+            "admin": {
+                "title": "Quản trị viên",
+                "desc": "Giám sát người dùng, lớp học và cấu hình hệ thống."
+            },
+            "teacher": {
+                "title": "Giảng viên",
+                "desc": "Vận hành lớp học, ra đề và chấm bài."
+            },
+            "student": {
+                "title": "Học viên",
+                "desc": "Tham gia lớp, làm bài thi và theo dõi tiến độ."
+            }
+        },
+        "ctaBand": {
+            "title": "Sẵn sàng bắt đầu?",
+            "subtitle": "Tạo tài khoản miễn phí trong chưa đầy một phút."
+        }
+    },
+    "about": {
+        "title": "Về chúng tôi",
+        "subtitle": "Chúng tôi giúp giảng viên và trường học dạy tốt hơn, trực tuyến.",
+        "body": "Quản lý lớp học là nền tảng tất-cả-trong-một cho lớp học trực tuyến, ngân hàng câu hỏi, đề thi, bài tập và chấm điểm. Chúng tôi tập trung vào trải nghiệm đơn giản, đáng tin cậy để người dạy dành ít thời gian cho thủ tục và nhiều thời gian hơn để giảng dạy.",
+        "values": {
+            "mission": {
+                "title": "Sứ mệnh",
+                "desc": "Đưa công cụ giáo dục chất lượng đến mọi lớp học."
+            },
+            "quality": {
+                "title": "Chất lượng trên hết",
+                "desc": "Chúng tôi chăm chút từng chi tiết để quy trình hằng ngày luôn trơn tru."
+            },
+            "community": {
+                "title": "Vì cộng đồng",
+                "desc": "Xây dựng từ phản hồi của giảng viên và học viên thực tế."
+            }
+        }
+    },
+    "pricing": {
+        "title": "Giá minh bạch, đơn giản",
+        "subtitle": "Bắt đầu miễn phí. Nâng cấp khi bạn cần thêm.",
+        "popular": "Phổ biến nhất",
+        "cta": "Bắt đầu",
+        "free": {
+            "name": "Miễn phí",
+            "price": "0₫",
+            "period": "/tháng",
+            "desc": "Dành cho cá nhân mới bắt đầu.",
+            "features": [
+                "1 lớp học",
+                "Tối đa 30 học viên",
+                "Ngân hàng câu hỏi cơ bản",
+                "Thi trực tuyến"
+            ]
+        },
+        "pro": {
+            "name": "Pro",
+            "price": "490.000₫",
+            "period": "/tháng",
+            "desc": "Dành cho giảng viên cần nhiều hơn.",
+            "features": [
+                "Không giới hạn lớp học",
+                "Tối đa 500 học viên",
+                "Ngân hàng câu hỏi nâng cao",
+                "Tự động chấm & phân tích",
+                "Hỗ trợ ưu tiên"
+            ]
+        },
+        "institution": {
+            "name": "Tổ chức",
+            "price": "Tùy chỉnh",
+            "period": "",
+            "desc": "Dành cho trường học và tổ chức.",
+            "features": [
+                "Mọi tính năng của Pro",
+                "Không giới hạn học viên",
+                "SSO & phân quyền",
+                "Hỗ trợ chuyên biệt",
+                "Triển khai theo yêu cầu"
+            ]
+        }
+    },
+    "contact": {
+        "title": "Liên hệ với chúng tôi",
+        "subtitle": "Có câu hỏi? Chúng tôi rất muốn lắng nghe bạn.",
+        "success": "Cảm ơn bạn! Tin nhắn của bạn đã được gửi.",
+        "info": {
+            "email": { "label": "Email", "value": "support@classmanagement.local" },
+            "phone": { "label": "Điện thoại", "value": "+84 28 1234 5678" },
+            "address": { "label": "Địa chỉ", "value": "Thành phố Hồ Chí Minh, Việt Nam" }
+        },
+        "form": {
+            "name": "Họ tên",
+            "namePlaceholder": "Tên của bạn",
+            "email": "Email",
+            "emailPlaceholder": "ban@example.com",
+            "subject": "Chủ đề",
+            "subjectPlaceholder": "Chúng tôi có thể giúp gì?",
+            "message": "Nội dung",
+            "messagePlaceholder": "Nhập nội dung của bạn…",
+            "submit": "Gửi tin nhắn"
+        },
+        "validation": {
+            "nameRequired": "Vui lòng nhập họ tên",
+            "emailRequired": "Vui lòng nhập email",
+            "emailInvalid": "Email không hợp lệ",
+            "subjectRequired": "Vui lòng nhập chủ đề",
+            "messageMin": "Nội dung phải có ít nhất 10 ký tự"
+        }
+    }
 }

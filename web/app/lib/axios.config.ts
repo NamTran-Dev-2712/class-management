@@ -39,27 +39,15 @@ export const http = {
         const res = await apiClient.get<ApiResponse<T>>(url, config);
         return res.data.data as T;
     },
-    async post<T>(
-        url: string,
-        body?: unknown,
-        config?: AxiosRequestConfig,
-    ): Promise<T> {
+    async post<T>(url: string, body?: unknown, config?: AxiosRequestConfig): Promise<T> {
         const res = await apiClient.post<ApiResponse<T>>(url, body, config);
         return res.data.data as T;
     },
-    async put<T>(
-        url: string,
-        body?: unknown,
-        config?: AxiosRequestConfig,
-    ): Promise<T> {
+    async put<T>(url: string, body?: unknown, config?: AxiosRequestConfig): Promise<T> {
         const res = await apiClient.put<ApiResponse<T>>(url, body, config);
         return res.data.data as T;
     },
-    async patch<T>(
-        url: string,
-        body?: unknown,
-        config?: AxiosRequestConfig,
-    ): Promise<T> {
+    async patch<T>(url: string, body?: unknown, config?: AxiosRequestConfig): Promise<T> {
         const res = await apiClient.patch<ApiResponse<T>>(url, body, config);
         return res.data.data as T;
     },
@@ -79,7 +67,6 @@ export function createServerApiClient(request: Request): AxiosInstance {
     const cookie = request.headers.get("Cookie");
     const acceptLanguage = request.headers.get("Accept-Language");
     if (cookie) instance.defaults.headers.common["Cookie"] = cookie;
-    if (acceptLanguage)
-        instance.defaults.headers.common["Accept-Language"] = acceptLanguage;
+    if (acceptLanguage) instance.defaults.headers.common["Accept-Language"] = acceptLanguage;
     return instance;
 }

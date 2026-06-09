@@ -12,12 +12,7 @@ export class ApiError extends Error {
     readonly errors: string[];
     readonly traceId?: string;
 
-    constructor(
-        message: string,
-        statusCode: number,
-        errors: string[] = [],
-        traceId?: string,
-    ) {
+    constructor(message: string, statusCode: number, errors: string[] = [], traceId?: string) {
         super(message);
         this.name = "ApiError";
         this.statusCode = statusCode;
@@ -30,12 +25,7 @@ export class ApiError extends Error {
         const status = error.response?.status ?? 0;
 
         if (body && typeof body === "object" && "message" in body) {
-            return new ApiError(
-                body.message,
-                status,
-                body.errors ?? [],
-                body.traceId,
-            );
+            return new ApiError(body.message, status, body.errors ?? [], body.traceId);
         }
 
         return new ApiError(error.message || "Network error", status);

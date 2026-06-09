@@ -1,13 +1,32 @@
 {
-  "appName": "Quản lý lớp học",
-  "language": "Ngôn ngữ",
-  "nav": {
-    "home": "Trang chủ",
-    "login": "Đăng nhập"
-  },
-  "actions": {
-    "submit": "Gửi",
-    "cancel": "Hủy",
-    "loading": "Đang tải…"
-  }
+    "appName": "Quản lý lớp học",
+    "tagline": "Lớp học trực tuyến, thi cử và chấm điểm — trong một nơi.",
+    "language": "Ngôn ngữ",
+    "nav": {
+        "home": "Trang chủ",
+        "login": "Đăng nhập",
+        "register": "Đăng ký",
+        "dashboard": "Bảng điều khiển"
+    },
+    "actions": {
+        "submit": "Gửi",
+        "cancel": "Hủy",
+        "loading": "Đang tải…"
+    },
+    "userMenu": {
+        "profile": "Hồ sơ",
+        "dashboard": "Bảng điều khiển",
+        "logout": "Đăng xuất"
+    },
+    "a11y": {
+        "showPassword": "Hiện mật khẩu",
+        "hidePassword": "Ẩn mật khẩu"
+    },
+    "errors": {
+        "unauthorized": {
+            "title": "Truy cập bị từ chối",
+            "description": "Bạn không có quyền xem trang này.",
+            "back": "Về trang chủ"
+        }
+    }
 }

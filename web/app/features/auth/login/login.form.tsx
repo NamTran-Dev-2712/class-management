@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,13 +16,16 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { ApiError } from "@/lib/api-error";
+import { roleHome, safeRedirect } from "@/lib/auth";
 import { useLogin } from "./login.hook";
 import { createLoginSchema, type LoginFormValues } from "./login.schema";
 
 export function LoginForm() {
     const { t } = useTranslation("auth");
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const login = useLogin();
 
     const schema = useMemo(() => createLoginSchema(t), [t]);
@@ -32,16 +36,13 @@ export function LoginForm() {
 
     const onSubmit = (values: LoginFormValues) => {
         login.mutate(values, {
-            onSuccess: () => {
+            onSuccess: (user) => {
                 toast.success(t("login.success"));
-                void navigate("/");
+                const target = safeRedirect(searchParams.get("redirectTo"), roleHome(user.roles));
+                void navigate(target, { replace: true });
             },
             onError: (error) => {
-                toast.error(
-                    error instanceof ApiError
-                        ? error.message
-                        : t("login.title"),
-                );
+                toast.error(error instanceof ApiError ? error.message : t("login.title"));
             },
         });
     };
@@ -75,8 +76,7 @@ export function LoginForm() {
                         <FormItem>
                             <FormLabel>{t("login.password")}</FormLabel>
                             <FormControl>
-                                <Input
-                                    type="password"
+                                <PasswordInput
                                     autoComplete="current-password"
                                     placeholder={t("login.passwordPlaceholder")}
                                     {...field}
@@ -87,11 +87,8 @@ export function LoginForm() {
                     )}
                 />
 
-                <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={login.isPending}
-                >
+                <Button type="submit" className="w-full" disabled={login.isPending}>
+                    {login.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
                     {t("login.submit")}
                 </Button>
             </form>

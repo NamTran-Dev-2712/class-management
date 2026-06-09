@@ -1,0 +1,32 @@
+{
+    "openMenu": "Open menu",
+    "toggleSidebar": "Toggle sidebar",
+    "comingSoon": "Soon",
+    "nav": {
+        "dashboard": "Dashboard",
+        "users": "Users",
+        "classrooms": "Classrooms",
+        "payments": "Payments",
+        "reports": "Reports",
+        "questionBank": "Question bank",
+        "exams": "Exams",
+        "assignments": "Assignments",
+        "myClasses": "My classes",
+        "grades": "Grades"
+    },
+    "admin": {
+        "title": "Admin",
+        "welcome": "Admin overview",
+        "subtitle": "Manage users, classrooms and platform settings."
+    },
+    "teacher": {
+        "title": "Teaching",
+        "welcome": "Welcome back",
+        "subtitle": "Manage your classrooms, question banks and exams."
+    },
+    "student": {
+        "title": "Learning",
+        "welcome": "Welcome back",
+        "subtitle": "Your classes, exams and assignments at a glance."
+    }
+}

@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+# Full gate before code leaves the machine: web build + api integration tests (Docker).
+
+echo "▶ pre-push: web typecheck + build…"
+(cd web && bun run typecheck && bun run build) || exit 1
+
+echo "▶ pre-push: api integration tests (requires Docker)…"
+dotnet test api/tests/ClassManagement.IntegrationTests/ClassManagement.IntegrationTests.csproj || exit 1
