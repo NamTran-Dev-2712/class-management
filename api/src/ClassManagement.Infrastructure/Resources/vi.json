@@ -36,6 +36,10 @@
   "Validation.AvatarUrl.Invalid": "URL ảnh đại diện phải bắt đầu bằng http:// hoặc https://.",
   "Validation.PhoneNumber.Invalid": "Số điện thoại không đúng định dạng.",
   "Validation.RefreshToken.Required": "Vui lòng cung cấp mã làm mới.",
+  "Validation.Subject.NameRequired": "Vui lòng nhập tên môn học.",
+  "Validation.Subject.NameLength": "Tên môn học phải từ 2 đến 100 ký tự.",
+  "Validation.Subject.DescriptionMaxLength": "Mô tả không được vượt quá 500 ký tự.",
+  "Validation.Subject.DisplayOrderInvalid": "Thứ tự hiển thị phải lớn hơn hoặc bằng 0.",
 
   "Auth.RegisterSuccess": "Đăng ký người dùng thành công.",
   "Auth.LoginSuccess": "Đăng nhập thành công.",
@@ -56,5 +60,11 @@
   "Auth.ResetCodeInvalid": "Mã đặt lại không hợp lệ hoặc đã hết hạn.",
   "Auth.ResetPasswordFailed": "Đặt lại mật khẩu thất bại.",
   "Auth.NotAuthenticated": "Chưa xác thực.",
-  "User.NotFound": "Không tìm thấy người dùng."
+  "User.NotFound": "Không tìm thấy người dùng.",
+
+  "Subject.Created": "Tạo môn học thành công.",
+  "Subject.Updated": "Cập nhật môn học thành công.",
+  "Subject.Deleted": "Xóa môn học thành công.",
+  "Subject.NotFound": "Không tìm thấy môn học.",
+  "Subject.NameExists": "Đã tồn tại môn học với tên này."
 }

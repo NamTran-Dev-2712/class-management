@@ -13,6 +13,14 @@
         "cancel": "Hủy",
         "loading": "Đang tải…"
     },
+    "table": {
+        "noResults": "Không tìm thấy kết quả.",
+        "total": "{{count}} mục",
+        "rowsPerPage": "Số dòng mỗi trang",
+        "pageOf": "Trang {{page}} / {{total}}",
+        "previous": "Trang trước",
+        "next": "Trang sau"
+    },
     "userMenu": {
         "profile": "Hồ sơ",
         "dashboard": "Bảng điều khiển",

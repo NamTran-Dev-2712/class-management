@@ -13,6 +13,14 @@
         "cancel": "Cancel",
         "loading": "Loading…"
     },
+    "table": {
+        "noResults": "No results found.",
+        "total": "{{count}} item(s)",
+        "rowsPerPage": "Rows per page",
+        "pageOf": "Page {{page}} of {{total}}",
+        "previous": "Previous page",
+        "next": "Next page"
+    },
     "userMenu": {
         "profile": "Profile",
         "dashboard": "Dashboard",

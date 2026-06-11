@@ -8,6 +8,7 @@ import {
     FileText,
     GraduationCap,
     LayoutDashboard,
+    Library,
     School,
     Users,
     type LucideIcon,
@@ -31,6 +32,7 @@ export interface NavItem {
 export const dashboardNav: Record<Role, NavItem[]> = {
     [Roles.Admin]: [
         { labelKey: "nav.dashboard", to: "/admin", icon: LayoutDashboard },
+        { labelKey: "nav.subjects", to: "/admin/subjects", icon: Library },
         { labelKey: "nav.users", to: "/admin/users", icon: Users, disabled: true },
         { labelKey: "nav.classrooms", to: "/admin/classrooms", icon: School, disabled: true },
         { labelKey: "nav.payments", to: "/admin/payments", icon: CreditCard, disabled: true },

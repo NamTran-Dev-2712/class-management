@@ -1,3 +1,4 @@
+global using ClassManagement.Application.Common.Pagination;
 global using ClassManagement.Application.Interfaces.Cache;
 global using ClassManagement.Application.Interfaces.Identity;
 global using ClassManagement.Domain.Common.Interfaces;

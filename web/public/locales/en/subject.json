@@ -1,0 +1,57 @@
+{
+    "title": "Subjects",
+    "subtitle": "Manage the subjects available across classrooms.",
+    "actions": {
+        "create": "Add subject",
+        "edit": "Edit",
+        "delete": "Delete"
+    },
+    "columns": {
+        "name": "Name",
+        "description": "Description",
+        "displayOrder": "Order",
+        "status": "Status",
+        "createdAt": "Created",
+        "actions": "Actions"
+    },
+    "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+    },
+    "filters": {
+        "search": "Search subjects…",
+        "all": "All statuses",
+        "active": "Active",
+        "inactive": "Inactive"
+    },
+    "form": {
+        "createTitle": "Add subject",
+        "editTitle": "Edit subject",
+        "subtitle": "Subjects group classes and question banks by topic.",
+        "name": "Name",
+        "namePlaceholder": "e.g. Mathematics",
+        "description": "Description",
+        "descriptionPlaceholder": "Short description (optional)",
+        "displayOrder": "Display order",
+        "displayOrderHint": "Lower numbers appear first.",
+        "isActive": "Active",
+        "isActiveHint": "Inactive subjects are hidden from selection.",
+        "cancel": "Cancel",
+        "save": "Save",
+        "validation": {
+            "nameLength": "Name must be between 2 and 100 characters.",
+            "descriptionMax": "Description must not exceed 500 characters.",
+            "displayOrderInvalid": "Display order must be zero or greater."
+        }
+    },
+    "delete": {
+        "title": "Delete subject?",
+        "description": "\"{{name}}\" will be removed. This action cannot be undone."
+    },
+    "toast": {
+        "created": "Subject created.",
+        "updated": "Subject updated.",
+        "deleted": "Subject deleted.",
+        "error": "Something went wrong. Please try again."
+    }
+}

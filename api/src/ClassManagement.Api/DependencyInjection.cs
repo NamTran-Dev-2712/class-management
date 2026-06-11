@@ -121,6 +121,7 @@ public static class DependencyInjection
             AddIpFixedWindow(RateLimitOptions.Policies.ForgotPassword, rl.ForgotPassword);
             AddIpFixedWindow(RateLimitOptions.Policies.ResetPassword, rl.ResetPassword);
             AddIpFixedWindow(RateLimitOptions.Policies.Logout, rl.Logout);
+            AddIpFixedWindow(RateLimitOptions.Policies.SubjectWrite, rl.SubjectWrite);
         });
 
         return services;

@@ -14,11 +14,16 @@ export default [
     layout("layouts/auth.layout.tsx", [
         route("login", "features/auth/login/login.page.tsx"),
         route("register", "features/auth/register/register.page.tsx"),
+        route("forgot-password", "features/auth/forgot-password/forgot-password.page.tsx"),
+        route("reset-password", "features/auth/reset-password/reset-password.page.tsx"),
     ]),
 
     // Role dashboards — each layout guards by role and renders the shared shell.
     layout("layouts/admin.layout.tsx", [
-        ...prefix("admin", [index("features/admin/dashboard/dashboard.page.tsx")]),
+        ...prefix("admin", [
+            index("features/admin/dashboard/dashboard.page.tsx"),
+            route("subjects", "features/admin/subjects/subjects.page.tsx"),
+        ]),
     ]),
     layout("layouts/teacher.layout.tsx", [
         ...prefix("teacher", [index("features/teacher/dashboard/dashboard.page.tsx")]),

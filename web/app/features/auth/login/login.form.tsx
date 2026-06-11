@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -74,7 +74,15 @@ export function LoginForm() {
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{t("login.password")}</FormLabel>
+                            <div className="flex items-center justify-between">
+                                <FormLabel>{t("login.password")}</FormLabel>
+                                <Link
+                                    to="/forgot-password"
+                                    className="text-muted-foreground hover:text-foreground text-xs"
+                                >
+                                    {t("login.forgotPassword")}
+                                </Link>
+                            </div>
                             <FormControl>
                                 <PasswordInput
                                     autoComplete="current-password"

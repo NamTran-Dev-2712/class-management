@@ -9,6 +9,7 @@ export const I18N_NAMESPACES = [
     "mentor",
     "payment",
     "public",
+    "subject",
 ] as const;
 
 export const I18N_DEFAULT_NAMESPACE = "common";

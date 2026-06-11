@@ -36,6 +36,10 @@
   "Validation.AvatarUrl.Invalid": "Avatar URL must start with http:// or https://.",
   "Validation.PhoneNumber.Invalid": "Phone number format is invalid.",
   "Validation.RefreshToken.Required": "Refresh token is required.",
+  "Validation.Subject.NameRequired": "Subject name is required.",
+  "Validation.Subject.NameLength": "Subject name must be between 2 and 100 characters.",
+  "Validation.Subject.DescriptionMaxLength": "Description must not exceed 500 characters.",
+  "Validation.Subject.DisplayOrderInvalid": "Display order must be zero or greater.",
 
   "Auth.RegisterSuccess": "User registered successfully.",
   "Auth.LoginSuccess": "Login successful.",
@@ -56,5 +60,11 @@
   "Auth.ResetCodeInvalid": "Invalid or expired reset code.",
   "Auth.ResetPasswordFailed": "Failed to reset password.",
   "Auth.NotAuthenticated": "Not authenticated.",
-  "User.NotFound": "User not found."
+  "User.NotFound": "User not found.",
+
+  "Subject.Created": "Subject created successfully.",
+  "Subject.Updated": "Subject updated successfully.",
+  "Subject.Deleted": "Subject deleted successfully.",
+  "Subject.NotFound": "Subject not found.",
+  "Subject.NameExists": "A subject with this name already exists."
 }

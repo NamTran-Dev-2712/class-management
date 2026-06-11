@@ -64,6 +64,19 @@ public static class AuthHelper
         return client;
     }
 
+    // Logs in as the seeded admin (see ApiFactory Seed config) and returns a cookie client.
+    public static async Task<HttpClient> CreateAdminClientAsync(ApiFactory factory)
+    {
+        var client = factory.CreateClientWithCookies();
+        var loginResponse = await LoginAsync(
+            client,
+            TestConstants.AdminEmail,
+            TestConstants.AdminPassword
+        );
+        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        return client;
+    }
+
     // Reads Data field from ApiResponse<T> envelope
     public static async Task<JsonElement> ReadDataAsync(HttpResponseMessage response)
     {

@@ -7,4 +7,9 @@ export const queryKeys = {
         all: ["auth"] as const,
         profile: () => [...queryKeys.auth.all, "profile"] as const,
     },
+    subjects: {
+        all: ["subjects"] as const,
+        list: (params: unknown) => [...queryKeys.subjects.all, "list", params] as const,
+        detail: (publicId: string) => [...queryKeys.subjects.all, "detail", publicId] as const,
+    },
 } as const;

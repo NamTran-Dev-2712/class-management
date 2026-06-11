@@ -26,6 +26,8 @@ public sealed class RateLimitOptions
         new() { PermitLimit = 5, WindowSeconds = 60 };
     public RateLimitPolicyOptions Logout { get; init; } =
         new() { PermitLimit = 10, WindowSeconds = 60 };
+    public RateLimitPolicyOptions SubjectWrite { get; init; } =
+        new() { PermitLimit = 20, WindowSeconds = 60 };
 
     public static class Policies
     {
@@ -37,5 +39,6 @@ public sealed class RateLimitOptions
         public const string ForgotPassword = "forgotPassword";
         public const string ResetPassword = "resetPassword";
         public const string Logout = "logout";
+        public const string SubjectWrite = "subjectWrite";
     }
 }
