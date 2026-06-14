@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiError } from "@/lib/api-error";
-import type { Subject } from "@/services/subject/dtos/subject";
+import type { Subject } from "@/services/subject/dtos/queries/list/response";
 import { useCreateSubject, useUpdateSubject } from "./subjects.hook";
 import { createSubjectSchema, type SubjectFormValues } from "./subject.schema";
 

@@ -6,6 +6,7 @@ global using ClassManagement.Domain.Common.Interfaces;
 global using ClassManagement.Domain.Modules.Auth.Entities;
 global using ClassManagement.Domain.Modules.Catalog.Entities;
 global using ClassManagement.Domain.Modules.Classroom.Entities;
+global using ClassManagement.Domain.Modules.Users.Entities;
 global using ClassManagement.Domain.Primitives;
 global using ClassManagement.Infrastructure.Identity;
 global using Microsoft.EntityFrameworkCore;

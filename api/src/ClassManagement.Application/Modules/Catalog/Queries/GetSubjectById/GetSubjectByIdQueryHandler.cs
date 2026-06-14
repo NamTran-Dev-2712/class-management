@@ -21,9 +21,7 @@ public class GetSubjectByIdQueryHandler : IRequestHandler<GetSubjectByIdQuery, S
             return cached;
 
         var subject =
-            await _unitOfWork
-                .Repository<Subject>()
-                .GetFirstOrDefaultAsync(s => s.PublicId == request.PublicId)
+            await _unitOfWork.Subjects.GetByPublicIdAsync(request.PublicId, ct)
             ?? throw new NotFoundException("Subject.NotFound");
 
         var dto = new SubjectDto

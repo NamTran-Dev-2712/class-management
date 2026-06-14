@@ -1,0 +1,82 @@
+{
+    "title": "Người dùng",
+    "subtitle": "Quản lý tài khoản quản trị viên, giáo viên và học sinh.",
+    "actions": {
+        "create": "Thêm người dùng",
+        "edit": "Sửa",
+        "lock": "Khóa",
+        "unlock": "Mở khóa",
+        "delete": "Xóa",
+        "back": "Về danh sách người dùng"
+    },
+    "columns": {
+        "displayName": "Họ tên",
+        "email": "Email",
+        "role": "Vai trò",
+        "status": "Trạng thái",
+        "lastLoginAt": "Đăng nhập gần nhất",
+        "createdAt": "Ngày tạo",
+        "actions": "Hành động"
+    },
+    "status": {
+        "active": "Hoạt động",
+        "locked": "Đã khóa"
+    },
+    "roles": {
+        "Admin": "Quản trị viên",
+        "Teacher": "Giáo viên",
+        "Student": "Học sinh"
+    },
+    "filters": {
+        "search": "Tìm theo tên hoặc email…",
+        "allStatuses": "Tất cả trạng thái",
+        "active": "Hoạt động",
+        "locked": "Đã khóa",
+        "allRoles": "Tất cả vai trò"
+    },
+    "empty": {
+        "lastLogin": "Chưa bao giờ"
+    },
+    "form": {
+        "createTitle": "Thêm người dùng",
+        "createSubtitle": "Tạo tài khoản. Mật khẩu tạm thời sẽ được gửi qua email cho người dùng.",
+        "editTitle": "Sửa người dùng",
+        "editSubtitle": "Cập nhật thông tin tài khoản. Không thể thay đổi địa chỉ email.",
+        "displayName": "Họ và tên",
+        "displayNamePlaceholder": "ví dụ: Nguyễn Văn A",
+        "email": "Địa chỉ email",
+        "emailPlaceholder": "ten@example.com",
+        "emailHint": "Mật khẩu tạm thời sẽ được gửi đến đây.",
+        "emailReadonlyHint": "Không thể thay đổi email sau khi tạo.",
+        "role": "Vai trò",
+        "rolePlaceholder": "Chọn vai trò",
+        "phoneNumber": "Số điện thoại",
+        "phoneNumberPlaceholder": "Không bắt buộc",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "create": "Tạo người dùng",
+        "validation": {
+            "displayNameLength": "Họ tên phải từ 2 đến 100 ký tự.",
+            "emailRequired": "Email là bắt buộc.",
+            "emailInvalid": "Nhập địa chỉ email hợp lệ.",
+            "roleRequired": "Vui lòng chọn vai trò.",
+            "phoneInvalid": "Nhập số điện thoại hợp lệ."
+        }
+    },
+    "delete": {
+        "title": "Xóa người dùng?",
+        "description": "\"{{name}}\" sẽ bị xóa. Hành động này không thể hoàn tác."
+    },
+    "lockConfirm": {
+        "title": "Khóa tài khoản này?",
+        "description": "\"{{name}}\" sẽ bị đăng xuất và không thể đăng nhập cho đến khi được mở khóa."
+    },
+    "toast": {
+        "created": "Đã tạo người dùng. Mật khẩu tạm thời đã được gửi qua email.",
+        "updated": "Đã cập nhật người dùng.",
+        "locked": "Đã khóa người dùng.",
+        "unlocked": "Đã mở khóa người dùng.",
+        "deleted": "Đã xóa người dùng.",
+        "error": "Đã xảy ra lỗi. Vui lòng thử lại."
+    }
+}

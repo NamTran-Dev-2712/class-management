@@ -1,9 +1,6 @@
-export interface Subject {
-    publicId: string;
+export interface CreateSubjectRequest {
     name: string;
     description: string | null;
     isActive: boolean;
     displayOrder: number;
-    createdAt: string;
-    updatedAt: string;
 }

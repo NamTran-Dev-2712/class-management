@@ -10,6 +10,9 @@ public sealed class FakeEmailQueueService : IEmailQueueService
     private readonly ConcurrentDictionary<string, (string Otp, string ResetLink)> _sent = new(
         StringComparer.OrdinalIgnoreCase
     );
+    private readonly ConcurrentDictionary<string, string> _welcome = new(
+        StringComparer.OrdinalIgnoreCase
+    );
 
     public void EnqueuePasswordResetEmail(
         string email,
@@ -18,8 +21,16 @@ public sealed class FakeEmailQueueService : IEmailQueueService
         string resetLink
     ) => _sent[email] = (otp, resetLink);
 
+    public void EnqueueWelcomeEmail(string email, string displayName, string temporaryPassword) =>
+        _welcome[email] = temporaryPassword;
+
     public string? GetLastOtp(string email) =>
         _sent.TryGetValue(email, out var entry) ? entry.Otp : null;
 
     public bool WasSentTo(string email) => _sent.ContainsKey(email);
+
+    public string? GetLastWelcomePassword(string email) =>
+        _welcome.TryGetValue(email, out var password) ? password : null;
+
+    public bool WasWelcomeSentTo(string email) => _welcome.ContainsKey(email);
 }

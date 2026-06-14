@@ -2,8 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
 import { subjectService } from "@/services/subject/subject.service";
-import type { SubjectFormRequest } from "@/services/subject/dtos/subject-form.request";
-import type { SubjectListQuery } from "@/services/subject/dtos/subject-list.query";
+import type { CreateSubjectRequest } from "@/services/subject/dtos/commands/create-subject/request";
+import type { UpdateSubjectRequest } from "@/services/subject/dtos/commands/update-subject/request";
+import type { SubjectListQuery } from "@/services/subject/dtos/queries/list/query";
 
 export function useSubjects(query: SubjectListQuery) {
     return useQuery({
@@ -17,7 +18,7 @@ export function useSubjects(query: SubjectListQuery) {
 export function useCreateSubject() {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: (payload: SubjectFormRequest) => subjectService.create(payload),
+        mutationFn: (payload: CreateSubjectRequest) => subjectService.create(payload),
         onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.subjects.all }),
     });
 }
@@ -25,7 +26,7 @@ export function useCreateSubject() {
 export function useUpdateSubject() {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: (input: { publicId: string; payload: SubjectFormRequest }) =>
+        mutationFn: (input: { publicId: string; payload: UpdateSubjectRequest }) =>
             subjectService.update(input.publicId, input.payload),
         onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.subjects.all }),
     });

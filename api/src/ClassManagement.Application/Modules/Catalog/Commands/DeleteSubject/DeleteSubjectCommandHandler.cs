@@ -14,14 +14,12 @@ public class DeleteSubjectCommandHandler : IRequestHandler<DeleteSubjectCommand>
 
     public async Task Handle(DeleteSubjectCommand request, CancellationToken ct)
     {
-        var repo = _unitOfWork.Repository<Subject>();
-
         var subject =
-            await repo.GetFirstOrDefaultAsync(s => s.PublicId == request.PublicId)
+            await _unitOfWork.Subjects.GetByPublicIdAsync(request.PublicId, ct)
             ?? throw new NotFoundException("Subject.NotFound");
 
         // AuditableEntityInterceptor converts deletes of ISoftDeletable into DeletedAt = now.
-        repo.Remove(subject);
+        _unitOfWork.Subjects.Remove(subject);
         await _unitOfWork.SaveChangesAsync(ct);
 
         await _cache.RemoveAsync(CacheKeys.SubjectList(), ct);

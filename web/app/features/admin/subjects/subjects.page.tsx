@@ -10,7 +10,7 @@ import { DataTablePagination } from "@/components/shared/data-table/data-table-p
 import { DataTable } from "@/components/shared/data-table/data-table";
 import { Button } from "@/components/ui/button";
 import { useTableParams } from "@/hooks/use-table-params";
-import type { Subject } from "@/services/subject/dtos/subject";
+import type { Subject } from "@/services/subject/dtos/queries/list/response";
 import { getSubjectColumns } from "./subject-columns";
 import { SubjectFilters, type ActiveFilter } from "./subject-filters";
 import { SubjectForm } from "./subject-form";

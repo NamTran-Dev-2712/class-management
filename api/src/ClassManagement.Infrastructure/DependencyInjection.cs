@@ -133,6 +133,13 @@ public static class DependencyInjection
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IAuthRepository, AuthRepository>();
 
+        // Catalog
+        services.AddScoped<ISubjectRepository, SubjectRepository>();
+
+        // Admin user management
+        services.AddScoped<IPasswordGenerator, PasswordGenerator>();
+        services.AddScoped<IUserAdminRepository, UserAdminRepository>();
+
         // Password-reset / email / client-app options
         services.Configure<PasswordResetOptions>(
             configuration.GetSection(PasswordResetOptions.SectionName)

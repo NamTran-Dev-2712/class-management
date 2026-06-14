@@ -31,6 +31,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             "ResetPassword",
             "Logout",
             "SubjectWrite",
+            "UserWrite",
         ];
         foreach (var policy in policies)
         {

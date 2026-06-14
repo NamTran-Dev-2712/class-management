@@ -14,16 +14,15 @@ public class UpdateSubjectCommandHandler : IRequestHandler<UpdateSubjectCommand>
 
     public async Task Handle(UpdateSubjectCommand request, CancellationToken ct)
     {
-        var repo = _unitOfWork.Repository<Subject>();
         var name = request.Name.Trim();
 
         var subject =
-            await repo.GetFirstOrDefaultAsync(s => s.PublicId == request.PublicId)
+            await _unitOfWork.Subjects.GetByPublicIdAsync(request.PublicId, ct)
             ?? throw new NotFoundException("Subject.NotFound");
 
         if (
             !string.Equals(subject.Name, name, StringComparison.Ordinal)
-            && await repo.ExistsAsync(s => s.Name == name && s.PublicId != request.PublicId)
+            && await _unitOfWork.Subjects.ExistsByNameAsync(name, request.PublicId, ct)
         )
             throw new ConflictException("Subject.NameExists");
 
@@ -32,7 +31,7 @@ public class UpdateSubjectCommandHandler : IRequestHandler<UpdateSubjectCommand>
         subject.IsActive = request.IsActive;
         subject.DisplayOrder = request.DisplayOrder;
 
-        repo.Update(subject);
+        _unitOfWork.Subjects.Update(subject);
         await _unitOfWork.SaveChangesAsync(ct);
 
         await _cache.RemoveAsync(CacheKeys.SubjectList(), ct);

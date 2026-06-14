@@ -38,6 +38,7 @@
 | `refresh_tokens` | Hash của refresh token | Custom entity |
 | `password_reset_tokens` | One-time reset token | Custom entity |
 | `subjects` | Môn học — Admin quản lý | Custom entity |
+| `vw_admin_users` *(view)* | Read model cho Admin user management — 1 dòng / user (chưa xóa) + role names gộp thành `text[]` | Custom view |
 
 ---
 
@@ -280,6 +281,48 @@ dotnet ef database update \
 
 > **Lưu ý:** `DatabaseSeeder.SeedAsync()` tự động gọi `context.Database.MigrateAsync()` khi app khởi động.
 > Triggers và citext extension được tạo/cập nhật idempotent trong `ApplyDatabaseExtensionsAsync()`.
+
+---
+
+## View: `vw_admin_users`
+
+**C# entity:** `ClassManagement.Domain.Modules.Users.Entities.User : BaseEntity, IHasPublicId` (read-only)
+**EF config:** `UserViewConfiguration` (`builder.ToView("vw_admin_users")`)
+**Migration:** `202606111824_add_admin_users_view` (raw SQL `CREATE VIEW` / `DROP VIEW`)
+**Purpose:** Read model cho **Admin user management**. Cho phép tái sử dụng `BaseGetQueryHandler`
+(search/filter/sort/paging/projection) cho danh sách user **mà không** để type Identity
+(`ApplicationUser`) rò rỉ vào tầng Application/Domain. Mọi thao tác ghi (create/update/lock/unlock/
+soft-delete) đi qua `IUserAdminRepository` trên `UserManager` — view này chỉ phục vụ đọc.
+
+### Definition
+```sql
+CREATE VIEW vw_admin_users AS
+SELECT
+    u.id, u.public_id, u.display_name, u.email, u.email_confirmed, u.phone_number,
+    u.is_active, u.is_locked, u.locked_at, u.last_login_at, u.created_at, u.updated_at,
+    COALESCE(array_agg(r.name) FILTER (WHERE r.name IS NOT NULL), '{}') AS roles
+FROM users u
+LEFT JOIN user_roles ur ON ur.user_id = u.id
+LEFT JOIN roles r ON r.id = ur.role_id
+WHERE u.deleted_at IS NULL          -- soft-deleted users excluded ở chính view
+GROUP BY u.id;                      -- u.id là PK ⇒ functional dependency, không cần group các cột khác
+```
+
+| Column | Type | Ghi chú |
+|---|---|---|
+| `id` | bigint | PK của `users` (internal, không expose) |
+| `public_id` | uuid | ID expose qua API |
+| `display_name`, `email`, `phone_number` | text / citext | Hồ sơ cơ bản |
+| `email_confirmed`, `is_active`, `is_locked` | boolean | Trạng thái tài khoản |
+| `locked_at`, `last_login_at`, `created_at`, `updated_at` | timestamptz | Mốc thời gian |
+| `roles` | text[] | Tên role gộp từ `user_roles` (single-role hiện tại ⇒ mảng 1 phần tử) |
+
+> View **không** implement `ISoftDeletable` nên không bị global query filter áp thêm — điều kiện
+> `deleted_at IS NULL` đã nằm trong định nghĩa view.
+>
+> View vẫn chứa **mọi** role (kể cả Admin). Việc giới hạn quản lý chỉ Student/Teacher (ẩn admin và
+> chính người đang đăng nhập) được áp ở tầng ứng dụng trong `GetUsersQueryHandler.GetBaseQuery`
+> (`WHERE NOT roles @> {Admin}`), **không** đổi định nghĩa view ⇒ không cần migration.
 
 ---
 

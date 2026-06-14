@@ -14,11 +14,10 @@ public class CreateSubjectCommandHandler : IRequestHandler<CreateSubjectCommand,
 
     public async Task<Guid> Handle(CreateSubjectCommand request, CancellationToken ct)
     {
-        var repo = _unitOfWork.Repository<Subject>();
         var name = request.Name.Trim();
 
         // Uniqueness among active (non-deleted) rows — matches uq_subjects_name_active.
-        if (await repo.ExistsAsync(s => s.Name == name))
+        if (await _unitOfWork.Subjects.ExistsByNameAsync(name, cancellationToken: ct))
             throw new ConflictException("Subject.NameExists");
 
         var subject = new Subject
@@ -29,7 +28,7 @@ public class CreateSubjectCommandHandler : IRequestHandler<CreateSubjectCommand,
             DisplayOrder = request.DisplayOrder,
         };
 
-        await repo.AddAsync(subject, ct);
+        await _unitOfWork.Subjects.AddAsync(subject, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         await _cache.RemoveAsync(CacheKeys.SubjectList(), ct);
 

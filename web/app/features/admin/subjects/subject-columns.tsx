@@ -10,7 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Subject } from "@/services/subject/dtos/subject";
+import type { Subject } from "@/services/subject/dtos/queries/list/response";
 
 interface ColumnOptions {
     t: TFunction;

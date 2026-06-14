@@ -33,7 +33,7 @@ export const dashboardNav: Record<Role, NavItem[]> = {
     [Roles.Admin]: [
         { labelKey: "nav.dashboard", to: "/admin", icon: LayoutDashboard },
         { labelKey: "nav.subjects", to: "/admin/subjects", icon: Library },
-        { labelKey: "nav.users", to: "/admin/users", icon: Users, disabled: true },
+        { labelKey: "nav.users", to: "/admin/users", icon: Users },
         { labelKey: "nav.classrooms", to: "/admin/classrooms", icon: School, disabled: true },
         { labelKey: "nav.payments", to: "/admin/payments", icon: CreditCard, disabled: true },
         { labelKey: "nav.reports", to: "/admin/reports", icon: BarChart3, disabled: true },

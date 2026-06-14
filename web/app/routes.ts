@@ -23,6 +23,9 @@ export default [
         ...prefix("admin", [
             index("features/admin/dashboard/dashboard.page.tsx"),
             route("subjects", "features/admin/subjects/subjects.page.tsx"),
+            route("users", "features/admin/users/list/users.page.tsx"),
+            route("users/new", "features/admin/users/create/user-create.page.tsx"),
+            route("users/:publicId", "features/admin/users/edit/user-edit.page.tsx"),
         ]),
     ]),
     layout("layouts/teacher.layout.tsx", [

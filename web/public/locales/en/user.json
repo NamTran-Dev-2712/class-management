@@ -1,0 +1,82 @@
+{
+    "title": "Users",
+    "subtitle": "Manage admin, teacher, and student accounts.",
+    "actions": {
+        "create": "Add user",
+        "edit": "Edit",
+        "lock": "Lock",
+        "unlock": "Unlock",
+        "delete": "Delete",
+        "back": "Back to users"
+    },
+    "columns": {
+        "displayName": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "lastLoginAt": "Last login",
+        "createdAt": "Created",
+        "actions": "Actions"
+    },
+    "status": {
+        "active": "Active",
+        "locked": "Locked"
+    },
+    "roles": {
+        "Admin": "Admin",
+        "Teacher": "Teacher",
+        "Student": "Student"
+    },
+    "filters": {
+        "search": "Search by name or email…",
+        "allStatuses": "All statuses",
+        "active": "Active",
+        "locked": "Locked",
+        "allRoles": "All roles"
+    },
+    "empty": {
+        "lastLogin": "Never"
+    },
+    "form": {
+        "createTitle": "Add user",
+        "createSubtitle": "Create an account. A temporary password is emailed to the user.",
+        "editTitle": "Edit user",
+        "editSubtitle": "Update the account details. The email address cannot be changed.",
+        "displayName": "Full name",
+        "displayNamePlaceholder": "e.g. Jane Doe",
+        "email": "Email address",
+        "emailPlaceholder": "name@example.com",
+        "emailHint": "The temporary password will be sent here.",
+        "emailReadonlyHint": "Email cannot be changed after creation.",
+        "role": "Role",
+        "rolePlaceholder": "Select a role",
+        "phoneNumber": "Phone number",
+        "phoneNumberPlaceholder": "Optional",
+        "cancel": "Cancel",
+        "save": "Save",
+        "create": "Create user",
+        "validation": {
+            "displayNameLength": "Name must be between 2 and 100 characters.",
+            "emailRequired": "Email is required.",
+            "emailInvalid": "Enter a valid email address.",
+            "roleRequired": "Please select a role.",
+            "phoneInvalid": "Enter a valid phone number."
+        }
+    },
+    "delete": {
+        "title": "Delete user?",
+        "description": "\"{{name}}\" will be removed. This action cannot be undone."
+    },
+    "lockConfirm": {
+        "title": "Lock this account?",
+        "description": "\"{{name}}\" will be signed out and unable to log in until unlocked."
+    },
+    "toast": {
+        "created": "User created. A temporary password was emailed.",
+        "updated": "User updated.",
+        "locked": "User locked.",
+        "unlocked": "User unlocked.",
+        "deleted": "User deleted.",
+        "error": "Something went wrong. Please try again."
+    }
+}
