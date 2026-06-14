@@ -56,6 +56,14 @@ public sealed class ApplicationUserConfiguration : IEntityTypeConfiguration<Appl
         builder.Property(u => u.CreatedAt).HasDefaultValueSql("now()");
         builder.Property(u => u.UpdatedAt).HasDefaultValueSql("now()");
 
+        builder.Property(u => u.IsActive).HasDefaultValue(true);
+        builder
+            .HasIndex(u => u.IsActive)
+            .HasDatabaseName("idx_users_is_active")
+            .HasFilter("is_active = false");
+
+        builder.Ignore(u => u.IsDeleted);
+
         builder.HasIndex(u => u.DeletedAt).HasDatabaseName("idx_users_deleted_at");
         builder
             .HasIndex(u => u.IsLocked)

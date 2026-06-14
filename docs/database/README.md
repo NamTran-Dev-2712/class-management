@@ -32,6 +32,7 @@ Bộ tài liệu này là **nền tảng kỹ thuật** để triển khai thự
 | [11-security.md](./11-security.md) | Password hashing, PII, RLS, backup | Cross-cutting |
 | [12-migrations-strategy.md](./12-migrations-strategy.md) | Migration order, rollback, zero-downtime | Cross-cutting |
 | [13-extensibility.md](./13-extensibility.md) | Database extension points cho ROADMAP-FUTURE | Future |
+| [14-background-jobs.md](./14-background-jobs.md) | Hangfire schema, email queue, dashboard | Cross-cutting |
 
 ---
 

@@ -38,6 +38,7 @@
 | `refresh_tokens` | Hash của refresh token | Custom entity |
 | `password_reset_tokens` | One-time reset token | Custom entity |
 | `subjects` | Môn học — Admin quản lý | Custom entity |
+| `vw_admin_users` *(view)* | Read model cho Admin user management — 1 dòng / user (chưa xóa) + role names gộp thành `text[]` | Custom view |
 
 ---
 
@@ -70,6 +71,7 @@
 | `display_name` | `TEXT` | NO | — | CHECK length 2–100 |
 | `avatar_url` | `TEXT` | YES | NULL | CHECK `^https?://` |
 | `bio` | `TEXT` | YES | NULL | CHECK length ≤ 500 |
+| `is_active` | `BOOLEAN` | NO | `true` | `false` = tài khoản bị vô hiệu hóa bởi admin |
 | `is_locked` | `BOOLEAN` | NO | `false` | **Admin-initiated lockout** (khác Identity lockout) |
 | `locked_at` | `TIMESTAMPTZ` | YES | NULL | Thời điểm admin khóa |
 | `locked_by` | `BIGINT` | YES | NULL | FK → users(id) SET NULL — admin đã khóa |
@@ -87,8 +89,12 @@ uq_users_email_active       UNIQUE (email) WHERE deleted_at IS NULL    ← parti
 EmailIndex                  (normalized_email)                          ← từ Identity
 UserNameIndex               UNIQUE (normalized_user_name)              ← từ Identity
 idx_users_deleted_at        (deleted_at)
+idx_users_is_active         (is_active) WHERE is_active = false        ← partial, chỉ index user bị disable
 idx_users_is_locked         (is_locked) WHERE is_locked = true
 ```
+
+> **`is_active` vs `deleted_at`:** `deleted_at IS NOT NULL` = xóa mềm (không thể phục hồi qua UI bình thường); `is_active = false` = tạm vô hiệu hóa (có thể bật lại). Đây là 2 cơ chế độc lập.
+> **`IsDeleted`** là computed property trên C# entity (`DeletedAt.HasValue`), **không** có cột DB tương ứng.
 
 ### Lockout Strategy (2 cơ chế coexist)
 | Cơ chế | Column | Kích hoạt bởi |
@@ -180,24 +186,40 @@ idx_refresh_tokens_expires      (expires_at)
 
 **C# entity:** `ClassManagement.Domain.Modules.Auth.Entities.PasswordResetToken : BaseEntity`
 **EF config:** `PasswordResetTokenConfiguration`
-**Pattern:** Append-only — TTL 15 phút
+**Pattern:** Append-only — TTL 15 phút (`PasswordResetOptions.ExpiryMinutes`)
 
 ### Columns
 
-| Column | Type | Nullable | Notes |
-|---|---|---|---|
-| `id` | `BIGINT` | NO | PK |
-| `user_id` | `BIGINT` | NO | FK → users(id) CASCADE |
-| `token_hash` | `TEXT` | NO | SHA-256(raw_token) |
-| `expires_at` | `TIMESTAMPTZ` | NO | CHECK > created_at, NOW() + 15 min |
-| `used_at` | `TIMESTAMPTZ` | YES | NULL = chưa dùng |
-| `created_at` | `TIMESTAMPTZ` | NO | DEFAULT now() |
+| Column | Type | Nullable | Default | Notes |
+|---|---|---|---|---|
+| `id` | `BIGINT` | NO | identity | PK |
+| `user_id` | `BIGINT` | NO | — | FK → users(id) CASCADE |
+| `token_hash` | `TEXT` | NO | — | SHA-256(`{user_id}:{otp}`) — xem ghi chú OTP bên dưới |
+| `expires_at` | `TIMESTAMPTZ` | NO | — | CHECK > created_at, NOW() + 15 min |
+| `used_at` | `TIMESTAMPTZ` | YES | NULL | NULL = chưa dùng (one-time use) |
+| `attempt_count` | `INT` | NO | `0` | Số lần nhập OTP sai — khoá token khi ≥ `MaxAttempts` |
+| `created_at` | `TIMESTAMPTZ` | NO | `now()` | |
 
 ### Indexes
 ```
 uq_password_reset_hash    UNIQUE (token_hash)
-idx_prt_user_active       (user_id) WHERE used_at IS NULL AND expires_at > NOW()
+idx_prt_user_active       (user_id) WHERE used_at IS NULL     ← partial; expires_at kiểm tra ở query time
 ```
+
+> **NOW() không IMMUTABLE** nên không thể đưa `expires_at > NOW()` vào predicate của partial index;
+> filter chỉ trên `used_at IS NULL`, còn hạn dùng được kiểm tra trong câu truy vấn.
+
+### Forgot/Reset password — thiết kế OTP (MVP-1)
+
+> Luồng: `POST /api/auth/forgot-password` → tạo **OTP 6 số** (sinh bằng `RandomNumberGenerator`),
+> lưu `token_hash = SHA-256("{user_id}:{otp}")` (salt bằng `user_id` để hash không phải digest trần của 1 số 6 chữ số),
+> gửi email **OTP + link** (`{ClientApp.BaseUrl}{ResetPasswordPath}?email=..&otp=..`) **bất đồng bộ qua Hangfire + Resend**.
+> `POST /api/auth/reset-password` (email + otp + mật khẩu mới) verify hash; mỗi lần sai tăng `attempt_count`,
+> đạt `MaxAttempts` thì khoá token. Reset thành công → `used_at = now()` + thu hồi toàn bộ refresh token của user.
+>
+> Tham số cấu hình (không hardcode): `PasswordReset.OtpLength` (6), `ExpiryMinutes` (15), `MaxAttempts` (5).
+> Forgot-password luôn trả `200` (kể cả email không tồn tại) để chống account enumeration.
+> Migration: `20260605160014_add_attempt_count_to_password_reset_tokens`.
 
 ---
 
@@ -259,6 +281,48 @@ dotnet ef database update \
 
 > **Lưu ý:** `DatabaseSeeder.SeedAsync()` tự động gọi `context.Database.MigrateAsync()` khi app khởi động.
 > Triggers và citext extension được tạo/cập nhật idempotent trong `ApplyDatabaseExtensionsAsync()`.
+
+---
+
+## View: `vw_admin_users`
+
+**C# entity:** `ClassManagement.Domain.Modules.Users.Entities.User : BaseEntity, IHasPublicId` (read-only)
+**EF config:** `UserViewConfiguration` (`builder.ToView("vw_admin_users")`)
+**Migration:** `202606111824_add_admin_users_view` (raw SQL `CREATE VIEW` / `DROP VIEW`)
+**Purpose:** Read model cho **Admin user management**. Cho phép tái sử dụng `BaseGetQueryHandler`
+(search/filter/sort/paging/projection) cho danh sách user **mà không** để type Identity
+(`ApplicationUser`) rò rỉ vào tầng Application/Domain. Mọi thao tác ghi (create/update/lock/unlock/
+soft-delete) đi qua `IUserAdminRepository` trên `UserManager` — view này chỉ phục vụ đọc.
+
+### Definition
+```sql
+CREATE VIEW vw_admin_users AS
+SELECT
+    u.id, u.public_id, u.display_name, u.email, u.email_confirmed, u.phone_number,
+    u.is_active, u.is_locked, u.locked_at, u.last_login_at, u.created_at, u.updated_at,
+    COALESCE(array_agg(r.name) FILTER (WHERE r.name IS NOT NULL), '{}') AS roles
+FROM users u
+LEFT JOIN user_roles ur ON ur.user_id = u.id
+LEFT JOIN roles r ON r.id = ur.role_id
+WHERE u.deleted_at IS NULL          -- soft-deleted users excluded ở chính view
+GROUP BY u.id;                      -- u.id là PK ⇒ functional dependency, không cần group các cột khác
+```
+
+| Column | Type | Ghi chú |
+|---|---|---|
+| `id` | bigint | PK của `users` (internal, không expose) |
+| `public_id` | uuid | ID expose qua API |
+| `display_name`, `email`, `phone_number` | text / citext | Hồ sơ cơ bản |
+| `email_confirmed`, `is_active`, `is_locked` | boolean | Trạng thái tài khoản |
+| `locked_at`, `last_login_at`, `created_at`, `updated_at` | timestamptz | Mốc thời gian |
+| `roles` | text[] | Tên role gộp từ `user_roles` (single-role hiện tại ⇒ mảng 1 phần tử) |
+
+> View **không** implement `ISoftDeletable` nên không bị global query filter áp thêm — điều kiện
+> `deleted_at IS NULL` đã nằm trong định nghĩa view.
+>
+> View vẫn chứa **mọi** role (kể cả Admin). Việc giới hạn quản lý chỉ Student/Teacher (ẩn admin và
+> chính người đang đăng nhập) được áp ở tầng ứng dụng trong `GetUsersQueryHandler.GetBaseQuery`
+> (`WHERE NOT roles @> {Admin}`), **không** đổi định nghĩa view ⇒ không cần migration.
 
 ---
 

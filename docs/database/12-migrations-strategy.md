@@ -96,7 +96,11 @@ Examples:
 202601150950_create_refresh_tokens_table
 202601151000_create_password_reset_tokens_table
 202601151010_create_subjects_table          -- + seed data
+202606051600_add_attempt_count_to_password_reset_tokens  -- OTP brute-force cap (forgot/reset password)
+202606111824_add_admin_users_view           -- vw_admin_users read model for Admin user management
 ```
+
+> Hangfire tự tạo schema `hangfire` lúc app start — **không** dùng EF migration. Xem [14-background-jobs.md](./14-background-jobs.md).
 
 ### MVP-2: Classroom
 

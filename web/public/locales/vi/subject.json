@@ -1,0 +1,57 @@
+{
+    "title": "Môn học",
+    "subtitle": "Quản lý các môn học dùng cho lớp học.",
+    "actions": {
+        "create": "Thêm môn học",
+        "edit": "Sửa",
+        "delete": "Xóa"
+    },
+    "columns": {
+        "name": "Tên",
+        "description": "Mô tả",
+        "displayOrder": "Thứ tự",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+    },
+    "status": {
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+    },
+    "filters": {
+        "search": "Tìm môn học…",
+        "all": "Tất cả trạng thái",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+    },
+    "form": {
+        "createTitle": "Thêm môn học",
+        "editTitle": "Sửa môn học",
+        "subtitle": "Môn học nhóm các lớp và ngân hàng câu hỏi theo chủ đề.",
+        "name": "Tên",
+        "namePlaceholder": "ví dụ: Toán học",
+        "description": "Mô tả",
+        "descriptionPlaceholder": "Mô tả ngắn (tùy chọn)",
+        "displayOrder": "Thứ tự hiển thị",
+        "displayOrderHint": "Số nhỏ hơn sẽ hiển thị trước.",
+        "isActive": "Hoạt động",
+        "isActiveHint": "Môn học ngừng hoạt động sẽ bị ẩn khi chọn.",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "validation": {
+            "nameLength": "Tên phải từ 2 đến 100 ký tự.",
+            "descriptionMax": "Mô tả không được vượt quá 500 ký tự.",
+            "displayOrderInvalid": "Thứ tự hiển thị phải lớn hơn hoặc bằng 0."
+        }
+    },
+    "delete": {
+        "title": "Xóa môn học?",
+        "description": "\"{{name}}\" sẽ bị xóa. Hành động này không thể hoàn tác."
+    },
+    "toast": {
+        "created": "Đã tạo môn học.",
+        "updated": "Đã cập nhật môn học.",
+        "deleted": "Đã xóa môn học.",
+        "error": "Đã có lỗi xảy ra. Vui lòng thử lại."
+    }
+}

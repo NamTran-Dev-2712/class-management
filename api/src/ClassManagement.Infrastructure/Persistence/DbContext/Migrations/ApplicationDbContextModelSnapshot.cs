@@ -32,6 +32,12 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<int>("AttemptCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("attempt_count");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -441,6 +447,71 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Users.Entities.User", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("display_name");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("email");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("email_confirmed");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
+
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_login_at");
+
+                    b.Property<DateTime?>("LockedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("locked_at");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text")
+                        .HasColumnName("phone_number");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.PrimitiveCollection<string[]>("Roles")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("roles");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_admin_users", (string)null);
+                });
+
             modelBuilder.Entity("ClassManagement.Infrastructure.Identity.ApplicationRole", b =>
                 {
                     b.Property<long>("Id")
@@ -543,6 +614,12 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("email_confirmed");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
                     b.Property<bool>("IsLocked")
                         .HasColumnType("boolean")
                         .HasColumnName("is_locked");
@@ -631,6 +708,10 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .IsUnique()
                         .HasDatabaseName("uq_users_email_active")
                         .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("idx_users_is_active")
+                        .HasFilter("is_active = false");
 
                     b.HasIndex("IsLocked")
                         .HasDatabaseName("idx_users_is_locked")

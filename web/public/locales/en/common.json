@@ -1,0 +1,40 @@
+{
+    "appName": "Class Management",
+    "tagline": "Online classrooms, exams and grading — in one place.",
+    "language": "Language",
+    "nav": {
+        "home": "Home",
+        "login": "Sign in",
+        "register": "Sign up",
+        "dashboard": "Dashboard"
+    },
+    "actions": {
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "loading": "Loading…"
+    },
+    "table": {
+        "noResults": "No results found.",
+        "total": "{{count}} item(s)",
+        "rowsPerPage": "Rows per page",
+        "pageOf": "Page {{page}} of {{total}}",
+        "previous": "Previous page",
+        "next": "Next page"
+    },
+    "userMenu": {
+        "profile": "Profile",
+        "dashboard": "Dashboard",
+        "logout": "Log out"
+    },
+    "a11y": {
+        "showPassword": "Show password",
+        "hidePassword": "Hide password"
+    },
+    "errors": {
+        "unauthorized": {
+            "title": "Access denied",
+            "description": "You don't have permission to view this page.",
+            "back": "Back to home"
+        }
+    }
+}

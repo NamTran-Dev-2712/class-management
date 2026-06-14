@@ -6,6 +6,10 @@
 
   <ItemGroup>
     <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
+    <PackageReference Include="Hangfire.Core" Version="1.8.23" />
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.21.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
     <PackageReference
       Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore"
       Version="10.0.8"
@@ -16,10 +20,17 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.8" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
+    <PackageReference Include="Resend" Version="0.5.1" />
   </ItemGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Localization resources are embedded so they load via the assembly manifest
+         (works at runtime and in tests, independent of output-copy behavior). -->
+    <EmbeddedResource Include="Resources\*.json" />
   </ItemGroup>
 
   <PropertyGroup>

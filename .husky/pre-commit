@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# Fast gate: format staged files, then typecheck web + build api. No Docker/tests here.
+
+echo "▶ pre-commit: formatting staged files…"
+bunx lint-staged || exit 1
+
+echo "▶ pre-commit: web typecheck…"
+(cd web && bun run typecheck) || exit 1
+
+echo "▶ pre-commit: api build…"
+dotnet build api/ClassManagement.slnx || exit 1
