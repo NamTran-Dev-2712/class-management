@@ -1,0 +1,155 @@
+{
+    "title": "Lớp của tôi",
+    "subtitle": "Tạo và quản lý lớp học cùng học sinh của bạn.",
+    "actions": {
+        "create": "Tạo lớp",
+        "back": "Về danh sách lớp",
+        "members": "Thành viên",
+        "edit": "Chỉnh sửa",
+        "archive": "Lưu trữ",
+        "unarchive": "Kích hoạt lại"
+    },
+    "columns": {
+        "name": "Tên lớp",
+        "subject": "Môn học",
+        "owner": "Giáo viên",
+        "status": "Trạng thái",
+        "members": "Thành viên",
+        "pendingBadge": "{{count}} chờ duyệt",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+    },
+    "status": {
+        "active": "Đang hoạt động",
+        "archived": "Đã lưu trữ"
+    },
+    "filters": {
+        "search": "Tìm lớp học…",
+        "all": "Tất cả trạng thái"
+    },
+    "form": {
+        "createTitle": "Tạo lớp học",
+        "createSubtitle": "Thiết lập lớp mới và chia sẻ mã mời cho học sinh.",
+        "editTitle": "Chỉnh sửa lớp học",
+        "editSubtitle": "Cập nhật thông tin lớp học của bạn.",
+        "name": "Tên lớp",
+        "namePlaceholder": "VD: Toán 10A1",
+        "description": "Mô tả",
+        "descriptionPlaceholder": "Mô tả ngắn (tùy chọn)",
+        "subject": "Môn học",
+        "subjectPlaceholder": "Chọn môn học",
+        "subjectNone": "Không có môn học",
+        "subjectCustom": "Khác (nhập thủ công)",
+        "subjectHint": "Chọn từ danh mục hoặc tự nhập môn học.",
+        "customSubject": "Môn học tự nhập",
+        "customSubjectPlaceholder": "VD: Câu lạc bộ Robotics",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "validation": {
+            "nameLength": "Tên lớp phải từ 2 đến 200 ký tự.",
+            "descriptionMax": "Mô tả không được vượt quá 1000 ký tự.",
+            "subjectMax": "Môn học không được vượt quá 200 ký tự.",
+            "customSubjectRequired": "Vui lòng nhập môn học."
+        }
+    },
+    "archiveConfirm": {
+        "title": "Lưu trữ lớp học?",
+        "description": "\"{{name}}\" sẽ chuyển sang tab lưu trữ và ngừng nhận thành viên mới. Bạn có thể kích hoạt lại sau."
+    },
+    "invite": {
+        "title": "Mã mời",
+        "subtitle": "Chia sẻ mã này để học sinh gửi yêu cầu tham gia.",
+        "copy": "Sao chép",
+        "copied": "Đã sao chép mã mời.",
+        "regenerate": "Mã mới",
+        "regenerated": "Đã tạo mã mời mới.",
+        "regenerateConfirm": {
+            "title": "Tạo mã mới?",
+            "description": "Mã hiện tại sẽ ngừng hoạt động ngay lập tức. Ai đang giữ mã cũ sẽ cần mã mới."
+        }
+    },
+    "members": {
+        "subtitle": "Duyệt yêu cầu tham gia và quản lý danh sách thành viên.",
+        "pendingTitle": "Yêu cầu chờ duyệt",
+        "pendingSubtitle": "Học sinh đang chờ bạn duyệt.",
+        "noPending": "Không có yêu cầu nào.",
+        "approvedTitle": "Thành viên",
+        "approvedSubtitle": "Học sinh đã được duyệt trong lớp.",
+        "noApproved": "Chưa có thành viên nào.",
+        "actions": {
+            "approve": "Duyệt",
+            "reject": "Từ chối",
+            "remove": "Xóa"
+        },
+        "toast": {
+            "approved": "Đã duyệt học sinh.",
+            "rejected": "Đã từ chối yêu cầu.",
+            "removed": "Đã xóa học sinh."
+        },
+        "rejectConfirm": {
+            "title": "Từ chối yêu cầu?",
+            "description": "Từ chối yêu cầu của {{name}}? Học sinh có thể thử lại bằng mã mời."
+        },
+        "kickConfirm": {
+            "title": "Xóa học sinh?",
+            "description": "Xóa {{name}} khỏi lớp? Dữ liệu cũ của họ vẫn được giữ lại."
+        }
+    },
+    "student": {
+        "title": "Lớp của tôi",
+        "subtitle": "Các lớp bạn đã tham gia.",
+        "empty": "Bạn chưa tham gia lớp nào.",
+        "noSubject": "Không có môn học",
+        "teacher": "Giáo viên: {{name}}",
+        "membersTitle": "Bạn cùng lớp",
+        "noMembers": "Chưa có bạn cùng lớp nào.",
+        "actions": {
+            "join": "Tham gia lớp",
+            "members": "Bạn cùng lớp",
+            "leave": "Rời lớp"
+        },
+        "toast": {
+            "left": "Bạn đã rời khỏi lớp."
+        },
+        "leaveConfirm": {
+            "title": "Rời lớp học?",
+            "description": "Rời khỏi \"{{name}}\"? Bạn sẽ không nhận bài tập của lớp này nữa. Dữ liệu cũ vẫn được giữ lại."
+        }
+    },
+    "join": {
+        "title": "Tham gia lớp học",
+        "subtitle": "Nhập mã mời mà giáo viên đã chia sẻ.",
+        "inviteCode": "Mã mời",
+        "placeholder": "ABC12345",
+        "submit": "Gửi yêu cầu",
+        "validation": {
+            "codeFormat": "Mã mời phải gồm 6 đến 8 chữ cái hoặc chữ số."
+        },
+        "toast": {
+            "sent": "Đã gửi yêu cầu. Bạn sẽ được thông báo khi được duyệt."
+        }
+    },
+    "requests": {
+        "title": "Yêu cầu tham gia",
+        "subtitle": "Theo dõi trạng thái các yêu cầu tham gia lớp của bạn.",
+        "empty": "Bạn chưa có yêu cầu tham gia nào.",
+        "status": {
+            "Pending": "Chờ duyệt",
+            "Approved": "Đã duyệt",
+            "Rejected": "Bị từ chối",
+            "Removed": "Đã bị xóa",
+            "Left": "Đã rời"
+        }
+    },
+    "admin": {
+        "title": "Lớp học",
+        "subtitle": "Tất cả lớp học trên hệ thống (chỉ xem)."
+    },
+    "toast": {
+        "created": "Đã tạo lớp học.",
+        "updated": "Đã cập nhật lớp học.",
+        "archived": "Đã lưu trữ lớp học.",
+        "unarchived": "Đã kích hoạt lại lớp học.",
+        "error": "Đã xảy ra lỗi. Vui lòng thử lại."
+    }
+}

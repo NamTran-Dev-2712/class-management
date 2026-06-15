@@ -123,6 +123,8 @@ public static class DependencyInjection
             AddIpFixedWindow(RateLimitOptions.Policies.Logout, rl.Logout);
             AddIpFixedWindow(RateLimitOptions.Policies.SubjectWrite, rl.SubjectWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.UserWrite, rl.UserWrite);
+            AddIpFixedWindow(RateLimitOptions.Policies.ClassWrite, rl.ClassWrite);
+            AddIpFixedWindow(RateLimitOptions.Policies.ClassJoin, rl.ClassJoin);
         });
 
         return services;

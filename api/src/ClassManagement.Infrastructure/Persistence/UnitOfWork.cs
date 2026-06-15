@@ -6,13 +6,22 @@ public class UnitOfWork : IUnitOfWork
 
     // Repositories are constructor-injected and share this unit's scoped DbContext (both resolve
     // the same pooled instance per request), so their staged changes commit on SaveChangesAsync.
-    public UnitOfWork(ApplicationDbContext context, ISubjectRepository subjects)
+    public UnitOfWork(
+        ApplicationDbContext context,
+        ISubjectRepository subjects,
+        IClassRepository classes,
+        IClassMembershipRepository classMemberships
+    )
     {
         _context = context;
         Subjects = subjects;
+        Classes = classes;
+        ClassMemberships = classMemberships;
     }
 
     public ISubjectRepository Subjects { get; }
+    public IClassRepository Classes { get; }
+    public IClassMembershipRepository ClassMemberships { get; }
 
     public IGenericRepository<T> Repository<T>()
         where T : class

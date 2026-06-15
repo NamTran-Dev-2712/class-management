@@ -33,6 +33,29 @@
                     }
                 },
                 {
+                    "name": "Register (Teacher)",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.environment.set('teacherEmail', 'teacher_' + Date.now() + '@example.com');"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"displayName\": \"Teacher One\",\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\",\n  \"role\": \"Teacher\"\n}"
+                        }
+                    }
+                },
+                {
                     "name": "Login (Admin)",
                     "request": {
                         "method": "POST",
@@ -42,6 +65,31 @@
                             "mode": "raw",
                             "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
                         }
+                    }
+                },
+                {
+                    "name": "Login (Teacher)",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Login (Student)",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{selfEmail}}\",\n  \"password\": \"Passw0rd!23\"\n}"
+                        },
+                        "description": "Logs in the self-registered student created by 'Register (Student)' (uses {{selfEmail}})."
                     }
                 },
                 {
@@ -298,12 +346,271 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Teacher Classes",
+            "description": "Login (Teacher) first. Create Class captures {{classId}}; Get Class / Regenerate capture {{inviteCode}}; List Members (Pending) captures {{membershipId}}.",
+            "item": [
+                {
+                    "name": "Create Class",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.publicId) {",
+                                    "  pm.collectionVariables.set('classId', json.data.publicId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/classes", "host": ["{{baseUrl}}"], "path": ["teacher", "classes"] },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Math 10A1 {{$timestamp}}\",\n  \"description\": \"Morning class\",\n  \"subjectId\": null,\n  \"subjectName\": \"Mathematics\",\n  \"coverImageUrl\": null\n}"
+                        },
+                        "description": "subjectId = an active catalog subject's publicId (e.g. {{subjectId}}); OR leave null and set subjectName for a free-text subject; OR both null for no subject."
+                    }
+                },
+                {
+                    "name": "List My Classes",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes?status=Active&pageNumber=1&pageSize=10&sortBy=createdAt&sortOrder=desc",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["teacher", "classes"],
+                            "query": [
+                                { "key": "status", "value": "Active" },
+                                { "key": "pageNumber", "value": "1" },
+                                { "key": "pageSize", "value": "10" },
+                                { "key": "sortBy", "value": "createdAt" },
+                                { "key": "sortOrder", "value": "desc" },
+                                { "key": "searchTerm", "value": "", "disabled": true }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Class",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.inviteCode) {",
+                                    "  pm.collectionVariables.set('inviteCode', json.data.inviteCode);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}"] }
+                    }
+                },
+                {
+                    "name": "Update Class",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}"] },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Math 10A1 (Updated)\",\n  \"description\": \"Updated\",\n  \"subjectId\": null,\n  \"subjectName\": \"Algebra\",\n  \"coverImageUrl\": null\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Archive Class",
+                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/archive", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "archive"] } }
+                },
+                {
+                    "name": "Unarchive Class",
+                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/unarchive", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "unarchive"] } }
+                },
+                {
+                    "name": "Regenerate Invite Code",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.inviteCode) {",
+                                    "  pm.collectionVariables.set('inviteCode', json.data.inviteCode);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/invite-code/regenerate", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "invite-code", "regenerate"] } }
+                },
+                {
+                    "name": "List Members (Pending)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.items && json.data.items.length) {",
+                                    "  pm.collectionVariables.set('membershipId', json.data.items[0].publicId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members?status=Pending&pageSize=50",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["teacher", "classes", "{{classId}}", "members"],
+                            "query": [{ "key": "status", "value": "Pending" }, { "key": "pageSize", "value": "50" }]
+                        }
+                    }
+                },
+                {
+                    "name": "List Members (Approved)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members?status=Approved&pageSize=50",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["teacher", "classes", "{{classId}}", "members"],
+                            "query": [{ "key": "status", "value": "Approved" }, { "key": "pageSize", "value": "50" }]
+                        }
+                    }
+                },
+                {
+                    "name": "Approve Member",
+                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{membershipId}}/approve", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members", "{{membershipId}}", "approve"] } }
+                },
+                {
+                    "name": "Reject Member",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{membershipId}}/reject", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members", "{{membershipId}}", "reject"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"rejectionReason\": \"Not this term\"\n}" }
+                    }
+                },
+                {
+                    "name": "Kick Member",
+                    "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{membershipId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members", "{{membershipId}}"] } }
+                }
+            ]
+        },
+        {
+            "name": "Student Classes",
+            "description": "Login (Student) first. Join uses {{inviteCode}} captured from the teacher's Get Class.",
+            "item": [
+                {
+                    "name": "Join Class",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/student/classes/join", "host": ["{{baseUrl}}"], "path": ["student", "classes", "join"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"inviteCode\": \"{{inviteCode}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "My Classes",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/student/classes?pageNumber=1&pageSize=12",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "classes"],
+                            "query": [{ "key": "pageNumber", "value": "1" }, { "key": "pageSize", "value": "12" }]
+                        }
+                    }
+                },
+                {
+                    "name": "My Requests",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/student/classes/requests?pageNumber=1&pageSize=10",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "classes", "requests"],
+                            "query": [{ "key": "pageNumber", "value": "1" }, { "key": "pageSize", "value": "10" }]
+                        }
+                    }
+                },
+                {
+                    "name": "Class Members (Classmates)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/student/classes/{{classId}}/members?pageSize=100",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "classes", "{{classId}}", "members"],
+                            "query": [{ "key": "pageSize", "value": "100" }]
+                        }
+                    }
+                },
+                {
+                    "name": "Leave Class",
+                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/student/classes/{{classId}}/leave", "host": ["{{baseUrl}}"], "path": ["student", "classes", "{{classId}}", "leave"] } }
+                }
+            ]
+        },
+        {
+            "name": "Admin Classes",
+            "description": "Login (Admin) first. Read-only overview of all classes.",
+            "item": [
+                {
+                    "name": "List All Classes",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/classes?status=Active&pageNumber=1&pageSize=10",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["admin", "classes"],
+                            "query": [
+                                { "key": "status", "value": "Active" },
+                                { "key": "pageNumber", "value": "1" },
+                                { "key": "pageSize", "value": "10" },
+                                { "key": "searchTerm", "value": "", "disabled": true }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Class (Admin)",
+                    "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["admin", "classes", "{{classId}}"] } }
+                }
+            ]
         }
     ],
     "variable": [
         { "key": "subjectId", "value": "" },
         { "key": "userId", "value": "" },
         { "key": "newUserEmail", "value": "" },
-        { "key": "selfEmail", "value": "" }
+        { "key": "selfEmail", "value": "" },
+        { "key": "classId", "value": "" },
+        { "key": "inviteCode", "value": "" },
+        { "key": "membershipId", "value": "" }
     ]
 }

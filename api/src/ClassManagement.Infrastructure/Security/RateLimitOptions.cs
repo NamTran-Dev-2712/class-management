@@ -31,6 +31,14 @@ public sealed class RateLimitOptions
     public RateLimitPolicyOptions UserWrite { get; init; } =
         new() { PermitLimit = 20, WindowSeconds = 60 };
 
+    // Classroom create/update/archive/member actions.
+    public RateLimitPolicyOptions ClassWrite { get; init; } =
+        new() { PermitLimit = 30, WindowSeconds = 60 };
+
+    // Joining a class by invite code — tighter to mitigate invite-code brute-forcing (MVP-2 risk).
+    public RateLimitPolicyOptions ClassJoin { get; init; } =
+        new() { PermitLimit = 5, WindowSeconds = 60 };
+
     public static class Policies
     {
         public const string Login = "login";
@@ -43,5 +51,7 @@ public sealed class RateLimitOptions
         public const string Logout = "logout";
         public const string SubjectWrite = "subjectWrite";
         public const string UserWrite = "userWrite";
+        public const string ClassWrite = "classWrite";
+        public const string ClassJoin = "classJoin";
     }
 }

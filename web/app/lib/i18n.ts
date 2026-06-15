@@ -5,6 +5,7 @@ export const I18N_NAMESPACES = [
     "common",
     "auth",
     "booking",
+    "classroom",
     "dashboard",
     "mentor",
     "payment",

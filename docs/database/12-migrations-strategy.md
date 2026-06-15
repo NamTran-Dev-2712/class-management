@@ -100,13 +100,19 @@ Examples:
 202606111824_add_admin_users_view           -- vw_admin_users read model for Admin user management
 ```
 
+> Lưu ý thực tế: `classes` và `class_memberships` (MVP-2) được tạo ngay trong `InitDatabase` (scaffold ban đầu), không phải migration riêng.
+
 > Hangfire tự tạo schema `hangfire` lúc app start — **không** dùng EF migration. Xem [14-background-jobs.md](./14-background-jobs.md).
 
 ### MVP-2: Classroom
 
+`classes` + `class_memberships` đã có sẵn từ `InitDatabase`. MVP-2 chỉ bổ sung:
+
 ```
-202601220900_create_classes_table           -- + triggers + indexes
-202601220910_create_class_memberships_table
+202606141757_create_classroom_views_and_subject_name
+  -- Thêm cột classes.subject_name (snapshot tên môn / free-text)
+  -- Tạo view vw_classes (class + owner + member counts)
+  -- Tạo view vw_class_members (membership + student + class + owner)
 ```
 
 ### MVP-3: Question Bank

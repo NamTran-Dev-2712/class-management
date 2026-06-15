@@ -3,6 +3,8 @@ public interface IUnitOfWork
     // Module repositories — handlers depend on IUnitOfWork only and reach the repos through it,
     // then commit via SaveChangesAsync. All repos share the unit's single DbContext.
     ISubjectRepository Subjects { get; }
+    IClassRepository Classes { get; }
+    IClassMembershipRepository ClassMemberships { get; }
 
     // Generic fallback for entities without a dedicated repository.
     IGenericRepository<T> Repository<T>()
