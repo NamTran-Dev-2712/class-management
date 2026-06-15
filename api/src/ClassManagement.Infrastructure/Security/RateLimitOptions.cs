@@ -39,6 +39,11 @@ public sealed class RateLimitOptions
     public RateLimitPolicyOptions ClassJoin { get; init; } =
         new() { PermitLimit = 5, WindowSeconds = 60 };
 
+    // Generous per-IP cap for GET list endpoints — output cache absorbs repeated identical reads, but
+    // this throttles param-varying spam that would otherwise bypass the cache and hit the database.
+    public RateLimitPolicyOptions Read { get; init; } =
+        new() { PermitLimit = 120, WindowSeconds = 60 };
+
     public static class Policies
     {
         public const string Login = "login";
@@ -53,5 +58,6 @@ public sealed class RateLimitOptions
         public const string UserWrite = "userWrite";
         public const string ClassWrite = "classWrite";
         public const string ClassJoin = "classJoin";
+        public const string Read = "read";
     }
 }

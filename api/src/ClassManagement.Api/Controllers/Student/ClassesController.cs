@@ -2,6 +2,7 @@ using ClassManagement.Application.Common.Constants;
 using ClassManagement.Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace ClassManagement.Api.Controllers.Student;
@@ -26,10 +27,13 @@ public class StudentClassesController : BaseApiController
     )
     {
         var classPublicId = await _mediator.Send(command, cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiOk(new { classPublicId }, "Class.Joined");
     }
 
     [HttpGet]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.StudentClassesRead)]
     public async Task<IActionResult> GetMyClasses(
         [FromQuery] GetStudentClassesQuery query,
         CancellationToken cancellationToken
@@ -40,6 +44,8 @@ public class StudentClassesController : BaseApiController
     }
 
     [HttpGet("requests")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.StudentClassesRead)]
     public async Task<IActionResult> GetMyRequests(
         [FromQuery] GetStudentMembershipRequestsQuery query,
         CancellationToken cancellationToken
@@ -50,6 +56,8 @@ public class StudentClassesController : BaseApiController
     }
 
     [HttpGet("{publicId:guid}/members")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.StudentClassesRead)]
     public async Task<IActionResult> GetMembers(
         Guid publicId,
         [FromQuery] GetStudentClassMembersQuery query,
@@ -71,6 +79,7 @@ public class StudentClassesController : BaseApiController
     public async Task<IActionResult> Leave(Guid publicId, CancellationToken cancellationToken)
     {
         await _mediator.Send(new LeaveClassCommand(publicId), cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiOk("Class.Left");
     }
 }

@@ -1,4 +1,5 @@
 using ClassManagement.Application.Interfaces.Localization;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace ClassManagement.Api.Contracts.Common;
 
@@ -10,6 +11,16 @@ public abstract class BaseApiController : ControllerBase
     // Resolve message keys (e.g. "Auth.LoginSuccess") to the current request culture.
     private string L(string key) =>
         HttpContext.RequestServices.GetRequiredService<ILocalizationService>().Translate(key);
+
+    // Invalidate every cached GET response tagged with <paramref name="tag"/>. Call after a successful
+    // write so the next read is served fresh. No-op when output caching is disabled (empty store).
+    protected ValueTask EvictCacheAsync(
+        string tag,
+        CancellationToken cancellationToken = default
+    ) =>
+        HttpContext
+            .RequestServices.GetRequiredService<IOutputCacheStore>()
+            .EvictByTagAsync(tag, cancellationToken);
 
     protected IActionResult ApiOk<T>(T data, string message = "Response.Success") =>
         base.Ok(ApiResponse<T>.Ok(data, HttpContext.TraceIdentifier, L(message)));

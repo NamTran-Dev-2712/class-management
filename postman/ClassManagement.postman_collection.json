@@ -602,6 +602,35 @@
                     "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["admin", "classes", "{{classId}}"] } }
                 }
             ]
+        },
+        {
+            "name": "Output Cache (manual perf)",
+            "description": "Verify output caching + tag eviction by hand. Login (Admin) first.\n1) Run 'GET Subjects (1st — cache miss)' then 'GET Subjects (2nd — cache HIT)': the 2nd should be noticeably faster (served from cache, no DB hit) — each request logs its responseTime to the Postman console.\n2) Run 'Create Subject (evicts cache)', then 'GET Subjects (after evict — fresh)': the list reflects the new subject immediately (the write evicted the 'subjects' tag).\nNote: responses also vary by Accept-Language and (for teacher/student endpoints) by the signed-in user.",
+            "item": [
+                {
+                    "name": "GET Subjects (1st — cache miss)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["console.log('1st GET /subjects responseTime =', pm.response.responseTime, 'ms');"] } }],
+                    "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/subjects?pageSize=20", "host": ["{{baseUrl}}"], "path": ["subjects"], "query": [{ "key": "pageSize", "value": "20" }] } }
+                },
+                {
+                    "name": "GET Subjects (2nd — cache HIT)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["console.log('2nd GET /subjects responseTime =', pm.response.responseTime, 'ms (should be faster on a cache hit)');"] } }],
+                    "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/subjects?pageSize=20", "host": ["{{baseUrl}}"], "path": ["subjects"], "query": [{ "key": "pageSize", "value": "20" }] } }
+                },
+                {
+                    "name": "Create Subject (evicts cache)",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/subjects", "host": ["{{baseUrl}}"], "path": ["subjects"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cache Demo {{$timestamp}}\",\n  \"description\": \"Created to demonstrate output-cache eviction\",\n  \"isActive\": true,\n  \"displayOrder\": 0\n}" }
+                    }
+                },
+                {
+                    "name": "GET Subjects (after evict — fresh)",
+                    "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/subjects?pageSize=20", "host": ["{{baseUrl}}"], "path": ["subjects"], "query": [{ "key": "pageSize", "value": "20" }] } }
+                }
+            ]
         }
     ],
     "variable": [

@@ -3,6 +3,7 @@ using ClassManagement.Application.Interfaces.Identity;
 using ClassManagement.Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace ClassManagement.Api.Controllers.Teacher;
@@ -22,6 +23,8 @@ public class TeacherClassesController : BaseApiController
     }
 
     [HttpGet]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.TeacherClassesRead)]
     public async Task<IActionResult> GetClasses(
         [FromQuery] GetTeacherClassesQuery query,
         CancellationToken cancellationToken
@@ -32,6 +35,7 @@ public class TeacherClassesController : BaseApiController
     }
 
     [HttpGet("{publicId:guid}", Name = "GetTeacherClass")]
+    [OutputCache(PolicyName = OutputCachePolicies.TeacherClassesRead)]
     public async Task<IActionResult> GetClass(Guid publicId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
@@ -49,6 +53,7 @@ public class TeacherClassesController : BaseApiController
     )
     {
         var publicId = await _mediator.Send(command, cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiCreated("GetTeacherClass", new { publicId }, new { publicId }, "Class.Created");
     }
 
@@ -61,6 +66,7 @@ public class TeacherClassesController : BaseApiController
     )
     {
         await _mediator.Send(command with { PublicId = publicId }, cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiOk("Class.Updated");
     }
 
@@ -69,6 +75,7 @@ public class TeacherClassesController : BaseApiController
     public async Task<IActionResult> Archive(Guid publicId, CancellationToken cancellationToken)
     {
         await _mediator.Send(new ArchiveClassCommand(publicId, true), cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiOk("Class.Archived");
     }
 
@@ -77,6 +84,7 @@ public class TeacherClassesController : BaseApiController
     public async Task<IActionResult> Unarchive(Guid publicId, CancellationToken cancellationToken)
     {
         await _mediator.Send(new ArchiveClassCommand(publicId, false), cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiOk("Class.Unarchived");
     }
 
@@ -91,10 +99,13 @@ public class TeacherClassesController : BaseApiController
             new RegenerateInviteCodeCommand(publicId),
             cancellationToken
         );
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiOk(new { inviteCode }, "Class.InviteCodeRegenerated");
     }
 
     [HttpGet("{publicId:guid}/members")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.TeacherClassesRead)]
     public async Task<IActionResult> GetMembers(
         Guid publicId,
         [FromQuery] GetClassMembersQuery query,
@@ -123,6 +134,7 @@ public class TeacherClassesController : BaseApiController
             new ApproveMemberCommand(publicId, membershipPublicId),
             cancellationToken
         );
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiOk("Class.MemberApproved");
     }
 
@@ -139,6 +151,7 @@ public class TeacherClassesController : BaseApiController
             new RejectMemberCommand(publicId, membershipPublicId, command?.RejectionReason),
             cancellationToken
         );
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiOk("Class.MemberRejected");
     }
 
@@ -154,6 +167,7 @@ public class TeacherClassesController : BaseApiController
             new KickMemberCommand(publicId, membershipPublicId),
             cancellationToken
         );
+        await EvictCacheAsync(OutputCacheTags.Classrooms, cancellationToken);
         return ApiOk("Class.MemberRemoved");
     }
 }

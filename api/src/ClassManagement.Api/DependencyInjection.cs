@@ -1,11 +1,14 @@
 using System.Globalization;
+using System.Security.Claims;
 using System.Threading.RateLimiting;
 using ClassManagement.Api.Contracts.Common;
 using ClassManagement.Api.Contracts.Exceptions;
+using ClassManagement.Application.Common.Constants;
 using ClassManagement.Application.Interfaces.Localization;
 using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Security;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
@@ -125,6 +128,57 @@ public static class DependencyInjection
             AddIpFixedWindow(RateLimitOptions.Policies.UserWrite, rl.UserWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.ClassWrite, rl.ClassWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.ClassJoin, rl.ClassJoin);
+            AddIpFixedWindow(RateLimitOptions.Policies.Read, rl.Read);
+        });
+
+        // Output caching — caches GET responses (keyed by all query params + Accept-Language, plus the
+        // user id for personalized reads) and is invalidated on writes via IOutputCacheStore tags.
+        // Registered unconditionally so IOutputCacheStore is always resolvable for eviction; the
+        // middleware itself is gated by OutputCache:Enabled (see UseApiMiddleware).
+        var oc =
+            configuration.GetSection(OutputCacheSettings.SectionName).Get<OutputCacheSettings>()
+            ?? new OutputCacheSettings();
+
+        services.AddOutputCache(options =>
+        {
+            var sharedExpiry = TimeSpan.FromSeconds(oc.DefaultExpirySeconds);
+            var perUserExpiry = TimeSpan.FromSeconds(oc.PerUserExpirySeconds);
+
+            // Shared read: same response for everyone at a given authorization level — vary only by
+            // query params (no hardcoded keys) and the request culture.
+            OutputCachePolicyBuilder Shared(OutputCachePolicyBuilder b, string tag) =>
+                b.Expire(sharedExpiry)
+                    .SetVaryByQuery("*")
+                    .SetVaryByHeader("Accept-Language")
+                    .Tag(tag);
+
+            // Per-user read: personalized lists — additionally vary by the caller's id so one user
+            // never receives another's cached page.
+            OutputCachePolicyBuilder PerUser(OutputCachePolicyBuilder b, string tag) =>
+                Shared(b, tag)
+                    .Expire(perUserExpiry)
+                    .VaryByValue(ctx => new KeyValuePair<string, string>(
+                        "uid",
+                        ctx.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anon"
+                    ));
+
+            options.AddPolicy(
+                OutputCachePolicies.SubjectsRead,
+                b => Shared(b, OutputCacheTags.Subjects)
+            );
+            options.AddPolicy(OutputCachePolicies.UsersRead, b => Shared(b, OutputCacheTags.Users));
+            options.AddPolicy(
+                OutputCachePolicies.AdminClassesRead,
+                b => Shared(b, OutputCacheTags.Classrooms)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.TeacherClassesRead,
+                b => PerUser(b, OutputCacheTags.Classrooms)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.StudentClassesRead,
+                b => PerUser(b, OutputCacheTags.Classrooms)
+            );
         });
 
         return services;
@@ -167,6 +221,17 @@ public static class DependencyInjection
             app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
+
+        // Output cache runs AFTER authentication/authorization so a cache hit can never bypass authz
+        // (the authorization middleware has already vetted the request). Gated by config so it can be
+        // turned off without code changes. Reads OutputCache:Enabled from the fully-built config
+        // (honours test ConfigureAppConfiguration overrides).
+        var outputCacheEnabled = app.Configuration.GetValue(
+            $"{OutputCacheSettings.SectionName}:Enabled",
+            true
+        );
+        if (outputCacheEnabled)
+            app.UseOutputCache();
 
         return app;
     }

@@ -1,6 +1,9 @@
 using ClassManagement.Application.Common.Constants;
+using ClassManagement.Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ClassManagement.Api.Controllers.Admin;
 
@@ -17,6 +20,8 @@ public class AdminClassesController : BaseApiController
     }
 
     [HttpGet]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.AdminClassesRead)]
     public async Task<IActionResult> GetClasses(
         [FromQuery] GetAdminClassesQuery query,
         CancellationToken cancellationToken
@@ -27,6 +32,7 @@ public class AdminClassesController : BaseApiController
     }
 
     [HttpGet("{publicId:guid}")]
+    [OutputCache(PolicyName = OutputCachePolicies.AdminClassesRead)]
     public async Task<IActionResult> GetClass(Guid publicId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
