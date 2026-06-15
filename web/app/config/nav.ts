@@ -2,6 +2,7 @@ import {
     Award,
     BarChart3,
     BookOpen,
+    ClipboardCheck,
     ClipboardList,
     CreditCard,
     FileQuestion,
@@ -34,13 +35,13 @@ export const dashboardNav: Record<Role, NavItem[]> = {
         { labelKey: "nav.dashboard", to: "/admin", icon: LayoutDashboard },
         { labelKey: "nav.subjects", to: "/admin/subjects", icon: Library },
         { labelKey: "nav.users", to: "/admin/users", icon: Users },
-        { labelKey: "nav.classrooms", to: "/admin/classrooms", icon: School, disabled: true },
+        { labelKey: "nav.classrooms", to: "/admin/classrooms", icon: School },
         { labelKey: "nav.payments", to: "/admin/payments", icon: CreditCard, disabled: true },
         { labelKey: "nav.reports", to: "/admin/reports", icon: BarChart3, disabled: true },
     ],
     [Roles.Teacher]: [
         { labelKey: "nav.dashboard", to: "/teacher", icon: LayoutDashboard },
-        { labelKey: "nav.classrooms", to: "/teacher/classrooms", icon: School, disabled: true },
+        { labelKey: "nav.classrooms", to: "/teacher/classrooms", icon: School },
         {
             labelKey: "nav.questionBank",
             to: "/teacher/question-bank",
@@ -57,7 +58,8 @@ export const dashboardNav: Record<Role, NavItem[]> = {
     ],
     [Roles.Student]: [
         { labelKey: "nav.dashboard", to: "/student", icon: LayoutDashboard },
-        { labelKey: "nav.myClasses", to: "/student/classes", icon: BookOpen, disabled: true },
+        { labelKey: "nav.myClasses", to: "/student/classes", icon: BookOpen },
+        { labelKey: "nav.requests", to: "/student/classes/requests", icon: ClipboardCheck },
         { labelKey: "nav.exams", to: "/student/exams", icon: FileText, disabled: true },
         {
             labelKey: "nav.assignments",

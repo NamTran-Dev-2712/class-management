@@ -2,6 +2,7 @@ using ClassManagement.Application.Common.Constants;
 using ClassManagement.Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
@@ -17,6 +18,8 @@ public class UsersController : BaseApiController
     }
 
     [HttpGet]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.UsersRead)]
     public async Task<IActionResult> GetUsers(
         [FromQuery] GetUsersQuery query,
         CancellationToken cancellationToken
@@ -27,6 +30,7 @@ public class UsersController : BaseApiController
     }
 
     [HttpGet("{publicId:guid}", Name = "GetUserById")]
+    [OutputCache(PolicyName = OutputCachePolicies.UsersRead)]
     public async Task<IActionResult> GetUser(Guid publicId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetUserByIdQuery(publicId), cancellationToken);
@@ -41,6 +45,7 @@ public class UsersController : BaseApiController
     )
     {
         var publicId = await _mediator.Send(command, cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Users, cancellationToken);
         return ApiCreated("GetUserById", new { publicId }, new { publicId }, "User.Created");
     }
 
@@ -53,6 +58,7 @@ public class UsersController : BaseApiController
     )
     {
         await _mediator.Send(command with { PublicId = publicId }, cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Users, cancellationToken);
         return ApiOk("User.Updated");
     }
 
@@ -61,6 +67,7 @@ public class UsersController : BaseApiController
     public async Task<IActionResult> Lock(Guid publicId, CancellationToken cancellationToken)
     {
         await _mediator.Send(new LockUserCommand(publicId), cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Users, cancellationToken);
         return ApiOk("User.Locked");
     }
 
@@ -69,6 +76,7 @@ public class UsersController : BaseApiController
     public async Task<IActionResult> Unlock(Guid publicId, CancellationToken cancellationToken)
     {
         await _mediator.Send(new UnlockUserCommand(publicId), cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Users, cancellationToken);
         return ApiOk("User.Unlocked");
     }
 
@@ -77,6 +85,7 @@ public class UsersController : BaseApiController
     public async Task<IActionResult> Delete(Guid publicId, CancellationToken cancellationToken)
     {
         await _mediator.Send(new DeleteUserCommand(publicId), cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Users, cancellationToken);
         return ApiOk("User.Deleted");
     }
 }

@@ -64,6 +64,25 @@ public static class AuthHelper
         return client;
     }
 
+    // Registers a user with the given self-registerable role (Student/Teacher) and logs in,
+    // returning an authenticated cookie client.
+    public static async Task<HttpClient> CreateRoleClientAsync(
+        ApiFactory factory,
+        string role,
+        string? email = null,
+        string? password = null
+    )
+    {
+        email ??= TestConstants.UniqueEmail();
+        password ??= TestConstants.DefaultPassword;
+
+        var client = factory.CreateClientWithCookies();
+        await RegisterAsync(client, TestConstants.DefaultDisplayName, email, password, role);
+        var loginResponse = await LoginAsync(client, email, password);
+        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        return client;
+    }
+
     // Logs in as the seeded admin (see ApiFactory Seed config) and returns a cookie client.
     public static async Task<HttpClient> CreateAdminClientAsync(ApiFactory factory)
     {

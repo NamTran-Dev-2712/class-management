@@ -27,7 +27,8 @@
 | `public_id` | `UUID` | NO | `gen_random_uuid()` | UNIQUE | API-facing ID |
 | `name` | `TEXT` | NO | — | CHECK (length >= 2 AND length <= 200) | Tên lớp học |
 | `description` | `TEXT` | YES | NULL | CHECK (length <= 1000) | Mô tả lớp |
-| `subject_id` | `BIGINT` | YES | NULL | FK → subjects(id) SET NULL | Nhãn môn học (tùy chọn). NULL = lớp không gắn môn học cụ thể |
+| `subject_id` | `BIGINT` | YES | NULL | FK → subjects(id) SET NULL | Liên kết tới Subject trong catalog khi Teacher chọn từ danh sách Admin tạo. NULL = free-text hoặc không gắn môn |
+| `subject_name` | `TEXT` | YES | NULL | CHECK (length <= 200) | **Snapshot tên môn học** hiển thị. Chọn catalog → copy tên Subject; nhập tay (free-text) → giữ text, `subject_id` NULL; không gắn → NULL. List/detail đọc cột này (không JOIN, không đổi khi Admin sửa/xoá Subject) |
 | `owner_id` | `BIGINT` | NO | — | FK → users(id) RESTRICT | Teacher sở hữu lớp |
 | `invite_code` | `TEXT` | NO | — | UNIQUE, CHECK (invite_code ~ '^[A-Z0-9]{6,8}$') | Mã mời join lớp |
 | `status` | `TEXT` | NO | `'Active'` | CHECK (status IN ('Active', 'Archived')) | Trạng thái lớp |
@@ -146,6 +147,39 @@ Rejected ──[Student retries]───► [NEW Pending record]  (NOT update s
 - Khi Student có status `Approved` trong Class, họ có thể xem Assignment của Class đó
 - Student bị `Removed`/`Left`: data cũ (Attempt, Grade) vẫn tồn tại, chỉ không nhận Assignment mới
 - Partial unique index: chỉ enforce unique trên trạng thái active (Pending + Approved). Rejected/Removed/Left có thể có nhiều rows cho cùng (class_id, student_id)
+
+---
+
+## Read-model Views
+
+Mapped read-only qua EF `ToView(...)`, dùng để list/detail reuse `BaseGetQueryHandler` **mà không
+leak `ApplicationUser`** (Identity) vào Application/Domain. Tạo bằng raw SQL trong migration
+`202606141733_create_classroom_views_and_subject_name`.
+
+### `vw_classes`
+Một dòng / class chưa xoá mềm, kèm thông tin owner + đếm thành viên.
+
+| Column | Nguồn | Mô tả |
+|---|---|---|
+| `id`, `public_id`, `name`, `description`, `subject_id`, `subject_name`, `invite_code`, `status`, `cover_image_url`, `created_at`, `updated_at` | `classes` | Cột gốc của class |
+| `subject_public_id` | LEFT JOIN `subjects` | Public id của Subject catalog (NULL nếu free-text) — để form edit pre-select |
+| `owner_id`, `owner_public_id`, `owner_name`, `owner_email` | JOIN `users` (owner) | Hiển thị giáo viên sở hữu |
+| `approved_member_count` | `class_memberships` FILTER status='Approved' | Số HS đã duyệt |
+| `pending_count` | `class_memberships` FILTER status='Pending' | Số HS chờ duyệt |
+
+`WHERE classes.deleted_at IS NULL`. Backs: teacher class list (scope `owner_id`), admin class list (all), class detail.
+
+### `vw_class_members`
+Một dòng / membership (mọi status), JOIN student + class + owner.
+
+| Column | Nguồn | Mô tả |
+|---|---|---|
+| `id`, `public_id`, `status`, `joined_at`, `processed_at`, `rejection_reason`, `created_at`, `class_id`, `student_id` | `class_memberships` | Cột gốc membership |
+| `class_public_id`, `class_name`, `subject_name`, `class_status`, `owner_id`, `owner_name` | JOIN `classes` + `users` (owner) | Thông tin lớp + giáo viên |
+| `student_public_id`, `student_name`, `student_email` | JOIN `users` (student) | Thông tin học sinh |
+
+`WHERE classes.deleted_at IS NULL`. Backs: teacher member list (scope `class_public_id`), student member
+list, student "my requests" (scope `student_id`), student "my classes" (scope `student_id` + `status='Approved'`).
 
 ---
 

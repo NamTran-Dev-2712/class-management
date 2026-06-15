@@ -136,6 +136,15 @@ public static class DependencyInjection
         // Catalog
         services.AddScoped<ISubjectRepository, SubjectRepository>();
 
+        // Classroom (MVP-2)
+        services.Configure<ClassroomOptions>(
+            configuration.GetSection(ClassroomOptions.SectionName)
+        );
+        services.AddScoped<IClassRepository, ClassRepository>();
+        services.AddScoped<IClassMembershipRepository, ClassMembershipRepository>();
+        services.AddSingleton<IInviteCodeGenerator, Services.Classroom.InviteCodeGenerator>();
+        services.AddSingleton<IClassroomPolicy, Services.Classroom.ClassroomPolicy>();
+
         // Admin user management
         services.AddScoped<IPasswordGenerator, PasswordGenerator>();
         services.AddScoped<IUserAdminRepository, UserAdminRepository>();

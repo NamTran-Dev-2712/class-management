@@ -17,4 +17,18 @@ export const queryKeys = {
         list: (params: unknown) => [...queryKeys.users.all, "list", params] as const,
         detail: (publicId: string) => [...queryKeys.users.all, "detail", publicId] as const,
     },
+    classrooms: {
+        all: ["classrooms"] as const,
+        teacherList: (params: unknown) =>
+            [...queryKeys.classrooms.all, "teacher", "list", params] as const,
+        adminList: (params: unknown) =>
+            [...queryKeys.classrooms.all, "admin", "list", params] as const,
+        studentList: (params: unknown) =>
+            [...queryKeys.classrooms.all, "student", "list", params] as const,
+        requests: (params: unknown) =>
+            [...queryKeys.classrooms.all, "student", "requests", params] as const,
+        detail: (publicId: string) => [...queryKeys.classrooms.all, "detail", publicId] as const,
+        members: (publicId: string, params: unknown) =>
+            [...queryKeys.classrooms.all, "members", publicId, params] as const,
+    },
 } as const;

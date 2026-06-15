@@ -18,6 +18,10 @@ public sealed class ClassConfiguration : IEntityTypeConfiguration<Class>
                     "chk_classes_description_length",
                     "description IS NULL OR length(description) <= 1000"
                 );
+                t.HasCheckConstraint(
+                    "chk_classes_subject_name_length",
+                    "subject_name IS NULL OR length(subject_name) <= 200"
+                );
                 t.HasCheckConstraint("chk_classes_invite_code", "invite_code ~ '^[A-Z0-9]{6,8}$'");
                 t.HasCheckConstraint("chk_classes_status", "status IN ('Active', 'Archived')");
                 t.HasCheckConstraint(
@@ -36,6 +40,7 @@ public sealed class ClassConfiguration : IEntityTypeConfiguration<Class>
         builder.HasIndex(c => c.PublicId).HasDatabaseName("uq_classes_public_id").IsUnique();
 
         builder.Property(c => c.Name).IsRequired().HasMaxLength(200);
+        builder.Property(c => c.SubjectName).HasMaxLength(200);
         builder.Property(c => c.InviteCode).IsRequired().HasMaxLength(8);
 
         builder.HasIndex(c => c.InviteCode).HasDatabaseName("uq_classes_invite_code").IsUnique();

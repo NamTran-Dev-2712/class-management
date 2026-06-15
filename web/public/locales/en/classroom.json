@@ -1,0 +1,155 @@
+{
+    "title": "My Classes",
+    "subtitle": "Create and manage your classrooms and students.",
+    "actions": {
+        "create": "Create class",
+        "back": "Back to classes",
+        "members": "Members",
+        "edit": "Edit",
+        "archive": "Archive",
+        "unarchive": "Reactivate"
+    },
+    "columns": {
+        "name": "Name",
+        "subject": "Subject",
+        "owner": "Teacher",
+        "status": "Status",
+        "members": "Members",
+        "pendingBadge": "{{count}} pending",
+        "createdAt": "Created",
+        "actions": "Actions"
+    },
+    "status": {
+        "active": "Active",
+        "archived": "Archived"
+    },
+    "filters": {
+        "search": "Search classes…",
+        "all": "All statuses"
+    },
+    "form": {
+        "createTitle": "Create class",
+        "createSubtitle": "Set up a new classroom and share its invite code with students.",
+        "editTitle": "Edit class",
+        "editSubtitle": "Update your classroom details.",
+        "name": "Class name",
+        "namePlaceholder": "e.g. Math 10A1",
+        "description": "Description",
+        "descriptionPlaceholder": "Short description (optional)",
+        "subject": "Subject",
+        "subjectPlaceholder": "Select a subject",
+        "subjectNone": "No subject",
+        "subjectCustom": "Other (type manually)",
+        "subjectHint": "Pick from the catalog or enter your own subject.",
+        "customSubject": "Custom subject",
+        "customSubjectPlaceholder": "e.g. Robotics Club",
+        "cancel": "Cancel",
+        "save": "Save",
+        "validation": {
+            "nameLength": "Name must be between 2 and 200 characters.",
+            "descriptionMax": "Description must not exceed 1000 characters.",
+            "subjectMax": "Subject must not exceed 200 characters.",
+            "customSubjectRequired": "Please enter a subject."
+        }
+    },
+    "archiveConfirm": {
+        "title": "Archive class?",
+        "description": "\"{{name}}\" will move to the archived tab and stop accepting new members. You can reactivate it later."
+    },
+    "invite": {
+        "title": "Invite code",
+        "subtitle": "Share this code so students can request to join.",
+        "copy": "Copy",
+        "copied": "Invite code copied.",
+        "regenerate": "New code",
+        "regenerated": "A new invite code was generated.",
+        "regenerateConfirm": {
+            "title": "Generate a new code?",
+            "description": "The current code will stop working immediately. Anyone holding the old code will need the new one."
+        }
+    },
+    "members": {
+        "subtitle": "Approve join requests and manage the roster.",
+        "pendingTitle": "Pending requests",
+        "pendingSubtitle": "Students waiting for your approval.",
+        "noPending": "No pending requests.",
+        "approvedTitle": "Members",
+        "approvedSubtitle": "Approved students in this class.",
+        "noApproved": "No members yet.",
+        "actions": {
+            "approve": "Approve",
+            "reject": "Reject",
+            "remove": "Remove"
+        },
+        "toast": {
+            "approved": "Student approved.",
+            "rejected": "Request rejected.",
+            "removed": "Student removed."
+        },
+        "rejectConfirm": {
+            "title": "Reject request?",
+            "description": "Reject {{name}}'s request to join? They can try again with the invite code."
+        },
+        "kickConfirm": {
+            "title": "Remove student?",
+            "description": "Remove {{name}} from this class? Their past data is kept."
+        }
+    },
+    "student": {
+        "title": "My Classes",
+        "subtitle": "Classes you've joined.",
+        "empty": "You haven't joined any classes yet.",
+        "noSubject": "No subject",
+        "teacher": "Teacher: {{name}}",
+        "membersTitle": "Classmates",
+        "noMembers": "No classmates yet.",
+        "actions": {
+            "join": "Join a class",
+            "members": "Classmates",
+            "leave": "Leave"
+        },
+        "toast": {
+            "left": "You left the class."
+        },
+        "leaveConfirm": {
+            "title": "Leave class?",
+            "description": "Leave \"{{name}}\"? You'll stop receiving its assignments. Your past data is kept."
+        }
+    },
+    "join": {
+        "title": "Join a class",
+        "subtitle": "Enter the invite code your teacher shared.",
+        "inviteCode": "Invite code",
+        "placeholder": "ABC12345",
+        "submit": "Send request",
+        "validation": {
+            "codeFormat": "Invite code must be 6 to 8 letters or digits."
+        },
+        "toast": {
+            "sent": "Request sent. You'll be notified once approved."
+        }
+    },
+    "requests": {
+        "title": "Join requests",
+        "subtitle": "Track the status of your requests to join classes.",
+        "empty": "You have no join requests.",
+        "status": {
+            "Pending": "Pending",
+            "Approved": "Approved",
+            "Rejected": "Rejected",
+            "Removed": "Removed",
+            "Left": "Left"
+        }
+    },
+    "admin": {
+        "title": "Classes",
+        "subtitle": "All classrooms across the platform (read-only)."
+    },
+    "toast": {
+        "created": "Class created.",
+        "updated": "Class updated.",
+        "archived": "Class archived.",
+        "unarchived": "Class reactivated.",
+        "error": "Something went wrong. Please try again."
+    }
+}

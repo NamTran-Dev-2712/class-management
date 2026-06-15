@@ -26,12 +26,34 @@ export default [
             route("users", "features/admin/users/list/users.page.tsx"),
             route("users/new", "features/admin/users/create/user-create.page.tsx"),
             route("users/:publicId", "features/admin/users/edit/user-edit.page.tsx"),
+            route("classrooms", "features/admin/classrooms/classrooms.page.tsx"),
         ]),
     ]),
     layout("layouts/teacher.layout.tsx", [
-        ...prefix("teacher", [index("features/teacher/dashboard/dashboard.page.tsx")]),
+        ...prefix("teacher", [
+            index("features/teacher/dashboard/dashboard.page.tsx"),
+            route("classrooms", "features/teacher/classrooms/list/classrooms.page.tsx"),
+            route("classrooms/new", "features/teacher/classrooms/create/classroom-create.page.tsx"),
+            route(
+                "classrooms/:publicId",
+                "features/teacher/classrooms/edit/classroom-edit.page.tsx",
+            ),
+            route(
+                "classrooms/:publicId/members",
+                "features/teacher/classrooms/members/class-members.page.tsx",
+            ),
+        ]),
     ]),
     layout("layouts/student.layout.tsx", [
-        ...prefix("student", [index("features/student/dashboard/dashboard.page.tsx")]),
+        ...prefix("student", [
+            index("features/student/dashboard/dashboard.page.tsx"),
+            route("classes", "features/student/classes/list/my-classes.page.tsx"),
+            route("classes/join", "features/student/classes/join/join-class.page.tsx"),
+            route("classes/requests", "features/student/classes/requests/requests.page.tsx"),
+            route(
+                "classes/:publicId/members",
+                "features/student/classes/members/class-members.page.tsx",
+            ),
+        ]),
     ]),
 ] satisfies RouteConfig;

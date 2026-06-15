@@ -303,6 +303,11 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("subject_id");
 
+                    b.Property<string>("SubjectName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("subject_name");
+
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -356,7 +361,97 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                             t.HasCheckConstraint("chk_classes_name_length", "length(name) >= 2 AND length(name) <= 200");
 
                             t.HasCheckConstraint("chk_classes_status", "status IN ('Active', 'Archived')");
+
+                            t.HasCheckConstraint("chk_classes_subject_name_length", "subject_name IS NULL OR length(subject_name) <= 200");
                         });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Classroom.Entities.ClassMemberView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("ClassId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("class_id");
+
+                    b.Property<string>("ClassName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("class_name");
+
+                    b.Property<Guid>("ClassPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("class_public_id");
+
+                    b.Property<string>("ClassStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("class_status");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at");
+
+                    b.Property<long>("OwnerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_id");
+
+                    b.Property<string>("OwnerName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("owner_name");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("StudentEmail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("student_email");
+
+                    b.Property<long>("StudentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("student_id");
+
+                    b.Property<string>("StudentName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("student_name");
+
+                    b.Property<Guid>("StudentPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("student_public_id");
+
+                    b.Property<string>("SubjectName")
+                        .HasColumnType("text")
+                        .HasColumnName("subject_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_class_member_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_class_members", (string)null);
                 });
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Classroom.Entities.ClassMembership", b =>
@@ -445,6 +540,93 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
 
                             t.HasCheckConstraint("chk_memberships_status", "status IN ('Pending', 'Approved', 'Rejected', 'Removed', 'Left')");
                         });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Classroom.Entities.ClassView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<int>("ApprovedMemberCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("approved_member_count");
+
+                    b.Property<string>("CoverImageUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("cover_image_url");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("InviteCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("invite_code");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("OwnerEmail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("owner_email");
+
+                    b.Property<long>("OwnerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_id");
+
+                    b.Property<string>("OwnerName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("owner_name");
+
+                    b.Property<Guid>("OwnerPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_public_id");
+
+                    b.Property<int>("PendingCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("pending_count");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<long?>("SubjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("subject_id");
+
+                    b.Property<string>("SubjectName")
+                        .HasColumnType("text")
+                        .HasColumnName("subject_name");
+
+                    b.Property<Guid?>("SubjectPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("subject_public_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_class_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_classes", (string)null);
                 });
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Users.Entities.User", b =>

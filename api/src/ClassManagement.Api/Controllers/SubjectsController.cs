@@ -2,6 +2,7 @@ using ClassManagement.Application.Common.Constants;
 using ClassManagement.Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
@@ -16,6 +17,8 @@ public class SubjectsController : BaseApiController
     }
 
     [HttpGet]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.SubjectsRead)]
     public async Task<IActionResult> GetSubjects(
         [FromQuery] GetSubjectsQuery query,
         CancellationToken cancellationToken
@@ -26,6 +29,7 @@ public class SubjectsController : BaseApiController
     }
 
     [HttpGet("{publicId:guid}", Name = "GetSubjectById")]
+    [OutputCache(PolicyName = OutputCachePolicies.SubjectsRead)]
     public async Task<IActionResult> GetSubject(Guid publicId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetSubjectByIdQuery(publicId), cancellationToken);
@@ -41,6 +45,7 @@ public class SubjectsController : BaseApiController
     )
     {
         var publicId = await _mediator.Send(command, cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Subjects, cancellationToken);
         return ApiCreated("GetSubjectById", new { publicId }, new { publicId }, "Subject.Created");
     }
 
@@ -54,6 +59,7 @@ public class SubjectsController : BaseApiController
     )
     {
         await _mediator.Send(command with { PublicId = publicId }, cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Subjects, cancellationToken);
         return ApiOk("Subject.Updated");
     }
 
@@ -63,6 +69,7 @@ public class SubjectsController : BaseApiController
     public async Task<IActionResult> Delete(Guid publicId, CancellationToken cancellationToken)
     {
         await _mediator.Send(new DeleteSubjectCommand(publicId), cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Subjects, cancellationToken);
         return ApiOk("Subject.Deleted");
     }
 }
