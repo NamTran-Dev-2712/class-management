@@ -117,12 +117,17 @@ Examples:
 
 ### MVP-3: Question Bank
 
+**Đã triển khai** — gộp trong **một** migration (khác với kế hoạch 4 migration ban đầu):
+
 ```
-202601290900_create_questions_table         -- + triggers + tsvector column
-202601290910_create_question_options_table
-202601290920_create_question_tags_table
-202601290930_create_gin_index_questions     -- GIN index (CONCURRENTLY trong prod)
+20260615180014_create_questions_and_views
+  -- Tạo bảng questions, question_options, question_tags (check constraints + indexes theo doc 03)
+  -- CREATE EXTENSION pg_trgm + index GIN idx_questions_content_trgm trên lower(content)
+  -- Tạo view vw_questions (question + teacher + subject + option_count + tags[])
 ```
+
+> Khác kế hoạch gốc: `content` là Markdown (không tsvector), `updated_at` qua interceptor (không
+> trigger), search dùng ILIKE + pg_trgm GIN. Chi tiết: [03-schema-question-bank.md](./03-schema-question-bank.md).
 
 ### MVP-4: Exam Builder
 

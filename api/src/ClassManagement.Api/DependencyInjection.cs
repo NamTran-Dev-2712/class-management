@@ -37,6 +37,11 @@ public static class DependencyInjection
                     .Serialization
                     .JsonIgnoreCondition
                     .WhenWritingNull;
+                // Accept/emit enum names (e.g. "SingleChoice") instead of numbers in request/response
+                // bodies — keeps the API self-describing and matches the string enums in read DTOs.
+                opts.JsonSerializerOptions.Converters.Add(
+                    new System.Text.Json.Serialization.JsonStringEnumConverter()
+                );
             });
 
         // Built-in OpenAPI document (Scalar reads this)
@@ -128,6 +133,7 @@ public static class DependencyInjection
             AddIpFixedWindow(RateLimitOptions.Policies.UserWrite, rl.UserWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.ClassWrite, rl.ClassWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.ClassJoin, rl.ClassJoin);
+            AddIpFixedWindow(RateLimitOptions.Policies.QuestionWrite, rl.QuestionWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.Read, rl.Read);
         });
 
@@ -178,6 +184,22 @@ public static class DependencyInjection
             options.AddPolicy(
                 OutputCachePolicies.StudentClassesRead,
                 b => PerUser(b, OutputCacheTags.Classrooms)
+            );
+
+            // Question bank (MVP-3): a teacher's own bank is personalized (PerUser); the public pool
+            // and the admin all-questions list are the same for every caller at that authorization
+            // level (Shared). All tagged "questions" so any write evicts every related read.
+            options.AddPolicy(
+                OutputCachePolicies.TeacherQuestionsRead,
+                b => PerUser(b, OutputCacheTags.Questions)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.PublicQuestionsRead,
+                b => Shared(b, OutputCacheTags.Questions)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminQuestionsRead,
+                b => Shared(b, OutputCacheTags.Questions)
             );
         });
 

@@ -145,6 +145,13 @@ public static class DependencyInjection
         services.AddSingleton<IInviteCodeGenerator, Services.Classroom.InviteCodeGenerator>();
         services.AddSingleton<IClassroomPolicy, Services.Classroom.ClassroomPolicy>();
 
+        // Question bank (MVP-3)
+        services.Configure<QuestionBankOptions>(
+            configuration.GetSection(QuestionBankOptions.SectionName)
+        );
+        services.AddScoped<IQuestionRepository, QuestionRepository>();
+        services.AddSingleton<IQuestionPolicy, Services.Questions.QuestionPolicy>();
+
         // Admin user management
         services.AddScoped<IPasswordGenerator, PasswordGenerator>();
         services.AddScoped<IUserAdminRepository, UserAdminRepository>();

@@ -22,6 +22,9 @@ public static class OutputCachePolicies
     public const string AdminClassesRead = "admin-classes-read";
     public const string TeacherClassesRead = "teacher-classes-read";
     public const string StudentClassesRead = "student-classes-read";
+    public const string TeacherQuestionsRead = "teacher-questions-read";
+    public const string PublicQuestionsRead = "public-questions-read";
+    public const string AdminQuestionsRead = "admin-questions-read";
 }
 
 /// <summary>
@@ -33,4 +36,5 @@ public static class OutputCacheTags
     public const string Subjects = "subjects";
     public const string Users = "users";
     public const string Classrooms = "classrooms";
+    public const string Questions = "questions";
 }
