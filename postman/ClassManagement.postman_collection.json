@@ -24,8 +24,22 @@
                     ],
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"displayName\": \"Self Signup\",\n  \"email\": \"{{selfEmail}}\",\n  \"password\": \"Passw0rd!23\",\n  \"role\": \"Student\"\n}"
@@ -47,8 +61,22 @@
                     ],
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"displayName\": \"Teacher One\",\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\",\n  \"role\": \"Teacher\"\n}"
@@ -59,8 +87,22 @@
                     "name": "Login (Admin)",
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
@@ -71,8 +113,22 @@
                     "name": "Login (Teacher)",
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}"
@@ -83,8 +139,22 @@
                     "name": "Login (Student)",
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"email\": \"{{selfEmail}}\",\n  \"password\": \"Passw0rd!23\"\n}"
@@ -97,7 +167,16 @@
                     "request": {
                         "method": "GET",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        }
                     }
                 },
                 {
@@ -105,15 +184,38 @@
                     "request": {
                         "method": "POST",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/refresh",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "refresh"
+                            ]
+                        }
                     }
                 },
                 {
                     "name": "Update Profile",
                     "request": {
                         "method": "PATCH",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "profile"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"displayName\": \"Updated Name\",\n  \"bio\": \"Hello\",\n  \"avatarUrl\": null,\n  \"phoneNumber\": null\n}"
@@ -124,8 +226,22 @@
                     "name": "Change Password",
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/auth/change-password", "host": ["{{baseUrl}}"], "path": ["auth", "change-password"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/change-password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "change-password"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"currentPassword\": \"Passw0rd!23\",\n  \"newPassword\": \"Passw0rd!99\",\n  \"confirmNewPassword\": \"Passw0rd!99\"\n}"
@@ -136,17 +252,48 @@
                     "name": "Forgot Password",
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["auth", "forgot-password"] },
-                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{selfEmail}}\"\n}" }
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/forgot-password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "forgot-password"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{selfEmail}}\"\n}"
+                        }
                     }
                 },
                 {
                     "name": "Reset Password",
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/auth/reset-password", "host": ["{{baseUrl}}"], "path": ["auth", "reset-password"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/reset-password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "reset-password"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"email\": \"{{selfEmail}}\",\n  \"otp\": \"000000\",\n  \"newPassword\": \"Passw0rd!77\",\n  \"confirmNewPassword\": \"Passw0rd!77\"\n}"
@@ -158,7 +305,16 @@
                     "request": {
                         "method": "POST",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/logout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "logout"
+                            ]
+                        }
                     }
                 }
             ]
@@ -173,15 +329,39 @@
                         "header": [],
                         "url": {
                             "raw": "{{baseUrl}}/subjects?pageNumber=1&pageSize=10&sortBy=displayOrder&sortOrder=asc",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["subjects"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects"
+                            ],
                             "query": [
-                                { "key": "pageNumber", "value": "1" },
-                                { "key": "pageSize", "value": "10" },
-                                { "key": "sortBy", "value": "displayOrder" },
-                                { "key": "sortOrder", "value": "asc" },
-                                { "key": "searchTerm", "value": "", "disabled": true },
-                                { "key": "isActive", "value": "true", "disabled": true }
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "displayOrder"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "asc"
+                                },
+                                {
+                                    "key": "searchTerm",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "isActive",
+                                    "value": "true",
+                                    "disabled": true
+                                }
                             ]
                         }
                     }
@@ -204,8 +384,21 @@
                     ],
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/subjects", "host": ["{{baseUrl}}"], "path": ["subjects"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/subjects",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"name\": \"Mathematics {{$timestamp}}\",\n  \"description\": \"Core math subject\",\n  \"isActive\": true,\n  \"displayOrder\": 0\n}"
@@ -217,15 +410,38 @@
                     "request": {
                         "method": "GET",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/subjects/{{subjectId}}", "host": ["{{baseUrl}}"], "path": ["subjects", "{{subjectId}}"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/subjects/{{subjectId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects",
+                                "{{subjectId}}"
+                            ]
+                        }
                     }
                 },
                 {
                     "name": "Update Subject",
                     "request": {
                         "method": "PUT",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/subjects/{{subjectId}}", "host": ["{{baseUrl}}"], "path": ["subjects", "{{subjectId}}"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/subjects/{{subjectId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects",
+                                "{{subjectId}}"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"name\": \"Mathematics (updated)\",\n  \"description\": \"Updated description\",\n  \"isActive\": true,\n  \"displayOrder\": 1\n}"
@@ -237,7 +453,16 @@
                     "request": {
                         "method": "DELETE",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/subjects/{{subjectId}}", "host": ["{{baseUrl}}"], "path": ["subjects", "{{subjectId}}"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/subjects/{{subjectId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects",
+                                "{{subjectId}}"
+                            ]
+                        }
                     }
                 }
             ]
@@ -252,16 +477,45 @@
                         "header": [],
                         "url": {
                             "raw": "{{baseUrl}}/admin/users?pageNumber=1&pageSize=10&sortBy=displayName&sortOrder=asc",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["admin", "users"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "users"
+                            ],
                             "query": [
-                                { "key": "pageNumber", "value": "1" },
-                                { "key": "pageSize", "value": "10" },
-                                { "key": "sortBy", "value": "displayName" },
-                                { "key": "sortOrder", "value": "asc" },
-                                { "key": "searchTerm", "value": "", "disabled": true },
-                                { "key": "role", "value": "Teacher", "disabled": true },
-                                { "key": "isLocked", "value": "true", "disabled": true }
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "displayName"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "asc"
+                                },
+                                {
+                                    "key": "searchTerm",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "role",
+                                    "value": "Teacher",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "isLocked",
+                                    "value": "true",
+                                    "disabled": true
+                                }
                             ]
                         }
                     }
@@ -293,8 +547,22 @@
                     ],
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/admin/users", "host": ["{{baseUrl}}"], "path": ["admin", "users"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/users",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "users"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"displayName\": \"New Teacher\",\n  \"email\": \"{{newUserEmail}}\",\n  \"role\": \"Teacher\",\n  \"phoneNumber\": null\n}"
@@ -306,15 +574,40 @@
                     "request": {
                         "method": "GET",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/admin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["admin", "users", "{{userId}}"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/users/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "users",
+                                "{{userId}}"
+                            ]
+                        }
                     }
                 },
                 {
                     "name": "Update User",
                     "request": {
                         "method": "PUT",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/admin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["admin", "users", "{{userId}}"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/users/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "users",
+                                "{{userId}}"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"displayName\": \"Renamed Teacher\",\n  \"role\": \"Student\",\n  \"phoneNumber\": \"+84 123 456 789\"\n}"
@@ -326,7 +619,18 @@
                     "request": {
                         "method": "POST",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/admin/users/{{userId}}/lock", "host": ["{{baseUrl}}"], "path": ["admin", "users", "{{userId}}", "lock"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/users/{{userId}}/lock",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "users",
+                                "{{userId}}",
+                                "lock"
+                            ]
+                        }
                     }
                 },
                 {
@@ -334,7 +638,18 @@
                     "request": {
                         "method": "POST",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/admin/users/{{userId}}/unlock", "host": ["{{baseUrl}}"], "path": ["admin", "users", "{{userId}}", "unlock"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/users/{{userId}}/unlock",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "users",
+                                "{{userId}}",
+                                "unlock"
+                            ]
+                        }
                     }
                 },
                 {
@@ -342,7 +657,17 @@
                     "request": {
                         "method": "DELETE",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/admin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["admin", "users", "{{userId}}"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/users/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "users",
+                                "{{userId}}"
+                            ]
+                        }
                     }
                 }
             ]
@@ -369,8 +694,22 @@
                     ],
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/teacher/classes", "host": ["{{baseUrl}}"], "path": ["teacher", "classes"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"name\": \"Math 10A1 {{$timestamp}}\",\n  \"description\": \"Morning class\",\n  \"subjectId\": null,\n  \"subjectName\": \"Mathematics\",\n  \"coverImageUrl\": null\n}"
@@ -385,15 +724,39 @@
                         "header": [],
                         "url": {
                             "raw": "{{baseUrl}}/teacher/classes?status=Active&pageNumber=1&pageSize=10&sortBy=createdAt&sortOrder=desc",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["teacher", "classes"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes"
+                            ],
                             "query": [
-                                { "key": "status", "value": "Active" },
-                                { "key": "pageNumber", "value": "1" },
-                                { "key": "pageSize", "value": "10" },
-                                { "key": "sortBy", "value": "createdAt" },
-                                { "key": "sortOrder", "value": "desc" },
-                                { "key": "searchTerm", "value": "", "disabled": true }
+                                {
+                                    "key": "status",
+                                    "value": "Active"
+                                },
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc"
+                                },
+                                {
+                                    "key": "searchTerm",
+                                    "value": "",
+                                    "disabled": true
+                                }
                             ]
                         }
                     }
@@ -417,15 +780,40 @@
                     "request": {
                         "method": "GET",
                         "header": [],
-                        "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}"] }
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}"
+                            ]
+                        }
                     }
                 },
                 {
                     "name": "Update Class",
                     "request": {
                         "method": "PUT",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}"] },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}"
+                            ]
+                        },
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"name\": \"Math 10A1 (Updated)\",\n  \"description\": \"Updated\",\n  \"subjectId\": null,\n  \"subjectName\": \"Algebra\",\n  \"coverImageUrl\": null\n}"
@@ -434,11 +822,41 @@
                 },
                 {
                     "name": "Archive Class",
-                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/archive", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "archive"] } }
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/archive",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "archive"
+                            ]
+                        }
+                    }
                 },
                 {
                     "name": "Unarchive Class",
-                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/unarchive", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "unarchive"] } }
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/unarchive",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "unarchive"
+                            ]
+                        }
+                    }
                 },
                 {
                     "name": "Regenerate Invite Code",
@@ -456,7 +874,23 @@
                             }
                         }
                     ],
-                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/invite-code/regenerate", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "invite-code", "regenerate"] } }
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/invite-code/regenerate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "invite-code",
+                                "regenerate"
+                            ]
+                        }
+                    }
                 },
                 {
                     "name": "List Members (Pending)",
@@ -479,9 +913,25 @@
                         "header": [],
                         "url": {
                             "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members?status=Pending&pageSize=50",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["teacher", "classes", "{{classId}}", "members"],
-                            "query": [{ "key": "status", "value": "Pending" }, { "key": "pageSize", "value": "50" }]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "members"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "Pending"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "50"
+                                }
+                            ]
                         }
                     }
                 },
@@ -492,28 +942,98 @@
                         "header": [],
                         "url": {
                             "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members?status=Approved&pageSize=50",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["teacher", "classes", "{{classId}}", "members"],
-                            "query": [{ "key": "status", "value": "Approved" }, { "key": "pageSize", "value": "50" }]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "members"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "Approved"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "50"
+                                }
+                            ]
                         }
                     }
                 },
                 {
                     "name": "Approve Member",
-                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{membershipId}}/approve", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members", "{{membershipId}}", "approve"] } }
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{membershipId}}/approve",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "members",
+                                "{{membershipId}}",
+                                "approve"
+                            ]
+                        }
+                    }
                 },
                 {
                     "name": "Reject Member",
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{membershipId}}/reject", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members", "{{membershipId}}", "reject"] },
-                        "body": { "mode": "raw", "raw": "{\n  \"rejectionReason\": \"Not this term\"\n}" }
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{membershipId}}/reject",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "members",
+                                "{{membershipId}}",
+                                "reject"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"rejectionReason\": \"Not this term\"\n}"
+                        }
                     }
                 },
                 {
                     "name": "Kick Member",
-                    "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{membershipId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members", "{{membershipId}}"] } }
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{membershipId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "members",
+                                "{{membershipId}}"
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -525,9 +1045,27 @@
                     "name": "Join Class",
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/student/classes/join", "host": ["{{baseUrl}}"], "path": ["student", "classes", "join"] },
-                        "body": { "mode": "raw", "raw": "{\n  \"inviteCode\": \"{{inviteCode}}\"\n}" }
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/student/classes/join",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "student",
+                                "classes",
+                                "join"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"inviteCode\": \"{{inviteCode}}\"\n}"
+                        }
                     }
                 },
                 {
@@ -537,9 +1075,23 @@
                         "header": [],
                         "url": {
                             "raw": "{{baseUrl}}/student/classes?pageNumber=1&pageSize=12",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["student", "classes"],
-                            "query": [{ "key": "pageNumber", "value": "1" }, { "key": "pageSize", "value": "12" }]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "student",
+                                "classes"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "12"
+                                }
+                            ]
                         }
                     }
                 },
@@ -550,9 +1102,24 @@
                         "header": [],
                         "url": {
                             "raw": "{{baseUrl}}/student/classes/requests?pageNumber=1&pageSize=10",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["student", "classes", "requests"],
-                            "query": [{ "key": "pageNumber", "value": "1" }, { "key": "pageSize", "value": "10" }]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "student",
+                                "classes",
+                                "requests"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "10"
+                                }
+                            ]
                         }
                     }
                 },
@@ -563,15 +1130,42 @@
                         "header": [],
                         "url": {
                             "raw": "{{baseUrl}}/student/classes/{{classId}}/members?pageSize=100",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["student", "classes", "{{classId}}", "members"],
-                            "query": [{ "key": "pageSize", "value": "100" }]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "student",
+                                "classes",
+                                "{{classId}}",
+                                "members"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageSize",
+                                    "value": "100"
+                                }
+                            ]
                         }
                     }
                 },
                 {
                     "name": "Leave Class",
-                    "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/student/classes/{{classId}}/leave", "host": ["{{baseUrl}}"], "path": ["student", "classes", "{{classId}}", "leave"] } }
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/student/classes/{{classId}}/leave",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "student",
+                                "classes",
+                                "{{classId}}",
+                                "leave"
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -586,20 +1180,516 @@
                         "header": [],
                         "url": {
                             "raw": "{{baseUrl}}/admin/classes?status=Active&pageNumber=1&pageSize=10",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["admin", "classes"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "classes"
+                            ],
                             "query": [
-                                { "key": "status", "value": "Active" },
-                                { "key": "pageNumber", "value": "1" },
-                                { "key": "pageSize", "value": "10" },
-                                { "key": "searchTerm", "value": "", "disabled": true }
+                                {
+                                    "key": "status",
+                                    "value": "Active"
+                                },
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "searchTerm",
+                                    "value": "",
+                                    "disabled": true
+                                }
                             ]
                         }
                     }
                 },
                 {
                     "name": "Get Class (Admin)",
-                    "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["admin", "classes", "{{classId}}"] } }
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/classes/{{classId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "classes",
+                                "{{classId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Teacher Questions",
+            "item": [
+                {
+                    "name": "List Active Subjects (capture subjectId)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.items && json.data.items.length) {",
+                                    "  pm.collectionVariables.set('subjectId', json.data.items[0].publicId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/subjects?pageNumber=1&pageSize=1&isActive=true&sortBy=name",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "isActive",
+                                    "value": "true"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "name"
+                                }
+                            ]
+                        },
+                        "description": "Run first as a Teacher (or anyone) to capture an active {{subjectId}} for question creation."
+                    }
+                },
+                {
+                    "name": "Create Question",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.publicId) {",
+                                    "  pm.collectionVariables.set('questionId', json.data.publicId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"type\": \"SingleChoice\",\n  \"content\": \"What is 2 + 2? Choose the correct answer.\",\n  \"difficulty\": \"Easy\",\n  \"suggestedPoint\": 1,\n  \"visibility\": \"Private\",\n  \"explanation\": \"Basic arithmetic.\",\n  \"options\": [\n    { \"content\": \"3\", \"isCorrect\": false },\n    { \"content\": \"4\", \"isCorrect\": true },\n    { \"content\": \"5\", \"isCorrect\": false }\n  ],\n  \"tags\": [\"arithmetic\", \"grade-1\"]\n}"
+                        },
+                        "description": "Create a question in the teacher's bank. type ∈ SingleChoice|MultipleChoice|TrueFalse|ShortWriting|LongWriting. Options apply to choice types only (TrueFalse seeds True/False server-side). Requires an active {{subjectId}}."
+                    }
+                },
+                {
+                    "name": "Create Question (no subject)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.publicId) {",
+                                    "  pm.collectionVariables.set('questionId', json.data.publicId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"subjectId\": null,\n  \"type\": \"ShortWriting\",\n  \"content\": \"Explain Newton's second law in your own words.\",\n  \"difficulty\": \"Medium\",\n  \"suggestedPoint\": 2,\n  \"visibility\": \"Private\",\n  \"explanation\": null,\n  \"options\": [],\n  \"tags\": [\"physics\"]\n}"
+                        },
+                        "description": "Subject is OPTIONAL - send subjectId null (e.g. when no catalog subject exists yet)."
+                    }
+                },
+                {
+                    "name": "List My Questions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions?pageNumber=1&pageSize=10&sortBy=updatedAt&sortOrder=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "updatedAt"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc"
+                                }
+                            ]
+                        },
+                        "description": "Filters (add as query params): subjectId, type, difficulty, visibility, tag, searchTerm."
+                    }
+                },
+                {
+                    "name": "Get My Question",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions/{{questionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions",
+                                "{{questionId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Question",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions/{{questionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions",
+                                "{{questionId}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"type\": \"SingleChoice\",\n  \"content\": \"Updated: what is 3 + 4? Choose the correct answer.\",\n  \"difficulty\": \"Medium\",\n  \"suggestedPoint\": 2,\n  \"visibility\": \"Private\",\n  \"explanation\": \"Updated explanation.\",\n  \"options\": [\n    { \"content\": \"6\", \"isCorrect\": false },\n    { \"content\": \"7\", \"isCorrect\": true }\n  ],\n  \"tags\": [\"arithmetic\"]\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Set Visibility (Public)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions/{{questionId}}/visibility",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions",
+                                "{{questionId}}",
+                                "visibility"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"visibility\": \"Public\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Set Visibility (Private)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions/{{questionId}}/visibility",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions",
+                                "{{questionId}}",
+                                "visibility"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"visibility\": \"Private\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Duplicate Question",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.publicId) {",
+                                    "  pm.collectionVariables.set('questionId', json.data.publicId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions/{{questionId}}/duplicate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions",
+                                "{{questionId}}",
+                                "duplicate"
+                            ]
+                        },
+                        "description": "Duplicates a Public or owned question into the caller's bank as a new Private copy."
+                    }
+                },
+                {
+                    "name": "Delete Question",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions/{{questionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions",
+                                "{{questionId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Public Questions",
+            "item": [
+                {
+                    "name": "Browse Public Questions",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.items && json.data.items.length) {",
+                                    "  pm.collectionVariables.set('publicQuestionId', json.data.items[0].publicId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions/public?pageNumber=1&pageSize=10&sortBy=updatedAt&sortOrder=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions",
+                                "public"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "updatedAt"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc"
+                                }
+                            ]
+                        },
+                        "description": "All Public questions from any teacher (read-only). Same filters as the bank list minus visibility."
+                    }
+                },
+                {
+                    "name": "Get Public Question",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/questions/public/{{publicQuestionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "questions",
+                                "public",
+                                "{{publicQuestionId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin Questions",
+            "item": [
+                {
+                    "name": "List All Questions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/questions?pageNumber=1&pageSize=10&sortBy=updatedAt&sortOrder=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "questions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageNumber",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "updatedAt"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc"
+                                }
+                            ]
+                        },
+                        "description": "Admin read-only list of every question (including Private). Login as Admin first."
+                    }
+                },
+                {
+                    "name": "Get Question (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/questions/{{questionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "questions",
+                                "{{questionId}}"
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -609,37 +1699,156 @@
             "item": [
                 {
                     "name": "GET Subjects (1st — cache miss)",
-                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["console.log('1st GET /subjects responseTime =', pm.response.responseTime, 'ms');"] } }],
-                    "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/subjects?pageSize=20", "host": ["{{baseUrl}}"], "path": ["subjects"], "query": [{ "key": "pageSize", "value": "20" }] } }
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "console.log('1st GET /subjects responseTime =', pm.response.responseTime, 'ms');"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/subjects?pageSize=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageSize",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    }
                 },
                 {
                     "name": "GET Subjects (2nd — cache HIT)",
-                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["console.log('2nd GET /subjects responseTime =', pm.response.responseTime, 'ms (should be faster on a cache hit)');"] } }],
-                    "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/subjects?pageSize=20", "host": ["{{baseUrl}}"], "path": ["subjects"], "query": [{ "key": "pageSize", "value": "20" }] } }
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "console.log('2nd GET /subjects responseTime =', pm.response.responseTime, 'ms (should be faster on a cache hit)');"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/subjects?pageSize=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageSize",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    }
                 },
                 {
                     "name": "Create Subject (evicts cache)",
                     "request": {
                         "method": "POST",
-                        "header": [{ "key": "Content-Type", "value": "application/json" }],
-                        "url": { "raw": "{{baseUrl}}/subjects", "host": ["{{baseUrl}}"], "path": ["subjects"] },
-                        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cache Demo {{$timestamp}}\",\n  \"description\": \"Created to demonstrate output-cache eviction\",\n  \"isActive\": true,\n  \"displayOrder\": 0\n}" }
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/subjects",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Cache Demo {{$timestamp}}\",\n  \"description\": \"Created to demonstrate output-cache eviction\",\n  \"isActive\": true,\n  \"displayOrder\": 0\n}"
+                        }
                     }
                 },
                 {
                     "name": "GET Subjects (after evict — fresh)",
-                    "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/subjects?pageSize=20", "host": ["{{baseUrl}}"], "path": ["subjects"], "query": [{ "key": "pageSize", "value": "20" }] } }
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/subjects?pageSize=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "subjects"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pageSize",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    }
                 }
             ]
         }
     ],
     "variable": [
-        { "key": "subjectId", "value": "" },
-        { "key": "userId", "value": "" },
-        { "key": "newUserEmail", "value": "" },
-        { "key": "selfEmail", "value": "" },
-        { "key": "classId", "value": "" },
-        { "key": "inviteCode", "value": "" },
-        { "key": "membershipId", "value": "" }
+        {
+            "key": "subjectId",
+            "value": ""
+        },
+        {
+            "key": "userId",
+            "value": ""
+        },
+        {
+            "key": "newUserEmail",
+            "value": ""
+        },
+        {
+            "key": "selfEmail",
+            "value": ""
+        },
+        {
+            "key": "classId",
+            "value": ""
+        },
+        {
+            "key": "inviteCode",
+            "value": ""
+        },
+        {
+            "key": "membershipId",
+            "value": ""
+        },
+        {
+            "key": "questionId",
+            "value": ""
+        },
+        {
+            "key": "publicQuestionId",
+            "value": ""
+        }
     ]
 }

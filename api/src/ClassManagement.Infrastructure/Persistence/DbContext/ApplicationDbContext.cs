@@ -25,6 +25,9 @@ public sealed class ApplicationDbContext
     public DbSet<Subject> Subjects => Set<Subject>();
     public DbSet<Class> Classes => Set<Class>();
     public DbSet<ClassMembership> ClassMemberships => Set<ClassMembership>();
+    public DbSet<Question> Questions => Set<Question>();
+    public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
+    public DbSet<QuestionTag> QuestionTags => Set<QuestionTag>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

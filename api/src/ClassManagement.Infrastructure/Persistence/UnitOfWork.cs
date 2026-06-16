@@ -10,18 +10,21 @@ public class UnitOfWork : IUnitOfWork
         ApplicationDbContext context,
         ISubjectRepository subjects,
         IClassRepository classes,
-        IClassMembershipRepository classMemberships
+        IClassMembershipRepository classMemberships,
+        IQuestionRepository questions
     )
     {
         _context = context;
         Subjects = subjects;
         Classes = classes;
         ClassMemberships = classMemberships;
+        Questions = questions;
     }
 
     public ISubjectRepository Subjects { get; }
     public IClassRepository Classes { get; }
     public IClassMembershipRepository ClassMemberships { get; }
+    public IQuestionRepository Questions { get; }
 
     public IGenericRepository<T> Repository<T>()
         where T : class

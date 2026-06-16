@@ -1,0 +1,141 @@
+{
+    "title": "Ngân hàng câu hỏi",
+    "subtitle": "Tạo, sắp xếp và tái sử dụng câu hỏi cho các đề thi.",
+    "actions": {
+        "back": "Về ngân hàng câu hỏi",
+        "create": "Câu hỏi mới",
+        "browsePublic": "Xem công khai",
+        "preview": "Xem trước",
+        "edit": "Sửa",
+        "duplicate": "Sao chép",
+        "makePublic": "Đặt công khai",
+        "makePrivate": "Đặt riêng tư",
+        "delete": "Xóa"
+    },
+    "columns": {
+        "content": "Câu hỏi",
+        "type": "Loại",
+        "difficulty": "Độ khó",
+        "subject": "Môn học",
+        "tags": "Thẻ",
+        "owner": "Tác giả",
+        "visibility": "Hiển thị",
+        "updatedAt": "Cập nhật",
+        "actions": "Thao tác"
+    },
+    "types": {
+        "SingleChoice": "Một đáp án",
+        "MultipleChoice": "Nhiều đáp án",
+        "TrueFalse": "Đúng / Sai",
+        "ShortWriting": "Tự luận ngắn",
+        "LongWriting": "Tự luận dài"
+    },
+    "difficulty": {
+        "Easy": "Dễ",
+        "Medium": "Trung bình",
+        "Hard": "Khó"
+    },
+    "visibility": {
+        "Public": "Công khai",
+        "Private": "Riêng tư"
+    },
+    "filters": {
+        "search": "Tìm nội dung…",
+        "type": "Loại",
+        "allTypes": "Tất cả loại",
+        "difficulty": "Độ khó",
+        "allDifficulties": "Tất cả độ khó",
+        "subject": "Môn học",
+        "allSubjects": "Tất cả môn học",
+        "tag": "Lọc theo thẻ…",
+        "visibility": "Hiển thị",
+        "allVisibility": "Tất cả hiển thị"
+    },
+    "form": {
+        "createTitle": "Câu hỏi mới",
+        "createSubtitle": "Thêm một câu hỏi vào ngân hàng của bạn.",
+        "editTitle": "Sửa câu hỏi",
+        "editSubtitle": "Cập nhật câu hỏi. Các đề thi đang dùng vẫn giữ bản sao của riêng chúng.",
+        "subject": "Môn học",
+        "subjectPlaceholder": "Chọn môn học",
+        "subjectNone": "Không có môn học",
+        "type": "Loại câu hỏi",
+        "content": "Nội dung câu hỏi",
+        "contentPlaceholder": "Soạn câu hỏi bằng Markdown…",
+        "markdownHint": "Hỗ trợ Markdown (danh sách, bảng, mã, liên kết).",
+        "write": "Soạn",
+        "preview": "Xem trước",
+        "previewEmpty": "Chưa có gì để xem trước.",
+        "toolbar": {
+            "bold": "In đậm",
+            "italic": "In nghiêng",
+            "strikethrough": "Gạch ngang",
+            "underline": "Gạch chân",
+            "heading": "Tiêu đề",
+            "quote": "Trích dẫn",
+            "bulletList": "Danh sách dấu chấm",
+            "orderedList": "Danh sách đánh số",
+            "code": "Mã nội dòng",
+            "codeBlock": "Khối mã",
+            "link": "Liên kết"
+        },
+        "options": "Các lựa chọn",
+        "markCorrect": "Đánh dấu đáp án đúng",
+        "markOneCorrect": "Chọn một đáp án đúng duy nhất.",
+        "markAnyCorrect": "Bật mọi đáp án đúng.",
+        "optionPlaceholder": "Lựa chọn {{index}}",
+        "addOption": "Thêm lựa chọn",
+        "removeOption": "Xóa lựa chọn",
+        "difficulty": "Độ khó",
+        "suggestedPoint": "Điểm gợi ý",
+        "suggestedPointHint": "Chỉ là gợi ý; điểm thực tế được đặt khi thêm vào đề thi.",
+        "explanation": "Giải thích (tùy chọn)",
+        "explanationPlaceholder": "Hiển thị cho học sinh sau khi chấm…",
+        "explanationHint": "Giải thích đáp án (tùy chọn).",
+        "tags": "Thẻ",
+        "tagsPlaceholder": "Nhập thẻ rồi nhấn Enter…",
+        "tagsHint": "Thẻ tự do, chuẩn hóa chữ thường. Tối đa 10.",
+        "makePublic": "Đặt công khai",
+        "makePublicHint": "Câu hỏi công khai có thể được giáo viên khác xem và sao chép.",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "validation": {
+            "contentLength": "Nội dung phải từ 10 đến 10000 ký tự.",
+            "pointRange": "Điểm phải lớn hơn 0 và tối đa 100.",
+            "explanationMax": "Giải thích không được vượt quá 2000 ký tự.",
+            "tooManyTags": "Mỗi câu hỏi chỉ có tối đa 10 thẻ.",
+            "optionsMin": "Thêm ít nhất 2 lựa chọn.",
+            "optionContentRequired": "Nội dung lựa chọn không được để trống.",
+            "singleChoiceOneCorrect": "Đánh dấu đúng một đáp án đúng.",
+            "multipleChoiceOneCorrect": "Đánh dấu ít nhất một đáp án đúng.",
+            "trueFalseOneCorrect": "Chọn Đúng hay Sai là đáp án đúng."
+        }
+    },
+    "preview": {
+        "title": "Xem trước câu hỏi",
+        "subtitle": "Câu hỏi hiển thị với học sinh như thế nào.",
+        "points": "{{points}} điểm",
+        "explanation": "Giải thích",
+        "writingHint": "Câu trả lời tự luận — chấm thủ công."
+    },
+    "public": {
+        "title": "Câu hỏi công khai",
+        "subtitle": "Duyệt câu hỏi do giáo viên khác chia sẻ và sao chép vào ngân hàng của bạn."
+    },
+    "admin": {
+        "title": "Tất cả câu hỏi",
+        "subtitle": "Xem toàn bộ câu hỏi (kể cả riêng tư) ở chế độ chỉ đọc."
+    },
+    "deleteConfirm": {
+        "title": "Xóa câu hỏi?",
+        "description": "Câu hỏi sẽ bị gỡ khỏi ngân hàng của bạn. Hành động này không thể hoàn tác."
+    },
+    "toast": {
+        "created": "Đã tạo câu hỏi.",
+        "updated": "Đã cập nhật câu hỏi.",
+        "deleted": "Đã xóa câu hỏi.",
+        "duplicated": "Đã sao chép câu hỏi vào ngân hàng của bạn.",
+        "visibilityUpdated": "Đã cập nhật hiển thị.",
+        "error": "Đã xảy ra lỗi. Vui lòng thử lại."
+    }
+}

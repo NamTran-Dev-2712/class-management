@@ -29,7 +29,7 @@
 | `teacher_id` | `BIGINT` | NO | — | FK → users(id) RESTRICT | Teacher sở hữu câu hỏi |
 | `subject_id` | `BIGINT` | YES | NULL | FK → subjects(id) SET NULL | Nhãn môn học (tùy chọn). NULL = câu hỏi chưa/không gắn môn học |
 | `type` | `TEXT` | NO | — | CHECK (type IN ('SingleChoice', 'MultipleChoice', 'TrueFalse', 'ShortWriting', 'LongWriting')) | Loại câu hỏi |
-| `content` | `TEXT` | NO | — | CHECK (length(content) >= 10 AND length(content) <= 10000) | Nội dung câu hỏi (plain text hoặc HTML sanitized) |
+| `content` | `TEXT` | NO | — | CHECK (length(content) >= 10 AND length(content) <= 10000) | Nội dung câu hỏi (**Markdown**, render ở FE bằng react-markdown + rehype-sanitize — cho phép HTML subset an toàn) |
 | `difficulty` | `TEXT` | NO | `'Medium'` | CHECK (difficulty IN ('Easy', 'Medium', 'Hard')) | Độ khó |
 | `suggested_point` | `NUMERIC(8,2)` | NO | `1.00` | CHECK (suggested_point > 0 AND suggested_point <= 100) | Điểm gợi ý (teacher có thể override khi thêm vào Exam) |
 | `visibility` | `TEXT` | NO | `'Private'` | CHECK (visibility IN ('Private', 'Public')) | |
@@ -60,7 +60,12 @@ idx_questions_teacher_type          (teacher_id, type, difficulty) WHERE deleted
 ```
 
 ### Notes
-- `content` format: app layer sanitize HTML trước khi store. DB chỉ lưu sanitized string.
+> **Trạng thái triển khai (MVP-3):** đã quyết & hiện thực như sau (cập nhật so với thiết kế gốc):
+> - `content` lưu **Markdown** (không phải HTML). FE render bằng `react-markdown` + `remark-gfm`, có **`rehype-raw` + `rehype-sanitize`** (allowlist chặt: chỉ thêm vài thẻ inline `u/ins/mark/sub/sup`, chặn script/onevent/`javascript:`) ⇒ vẫn an toàn XSS; backend **không cần** HTML sanitizer. Editor là kiểu GitHub-PR (toolbar đậm/nghiêng/gạch ngang/gạch chân/heading/list/quote/code/link + Write/Preview).
+> - `subject_id` để **nullable + SET NULL** và **tùy chọn lúc tạo** (không có môn học vẫn tạo được — vì Admin có thể chưa seed môn học nào). Khi *có* chọn subject thì handler kiểm tra subject phải active (BR-3-01 nới lỏng).
+> - `updated_at` được set bởi `AuditableEntityInterceptor` + `DEFAULT now()` (giống `classes`), **không dùng DB trigger**.
+> - Tìm kiếm keyword: **ILIKE `%term%` trên `lower(content)`** + index GIN `pg_trgm` (xem Full-Text Search bên dưới) — chọn thay cho tsvector để EF translate đơn giản và hỗ trợ substring.
+> - Migration: `20260615180014_create_questions_and_views` (tạo 3 bảng + extension `pg_trgm` + index `idx_questions_content_trgm` + view `vw_questions`).
 - Soft delete question: `exam_questions` vẫn giữ FK đến `question_id`. Khi Exam được snapshot (MVP-5), content đã được copy. Nếu question bị soft delete sau khi snapshot → snapshot vẫn intact.
 - **Không xóa** question đang có trong `exam_questions` active (app kiểm tra). Nếu muốn xóa: phải remove khỏi Exam trước.
 - `explanation`: Teacher nhập để show cho Student sau khi làm bài (theo setting `show_answers_after_grade` trong Assignment)
@@ -175,30 +180,19 @@ questions (*) ─────────────── (*) exams           
 
 ## Full-Text Search Design
 
-### Tìm kiếm trong Question Bank
+### Tìm kiếm trong Question Bank — **đã triển khai: ILIKE + pg_trgm GIN**
 
-Hai cách approach cho MVP-3:
+MVP-3 dùng substring ILIKE trên `lower(content)` với một functional GIN trigram index, để (a) cho
+phép tìm **substring** (UX tốt hơn so với tsvector vốn match theo từ), và (b) biểu diễn được bằng
+LINQ thuần (`lower(content) LIKE '%term%'`) — Application layer **không** phụ thuộc EF/Npgsql.
 
-**Option A — ILIKE (đơn giản, đủ dùng cho MVP)**
 ```sql
--- Index hỗ trợ LIKE prefix
-CREATE INDEX idx_questions_content_pattern ON questions USING btree (content text_pattern_ops);
--- Query: WHERE content ILIKE '%keyword%' -- chậm với large dataset
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX idx_questions_content_trgm ON questions USING gin (lower(content) gin_trgm_ops);
+-- Query: WHERE lower(content) LIKE '%' || lower(:keyword) || '%'   (index-backed)
 ```
 
-**Option B — tsvector full-text search (recommended cho production)**
-```sql
--- Generated column lưu tsvector
-ALTER TABLE questions ADD COLUMN content_search TSVECTOR
-  GENERATED ALWAYS AS (to_tsvector('english', content)) STORED;
-
--- GIN index trên tsvector
-CREATE INDEX gin_questions_content_search ON questions USING GIN (content_search);
-
--- Query: WHERE content_search @@ plainto_tsquery('english', :keyword)
-```
-
-> **Đề xuất:** Implement Option B ngay từ đầu — generated column không tốn effort maintain, GIN index nhanh hơn ILIKE rất nhiều khi data lớn.
+> tsvector (`to_tsvector` + GIN) vẫn là hướng nâng cấp nếu cần ranking/ngôn ngữ; chưa cần ở MVP-3.
 
 ### Tag search
 ```sql
@@ -224,10 +218,39 @@ Phụ thuộc:
 
 ---
 
-## Open Questions
+## Read model — view `vw_questions`
 
-- [ ] `content` format: plain text hay HTML/Markdown? HTML cần sanitize server-side. Ảnh hưởng CHECK constraint.
-- [ ] Hình ảnh trong câu hỏi: inline base64 (không khuyến nghị), URL external, hay upload riêng? Nếu upload riêng: thêm bảng `question_attachments`
-- [ ] `TrueFalse` options: seed "True"/"False" tự động ở app hay cho teacher nhập tên option ("Đúng"/"Sai")?
-- [ ] Language-aware full-text search: `'english'` dictionary cho tiếng Anh, nhưng nội dung tiếng Việt cần `simple` dictionary. Quyết định khi implement.
-- [ ] Giới hạn số tags per câu hỏi? Đề xuất: max 10 tags (validate app)
+List/detail reads dùng một read-model view (giống `vw_classes`) để tái sử dụng `BaseGetQueryHandler`
+mà không phải JOIN tới Identity `ApplicationUser`. Một dòng / mỗi question chưa bị xóa, kèm tên
+teacher, subject (live, `deleted_at IS NULL`), số option, và mảng tags đã gộp.
+
+```sql
+CREATE VIEW vw_questions AS
+SELECT q.id, q.public_id, q.type, q.content, q.difficulty, q.suggested_point, q.visibility,
+       q.explanation, q.created_at, q.updated_at,
+       q.subject_id, sub.public_id AS subject_public_id, sub.name AS subject_name,
+       q.teacher_id, t.public_id AS teacher_public_id, t.display_name AS teacher_name,
+       COALESCE(oc.option_count, 0) AS option_count,
+       COALESCE(tg.tags, '{}'::text[]) AS tags
+FROM questions q
+JOIN users t ON t.id = q.teacher_id
+LEFT JOIN subjects sub ON sub.id = q.subject_id AND sub.deleted_at IS NULL
+LEFT JOIN (SELECT question_id, COUNT(*) AS option_count FROM question_options GROUP BY question_id) oc
+       ON oc.question_id = q.id
+LEFT JOIN (SELECT question_id, array_agg(tag ORDER BY tag) AS tags FROM question_tags GROUP BY question_id) tg
+       ON tg.question_id = q.id
+WHERE q.deleted_at IS NULL;
+```
+
+`tags` là cột `text[]` → map sang `List<string>` (lọc tag bằng `Tags.Contains(slug)` ⇒ `slug = ANY(tags)`).
+
+---
+
+## Open Questions — đã chốt ở MVP-3
+
+- [x] `content` format → **Markdown** + editor kiểu GitHub-PR; render ở FE qua `rehype-raw` + `rehype-sanitize` (HTML subset an toàn), không sanitize phía server.
+- [x] `subject_id` → **tùy chọn** lúc tạo (không bắt buộc chọn môn học); active-check chỉ khi có chọn.
+- [ ] Hình ảnh trong câu hỏi: hiện chèn bằng Markdown image (URL external). Upload riêng (`question_attachments`) để dành phase sau.
+- [x] `TrueFalse` options → app **tự seed** "True"/"False"; teacher chỉ chọn đáp án đúng.
+- [x] Full-text search → ILIKE + `pg_trgm` GIN trên `lower(content)` (xem trên); tsvector để dành.
+- [x] Giới hạn tags/câu hỏi → **max 10** (validate ở app, normalize `^[a-z0-9-]{1,50}$`).

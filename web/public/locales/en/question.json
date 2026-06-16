@@ -1,0 +1,141 @@
+{
+    "title": "Question bank",
+    "subtitle": "Create, organize and reuse your questions across exams.",
+    "actions": {
+        "back": "Back to question bank",
+        "create": "New question",
+        "browsePublic": "Browse public",
+        "preview": "Preview",
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "makePublic": "Make public",
+        "makePrivate": "Make private",
+        "delete": "Delete"
+    },
+    "columns": {
+        "content": "Question",
+        "type": "Type",
+        "difficulty": "Difficulty",
+        "subject": "Subject",
+        "tags": "Tags",
+        "owner": "Author",
+        "visibility": "Visibility",
+        "updatedAt": "Updated",
+        "actions": "Actions"
+    },
+    "types": {
+        "SingleChoice": "Single choice",
+        "MultipleChoice": "Multiple choice",
+        "TrueFalse": "True / False",
+        "ShortWriting": "Short answer",
+        "LongWriting": "Essay"
+    },
+    "difficulty": {
+        "Easy": "Easy",
+        "Medium": "Medium",
+        "Hard": "Hard"
+    },
+    "visibility": {
+        "Public": "Public",
+        "Private": "Private"
+    },
+    "filters": {
+        "search": "Search content…",
+        "type": "Type",
+        "allTypes": "All types",
+        "difficulty": "Difficulty",
+        "allDifficulties": "All difficulties",
+        "subject": "Subject",
+        "allSubjects": "All subjects",
+        "tag": "Filter by tag…",
+        "visibility": "Visibility",
+        "allVisibility": "All visibility"
+    },
+    "form": {
+        "createTitle": "New question",
+        "createSubtitle": "Add a question to your bank.",
+        "editTitle": "Edit question",
+        "editSubtitle": "Update this question. Exams already using it keep their snapshot.",
+        "subject": "Subject",
+        "subjectPlaceholder": "Choose a subject",
+        "subjectNone": "No subject",
+        "type": "Question type",
+        "content": "Question content",
+        "contentPlaceholder": "Write the question using Markdown…",
+        "markdownHint": "Markdown is supported (lists, tables, code, links).",
+        "write": "Write",
+        "preview": "Preview",
+        "previewEmpty": "Nothing to preview yet.",
+        "toolbar": {
+            "bold": "Bold",
+            "italic": "Italic",
+            "strikethrough": "Strikethrough",
+            "underline": "Underline",
+            "heading": "Heading",
+            "quote": "Quote",
+            "bulletList": "Bulleted list",
+            "orderedList": "Numbered list",
+            "code": "Inline code",
+            "codeBlock": "Code block",
+            "link": "Link"
+        },
+        "options": "Answer options",
+        "markCorrect": "Mark as correct",
+        "markOneCorrect": "Select the single correct answer.",
+        "markAnyCorrect": "Toggle every correct answer.",
+        "optionPlaceholder": "Option {{index}}",
+        "addOption": "Add option",
+        "removeOption": "Remove option",
+        "difficulty": "Difficulty",
+        "suggestedPoint": "Suggested point",
+        "suggestedPointHint": "A hint only; the real point is set when added to an exam.",
+        "explanation": "Explanation (optional)",
+        "explanationPlaceholder": "Shown to students after grading…",
+        "explanationHint": "Optional answer explanation.",
+        "tags": "Tags",
+        "tagsPlaceholder": "Type a tag and press Enter…",
+        "tagsHint": "Free-form tags, normalized to lowercase. Up to 10.",
+        "makePublic": "Make public",
+        "makePublicHint": "Public questions can be viewed and duplicated by other teachers.",
+        "cancel": "Cancel",
+        "save": "Save",
+        "validation": {
+            "contentLength": "Content must be between 10 and 10000 characters.",
+            "pointRange": "Point must be greater than 0 and at most 100.",
+            "explanationMax": "Explanation must not exceed 2000 characters.",
+            "tooManyTags": "A question can have at most 10 tags.",
+            "optionsMin": "Add at least 2 options.",
+            "optionContentRequired": "Option content cannot be empty.",
+            "singleChoiceOneCorrect": "Mark exactly one correct answer.",
+            "multipleChoiceOneCorrect": "Mark at least one correct answer.",
+            "trueFalseOneCorrect": "Choose whether True or False is correct."
+        }
+    },
+    "preview": {
+        "title": "Question preview",
+        "subtitle": "How this question looks to students.",
+        "points": "{{points}} pts",
+        "explanation": "Explanation",
+        "writingHint": "Written answer — graded manually."
+    },
+    "public": {
+        "title": "Public questions",
+        "subtitle": "Browse questions shared by other teachers and duplicate them into your bank."
+    },
+    "admin": {
+        "title": "All questions",
+        "subtitle": "Read-only overview of every question, including private ones."
+    },
+    "deleteConfirm": {
+        "title": "Delete question?",
+        "description": "This question will be removed from your bank. This cannot be undone."
+    },
+    "toast": {
+        "created": "Question created.",
+        "updated": "Question updated.",
+        "deleted": "Question deleted.",
+        "duplicated": "Question duplicated to your bank.",
+        "visibilityUpdated": "Visibility updated.",
+        "error": "Something went wrong. Please try again."
+    }
+}
