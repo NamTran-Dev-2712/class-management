@@ -1,0 +1,120 @@
+{
+    "title": "Đề thi",
+    "subtitle": "Tạo đề thi mẫu tái sử dụng từ ngân hàng câu hỏi.",
+    "actions": {
+        "back": "Quay lại danh sách đề",
+        "create": "Đề thi mới",
+        "browsePublic": "Xem đề công khai",
+        "preview": "Xem trước",
+        "edit": "Sửa",
+        "manageQuestions": "Sửa câu hỏi",
+        "duplicate": "Nhân bản",
+        "makePublic": "Đặt công khai",
+        "makePrivate": "Đặt riêng tư",
+        "delete": "Xóa"
+    },
+    "columns": {
+        "title": "Tên đề",
+        "subject": "Môn học",
+        "questions": "Số câu",
+        "totalPoint": "Tổng điểm",
+        "owner": "Tác giả",
+        "visibility": "Hiển thị",
+        "version": "Phiên bản",
+        "updatedAt": "Cập nhật",
+        "actions": "Hành động"
+    },
+    "visibility": {
+        "Public": "Công khai",
+        "Private": "Riêng tư"
+    },
+    "filters": {
+        "search": "Tìm theo tên…",
+        "subject": "Môn học",
+        "allSubjects": "Tất cả môn học",
+        "visibility": "Hiển thị",
+        "allVisibility": "Tất cả trạng thái"
+    },
+    "form": {
+        "createTitle": "Đề thi mới",
+        "createSubtitle": "Đặt tên cho đề; bạn sẽ thêm câu hỏi ở bước tiếp theo.",
+        "editTitle": "Sửa đề thi",
+        "editSubtitle": "Cập nhật thông tin và câu hỏi. Bài giao đã dùng đề vẫn giữ bản snapshot.",
+        "title": "Tên đề",
+        "titlePlaceholder": "VD: Chương 1 — Kiểm tra 15 phút",
+        "description": "Mô tả (tùy chọn)",
+        "descriptionPlaceholder": "Ghi chú ngắn về đề thi này…",
+        "subject": "Môn học",
+        "subjectPlaceholder": "Chọn môn học",
+        "subjectNone": "Không có môn",
+        "makePublic": "Đặt công khai",
+        "makePublicHint": "Đề công khai có thể được giáo viên khác xem và nhân bản.",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "saveAndContinue": "Lưu và thêm câu hỏi",
+        "validation": {
+            "titleLength": "Tên đề phải từ 3 đến 300 ký tự.",
+            "descriptionMax": "Mô tả không được vượt quá 1000 ký tự."
+        }
+    },
+    "builder": {
+        "title": "Câu hỏi",
+        "subtitle": "Thêm, sắp xếp và đặt điểm cho từng câu hỏi.",
+        "addQuestions": "Thêm câu hỏi",
+        "empty": "Chưa có câu hỏi nào. Thêm câu hỏi từ ngân hàng để tạo đề.",
+        "totalPoint": "Tổng điểm",
+        "totalQuestions": "Số câu",
+        "point": "Điểm",
+        "remove": "Xóa",
+        "moveUp": "Lên trên",
+        "moveDown": "Xuống dưới",
+        "dragHandle": "Kéo để sắp xếp",
+        "unavailable": "Câu hỏi này không còn khả dụng. Hãy gỡ trước khi giao bài.",
+        "save": "Lưu câu hỏi",
+        "saved": "Đã lưu câu hỏi.",
+        "version": "Phiên bản {{version}}",
+        "picker": {
+            "title": "Thêm câu hỏi",
+            "subtitle": "Chọn câu hỏi từ ngân hàng của bạn hoặc kho công khai.",
+            "tabMine": "Của tôi",
+            "tabPublic": "Công khai",
+            "add": "Thêm",
+            "added": "Đã thêm",
+            "alreadyIn": "Đã có trong đề",
+            "done": "Xong",
+            "empty": "Không tìm thấy câu hỏi.",
+            "selectedCount": "Đã chọn {{count}}"
+        }
+    },
+    "preview": {
+        "title": "Xem trước đề thi",
+        "subtitle": "Cách học sinh nhìn thấy đề (ẩn đáp án).",
+        "points": "{{points}} điểm",
+        "totalPoint": "Tổng: {{points}} điểm",
+        "questionLabel": "Câu {{order}}",
+        "unavailable": "Câu hỏi không khả dụng",
+        "writingHint": "Câu tự luận — chấm thủ công.",
+        "empty": "Đề thi này chưa có câu hỏi."
+    },
+    "public": {
+        "title": "Đề thi công khai",
+        "subtitle": "Xem đề được giáo viên khác chia sẻ và nhân bản về ngân hàng của bạn."
+    },
+    "admin": {
+        "title": "Tất cả đề thi",
+        "subtitle": "Xem toàn bộ đề thi (gồm cả riêng tư) ở chế độ chỉ đọc."
+    },
+    "deleteConfirm": {
+        "title": "Xóa đề thi?",
+        "description": "Đề thi sẽ bị xóa khỏi ngân hàng của bạn. Không thể hoàn tác."
+    },
+    "toast": {
+        "created": "Đã tạo đề thi.",
+        "updated": "Đã cập nhật đề thi.",
+        "questionsSaved": "Đã lưu câu hỏi.",
+        "deleted": "Đã xóa đề thi.",
+        "duplicated": "Đã nhân bản đề thi vào ngân hàng của bạn.",
+        "visibilityUpdated": "Đã cập nhật chế độ hiển thị.",
+        "error": "Đã có lỗi xảy ra. Vui lòng thử lại."
+    }
+}

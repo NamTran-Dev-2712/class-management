@@ -37,6 +37,7 @@ export const dashboardNav: Record<Role, NavItem[]> = {
         { labelKey: "nav.users", to: "/admin/users", icon: Users },
         { labelKey: "nav.classrooms", to: "/admin/classrooms", icon: School },
         { labelKey: "nav.questions", to: "/admin/questions", icon: FileQuestion },
+        { labelKey: "nav.exams", to: "/admin/exams", icon: FileText },
         { labelKey: "nav.payments", to: "/admin/payments", icon: CreditCard, disabled: true },
         { labelKey: "nav.reports", to: "/admin/reports", icon: BarChart3, disabled: true },
     ],
@@ -48,7 +49,7 @@ export const dashboardNav: Record<Role, NavItem[]> = {
             to: "/teacher/question-bank",
             icon: FileQuestion,
         },
-        { labelKey: "nav.exams", to: "/teacher/exams", icon: FileText, disabled: true },
+        { labelKey: "nav.exams", to: "/teacher/exams", icon: FileText },
         {
             labelKey: "nav.assignments",
             to: "/teacher/assignments",

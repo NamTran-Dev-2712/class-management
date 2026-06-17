@@ -131,10 +131,19 @@ Examples:
 
 ### MVP-4: Exam Builder
 
+**Đã triển khai** — gộp trong **một** migration (khác với kế hoạch 2 migration ban đầu):
+
 ```
-202602050900_create_exams_table             -- + triggers
-202602050910_create_exam_questions_table    -- + sync trigger
+20260617150412_create_exams_and_views
+  -- Tạo bảng exams, exam_questions (check constraints + indexes theo doc 04)
+  -- Tạo view vw_exams (exam + teacher display_name + live subject name/public_id)
 ```
+
+> Khác kế hoạch gốc: **không dùng DB trigger** để sync `total_point`/`total_questions`/`version`.
+> Các giá trị denormalized này được tính lại + tăng `version` ngay trong **application write handler**
+> (`UpdateExamQuestionsCommandHandler`) cùng một `SaveChangesAsync` — dễ debug, đúng chuẩn UoW của
+> repo, và `version` tăng đúng +1 mỗi lần lưu danh sách câu hỏi. `updated_at` qua interceptor.
+> Chi tiết: [04-schema-exam.md](./04-schema-exam.md).
 
 ### MVP-5: Assignment & Testing
 
