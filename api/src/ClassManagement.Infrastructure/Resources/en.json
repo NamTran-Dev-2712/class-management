@@ -136,5 +136,28 @@
   "Question.NotOwner": "You can only manage your own questions.",
   "Question.SubjectInactive": "The selected subject is not active.",
   "Question.MaxQuestionsReached": "You have reached the maximum number of questions allowed.",
-  "Question.InUseByExam": "This question is used by one or more exams and cannot be deleted."
+  "Question.InUseByExam": "This question is used by one or more exams and cannot be deleted.",
+
+  "Validation.Exam.VisibilityInvalid": "The visibility option is invalid.",
+  "Validation.Exam.TitleRequired": "Exam title is required.",
+  "Validation.Exam.TitleLength": "Exam title must be between 3 and 300 characters.",
+  "Validation.Exam.DescriptionMaxLength": "Description must not exceed 1000 characters.",
+  "Validation.Exam.NotFound": "Exam not found.",
+  "Validation.Exam.QuestionsNull": "The question list is required.",
+  "Validation.Exam.TooManyQuestions": "An exam can have at most 500 questions.",
+  "Validation.Exam.DuplicateQuestion": "This question is already in the exam.",
+  "Validation.Exam.PointInvalid": "Each question's point must be greater than 0 and at most 100.",
+
+  "Exam.Created": "Exam created successfully.",
+  "Exam.Updated": "Exam updated successfully.",
+  "Exam.QuestionsUpdated": "Exam questions saved successfully.",
+  "Exam.VisibilityUpdated": "Exam visibility updated.",
+  "Exam.Duplicated": "Exam duplicated to your bank.",
+  "Exam.Deleted": "Exam deleted successfully.",
+  "Exam.NotFound": "Exam not found.",
+  "Exam.NotOwner": "You can only manage your own exams.",
+  "Exam.SubjectInactive": "The selected subject is not active.",
+  "Exam.MaxExamsReached": "You have reached the maximum number of exams allowed.",
+  "Exam.QuestionNotFound": "One or more selected questions could not be found or are not accessible.",
+  "Exam.InUseByAssignment": "This exam is used by one or more assignments and cannot be deleted."
 }

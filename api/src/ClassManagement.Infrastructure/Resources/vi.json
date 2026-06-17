@@ -136,5 +136,28 @@
   "Question.NotOwner": "Bạn chỉ có thể quản lý câu hỏi của mình.",
   "Question.SubjectInactive": "Môn học đã chọn hiện không hoạt động.",
   "Question.MaxQuestionsReached": "Bạn đã đạt số lượng câu hỏi tối đa cho phép.",
-  "Question.InUseByExam": "Câu hỏi này đang được dùng trong một hoặc nhiều đề thi nên không thể xóa."
+  "Question.InUseByExam": "Câu hỏi này đang được dùng trong một hoặc nhiều đề thi nên không thể xóa.",
+
+  "Validation.Exam.VisibilityInvalid": "Tùy chọn hiển thị không hợp lệ.",
+  "Validation.Exam.TitleRequired": "Tên đề thi là bắt buộc.",
+  "Validation.Exam.TitleLength": "Tên đề thi phải từ 3 đến 300 ký tự.",
+  "Validation.Exam.DescriptionMaxLength": "Mô tả không được vượt quá 1000 ký tự.",
+  "Validation.Exam.NotFound": "Không tìm thấy đề thi.",
+  "Validation.Exam.QuestionsNull": "Danh sách câu hỏi là bắt buộc.",
+  "Validation.Exam.TooManyQuestions": "Một đề thi chỉ được tối đa 500 câu hỏi.",
+  "Validation.Exam.DuplicateQuestion": "Câu hỏi này đã có trong đề thi.",
+  "Validation.Exam.PointInvalid": "Điểm mỗi câu hỏi phải lớn hơn 0 và tối đa 100.",
+
+  "Exam.Created": "Tạo đề thi thành công.",
+  "Exam.Updated": "Cập nhật đề thi thành công.",
+  "Exam.QuestionsUpdated": "Đã lưu danh sách câu hỏi của đề thi.",
+  "Exam.VisibilityUpdated": "Đã cập nhật chế độ hiển thị đề thi.",
+  "Exam.Duplicated": "Đã sao chép đề thi vào ngân hàng của bạn.",
+  "Exam.Deleted": "Xóa đề thi thành công.",
+  "Exam.NotFound": "Không tìm thấy đề thi.",
+  "Exam.NotOwner": "Bạn chỉ có thể quản lý đề thi của mình.",
+  "Exam.SubjectInactive": "Môn học đã chọn hiện không hoạt động.",
+  "Exam.MaxExamsReached": "Bạn đã đạt số lượng đề thi tối đa cho phép.",
+  "Exam.QuestionNotFound": "Một hoặc nhiều câu hỏi đã chọn không tồn tại hoặc không thể truy cập.",
+  "Exam.InUseByAssignment": "Đề thi này đang được dùng trong một hoặc nhiều bài giao nên không thể xóa."
 }

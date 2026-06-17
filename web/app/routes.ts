@@ -28,6 +28,7 @@ export default [
             route("users/:publicId", "features/admin/users/edit/user-edit.page.tsx"),
             route("classrooms", "features/admin/classrooms/classrooms.page.tsx"),
             route("questions", "features/admin/questions/questions.page.tsx"),
+            route("exams", "features/admin/exams/exams.page.tsx"),
         ]),
     ]),
     layout("layouts/teacher.layout.tsx", [
@@ -56,6 +57,10 @@ export default [
                 "question-bank/:publicId",
                 "features/teacher/questions/edit/question-edit.page.tsx",
             ),
+            route("exams", "features/teacher/exams/list/exams.page.tsx"),
+            route("exams/new", "features/teacher/exams/create/exam-create.page.tsx"),
+            route("exams/public", "features/teacher/exams/public/public-exams.page.tsx"),
+            route("exams/:publicId", "features/teacher/exams/edit/exam-edit.page.tsx"),
         ]),
     ]),
     layout("layouts/student.layout.tsx", [

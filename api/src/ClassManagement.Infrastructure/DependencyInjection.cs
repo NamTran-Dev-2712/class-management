@@ -152,6 +152,11 @@ public static class DependencyInjection
         services.AddScoped<IQuestionRepository, QuestionRepository>();
         services.AddSingleton<IQuestionPolicy, Services.Questions.QuestionPolicy>();
 
+        // Exam builder (MVP-4)
+        services.Configure<ExamOptions>(configuration.GetSection(ExamOptions.SectionName));
+        services.AddScoped<IExamRepository, ExamRepository>();
+        services.AddSingleton<IExamPolicy, Services.Exams.ExamPolicy>();
+
         // Admin user management
         services.AddScoped<IPasswordGenerator, PasswordGenerator>();
         services.AddScoped<IUserAdminRepository, UserAdminRepository>();

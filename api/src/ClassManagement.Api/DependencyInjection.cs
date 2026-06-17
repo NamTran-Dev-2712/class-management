@@ -134,6 +134,7 @@ public static class DependencyInjection
             AddIpFixedWindow(RateLimitOptions.Policies.ClassWrite, rl.ClassWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.ClassJoin, rl.ClassJoin);
             AddIpFixedWindow(RateLimitOptions.Policies.QuestionWrite, rl.QuestionWrite);
+            AddIpFixedWindow(RateLimitOptions.Policies.ExamWrite, rl.ExamWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.Read, rl.Read);
         });
 
@@ -200,6 +201,22 @@ public static class DependencyInjection
             options.AddPolicy(
                 OutputCachePolicies.AdminQuestionsRead,
                 b => Shared(b, OutputCacheTags.Questions)
+            );
+
+            // Exam builder (MVP-4): a teacher's own bank is personalized (PerUser); the public pool
+            // and the admin-wide list are the same for everyone at a given authorization level
+            // (Shared). All tagged "exams" so any write evicts every related read.
+            options.AddPolicy(
+                OutputCachePolicies.TeacherExamsRead,
+                b => PerUser(b, OutputCacheTags.Exams)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.PublicExamsRead,
+                b => Shared(b, OutputCacheTags.Exams)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminExamsRead,
+                b => Shared(b, OutputCacheTags.Exams)
             );
         });
 

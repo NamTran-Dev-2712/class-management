@@ -35,6 +35,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             "ClassWrite",
             "ClassJoin",
             "QuestionWrite",
+            "ExamWrite",
             "Read",
         ];
         foreach (var policy in policies)

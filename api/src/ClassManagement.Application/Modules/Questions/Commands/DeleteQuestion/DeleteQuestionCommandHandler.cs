@@ -1,3 +1,5 @@
+using ClassManagement.Application.Exceptions;
+
 public class DeleteQuestionCommandHandler : IRequestHandler<DeleteQuestionCommand>
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -16,9 +18,24 @@ public class DeleteQuestionCommandHandler : IRequestHandler<DeleteQuestionComman
             _currentUser.UserId
         );
 
-        // BR-3-08: a question used by ≥1 Exam cannot be deleted (must be removed from the Exam first).
-        // Exams arrive in MVP-4; once exam_questions exists, add the in-use check here and throw
-        // ConflictException("Question.InUseByExam") with the offending exams.
+        // BR-3-08 / BR-4-05: a question still used in one of the teacher's own (non-deleted) exams
+        // cannot be soft-deleted — they must remove it from those exams first. (A Public question used
+        // in *another* teacher's exam is not blocked; that exam shows it as "unavailable" instead.)
+        var examQuestionRepo = _unitOfWork.Repository<ExamQuestion>();
+        var examRepo = _unitOfWork.Repository<Exam>();
+        var inUse = await examQuestionRepo.CountAsync(
+            examQuestionRepo
+                .Query()
+                .Where(eq =>
+                    eq.QuestionId == question.Id
+                    && examRepo
+                        .Query()
+                        .Any(e => e.Id == eq.ExamId && e.TeacherId == question.TeacherId)
+                ),
+            ct
+        );
+        if (inUse > 0)
+            throw new ConflictException("Question.InUseByExam");
 
         // Soft-delete via the AuditableEntityInterceptor (ISoftDeletable → DeletedAt = now).
         _unitOfWork.Questions.Remove(question);

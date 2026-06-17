@@ -7,9 +7,11 @@ export const I18N_NAMESPACES = [
     "booking",
     "classroom",
     "dashboard",
+    "exam",
     "mentor",
     "payment",
     "public",
+    "question",
     "subject",
     "user",
 ] as const;

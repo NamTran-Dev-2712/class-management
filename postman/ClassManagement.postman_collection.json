@@ -1694,6 +1694,348 @@
             ]
         },
         {
+            "name": "Teacher Exams",
+            "item": [
+                {
+                    "name": "Create Exam",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.publicId) {",
+                                    "  pm.collectionVariables.set('examId', json.data.publicId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"title\": \"Chapter 1 - 15 minute quiz\",\n  \"description\": \"A reusable exam template.\",\n  \"visibility\": \"Private\"\n}"
+                        },
+                        "description": "Create an exam template (starts empty). subjectId is optional — send null to omit. Captures {{examId}}. Login as Teacher first."
+                    }
+                },
+                {
+                    "name": "List My Exams",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams?pageNumber=1&pageSize=10&sortBy=updatedAt&sortOrder=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams"
+                            ],
+                            "query": [
+                                { "key": "pageNumber", "value": "1" },
+                                { "key": "pageSize", "value": "10" },
+                                { "key": "sortBy", "value": "updatedAt" },
+                                { "key": "sortOrder", "value": "desc" },
+                                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true },
+                                { "key": "visibility", "value": "Private", "disabled": true },
+                                { "key": "searchTerm", "value": "", "disabled": true }
+                            ]
+                        },
+                        "description": "The teacher's own exam bank. Filter by subjectId/visibility and search by title."
+                    }
+                },
+                {
+                    "name": "Get Exam",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams/{{examId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams",
+                                "{{examId}}"
+                            ]
+                        },
+                        "description": "Full exam detail with its ordered questions (owner only)."
+                    }
+                },
+                {
+                    "name": "Update Exam (metadata)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams/{{examId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams",
+                                "{{examId}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"title\": \"Chapter 1 - Updated\",\n  \"description\": \"Updated description.\",\n  \"visibility\": \"Private\"\n}"
+                        },
+                        "description": "Edit title/description/subject/visibility. Does NOT bump the exam version."
+                    }
+                },
+                {
+                    "name": "Update Exam Questions",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams/{{examId}}/questions",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams",
+                                "{{examId}}",
+                                "questions"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"questions\": [\n    { \"questionId\": \"{{questionId}}\", \"point\": 2 }\n  ]\n}"
+                        },
+                        "description": "Save the full ordered question list (wholesale replace). Create a question first (Teacher Questions > Create Question) so {{questionId}} is set. Each point must be > 0. Recomputes totals and bumps the version by 1."
+                    }
+                },
+                {
+                    "name": "Preview Exam (student view)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams/{{examId}}/preview",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams",
+                                "{{examId}}",
+                                "preview"
+                            ]
+                        },
+                        "description": "Exam rendered as a student sees it — options without the correct-answer flags (owner only)."
+                    }
+                },
+                {
+                    "name": "Set Visibility",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams/{{examId}}/visibility",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams",
+                                "{{examId}}",
+                                "visibility"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"visibility\": \"Public\"\n}"
+                        },
+                        "description": "Flip the exam Public/Private."
+                    }
+                },
+                {
+                    "name": "Duplicate Exam",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams/{{examId}}/duplicate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams",
+                                "{{examId}}",
+                                "duplicate"
+                            ]
+                        },
+                        "description": "Duplicate an exam you can see (own or any Public one) into your bank as a fresh Private copy."
+                    }
+                },
+                {
+                    "name": "Delete Exam",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams/{{examId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams",
+                                "{{examId}}"
+                            ]
+                        },
+                        "description": "Soft-delete one of your own exams."
+                    }
+                },
+                {
+                    "name": "Browse Public Exams (capture publicExamId)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.data && json.data.items && json.data.items.length) {",
+                                    "  pm.collectionVariables.set('publicExamId', json.data.items[0].publicId);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams/public?pageNumber=1&pageSize=10&sortBy=updatedAt&sortOrder=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams",
+                                "public"
+                            ],
+                            "query": [
+                                { "key": "pageNumber", "value": "1" },
+                                { "key": "pageSize", "value": "10" },
+                                { "key": "sortBy", "value": "updatedAt" },
+                                { "key": "sortOrder", "value": "desc" }
+                            ]
+                        },
+                        "description": "All Public exams from any teacher (read-only). Captures {{publicExamId}}."
+                    }
+                },
+                {
+                    "name": "Get Public Exam",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/exams/public/{{publicExamId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "exams",
+                                "public",
+                                "{{publicExamId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin Exams",
+            "item": [
+                {
+                    "name": "List All Exams",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/exams?pageNumber=1&pageSize=10&sortBy=updatedAt&sortOrder=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "exams"
+                            ],
+                            "query": [
+                                { "key": "pageNumber", "value": "1" },
+                                { "key": "pageSize", "value": "10" },
+                                { "key": "sortBy", "value": "updatedAt" },
+                                { "key": "sortOrder", "value": "desc" }
+                            ]
+                        },
+                        "description": "Admin read-only list of every exam (including Private). Login as Admin first."
+                    }
+                },
+                {
+                    "name": "Get Exam (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/exams/{{examId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "exams",
+                                "{{examId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
             "name": "Output Cache (manual perf)",
             "description": "Verify output caching + tag eviction by hand. Login (Admin) first.\n1) Run 'GET Subjects (1st — cache miss)' then 'GET Subjects (2nd — cache HIT)': the 2nd should be noticeably faster (served from cache, no DB hit) — each request logs its responseTime to the Postman console.\n2) Run 'Create Subject (evicts cache)', then 'GET Subjects (after evict — fresh)': the list reflects the new subject immediately (the write evicted the 'subjects' tag).\nNote: responses also vary by Accept-Language and (for teacher/student endpoints) by the signed-in user.",
             "item": [
@@ -1848,6 +2190,14 @@
         },
         {
             "key": "publicQuestionId",
+            "value": ""
+        },
+        {
+            "key": "examId",
+            "value": ""
+        },
+        {
+            "key": "publicExamId",
             "value": ""
         }
     ]

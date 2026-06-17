@@ -43,6 +43,10 @@ public sealed class RateLimitOptions
     public RateLimitPolicyOptions QuestionWrite { get; init; } =
         new() { PermitLimit = 30, WindowSeconds = 60 };
 
+    // Exam create/update/questions/visibility/duplicate/delete actions (MVP-4).
+    public RateLimitPolicyOptions ExamWrite { get; init; } =
+        new() { PermitLimit = 30, WindowSeconds = 60 };
+
     // Generous per-IP cap for GET list endpoints — output cache absorbs repeated identical reads, but
     // this throttles param-varying spam that would otherwise bypass the cache and hit the database.
     public RateLimitPolicyOptions Read { get; init; } =
@@ -63,6 +67,7 @@ public sealed class RateLimitOptions
         public const string ClassWrite = "classWrite";
         public const string ClassJoin = "classJoin";
         public const string QuestionWrite = "questionWrite";
+        public const string ExamWrite = "examWrite";
         public const string Read = "read";
     }
 }

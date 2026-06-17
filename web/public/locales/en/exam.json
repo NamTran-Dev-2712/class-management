@@ -1,0 +1,120 @@
+{
+    "title": "Exams",
+    "subtitle": "Build reusable exam templates from your question bank.",
+    "actions": {
+        "back": "Back to exams",
+        "create": "New exam",
+        "browsePublic": "Browse public",
+        "preview": "Preview",
+        "edit": "Edit",
+        "manageQuestions": "Edit questions",
+        "duplicate": "Duplicate",
+        "makePublic": "Make public",
+        "makePrivate": "Make private",
+        "delete": "Delete"
+    },
+    "columns": {
+        "title": "Title",
+        "subject": "Subject",
+        "questions": "Questions",
+        "totalPoint": "Total points",
+        "owner": "Author",
+        "visibility": "Visibility",
+        "version": "Version",
+        "updatedAt": "Updated",
+        "actions": "Actions"
+    },
+    "visibility": {
+        "Public": "Public",
+        "Private": "Private"
+    },
+    "filters": {
+        "search": "Search title…",
+        "subject": "Subject",
+        "allSubjects": "All subjects",
+        "visibility": "Visibility",
+        "allVisibility": "All visibility"
+    },
+    "form": {
+        "createTitle": "New exam",
+        "createSubtitle": "Name your exam; you'll add questions next.",
+        "editTitle": "Edit exam",
+        "editSubtitle": "Update details and questions. Assignments already using it keep their snapshot.",
+        "title": "Title",
+        "titlePlaceholder": "e.g. Chapter 1 — 15-minute quiz",
+        "description": "Description (optional)",
+        "descriptionPlaceholder": "A short note about this exam…",
+        "subject": "Subject",
+        "subjectPlaceholder": "Choose a subject",
+        "subjectNone": "No subject",
+        "makePublic": "Make public",
+        "makePublicHint": "Public exams can be viewed and duplicated by other teachers.",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saveAndContinue": "Save and add questions",
+        "validation": {
+            "titleLength": "Title must be between 3 and 300 characters.",
+            "descriptionMax": "Description must not exceed 1000 characters."
+        }
+    },
+    "builder": {
+        "title": "Questions",
+        "subtitle": "Add, reorder and set the point for each question.",
+        "addQuestions": "Add questions",
+        "empty": "No questions yet. Add questions from your bank to build the exam.",
+        "totalPoint": "Total points",
+        "totalQuestions": "Questions",
+        "point": "Point",
+        "remove": "Remove",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "dragHandle": "Drag to reorder",
+        "unavailable": "This question is no longer available. Remove it before publishing.",
+        "save": "Save questions",
+        "saved": "Questions saved.",
+        "version": "Version {{version}}",
+        "picker": {
+            "title": "Add questions",
+            "subtitle": "Pick questions from your bank or the public pool.",
+            "tabMine": "My bank",
+            "tabPublic": "Public",
+            "add": "Add",
+            "added": "Added",
+            "alreadyIn": "Already in exam",
+            "done": "Done",
+            "empty": "No questions found.",
+            "selectedCount": "{{count}} selected"
+        }
+    },
+    "preview": {
+        "title": "Exam preview",
+        "subtitle": "How this exam looks to students (answers hidden).",
+        "points": "{{points}} pts",
+        "totalPoint": "Total: {{points}} pts",
+        "questionLabel": "Question {{order}}",
+        "unavailable": "Unavailable question",
+        "writingHint": "Written answer — graded manually.",
+        "empty": "This exam has no questions yet."
+    },
+    "public": {
+        "title": "Public exams",
+        "subtitle": "Browse exams shared by other teachers and duplicate them into your bank."
+    },
+    "admin": {
+        "title": "All exams",
+        "subtitle": "Read-only overview of every exam, including private ones."
+    },
+    "deleteConfirm": {
+        "title": "Delete exam?",
+        "description": "This exam will be removed from your bank. This cannot be undone."
+    },
+    "toast": {
+        "created": "Exam created.",
+        "updated": "Exam updated.",
+        "questionsSaved": "Questions saved.",
+        "deleted": "Exam deleted.",
+        "duplicated": "Exam duplicated to your bank.",
+        "visibilityUpdated": "Visibility updated.",
+        "error": "Something went wrong. Please try again."
+    }
+}

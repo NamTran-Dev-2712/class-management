@@ -45,4 +45,18 @@ export const queryKeys = {
         adminDetail: (publicId: string) =>
             [...queryKeys.questions.all, "admin", "detail", publicId] as const,
     },
+    exams: {
+        all: ["exams"] as const,
+        teacherList: (params: unknown) =>
+            [...queryKeys.exams.all, "teacher", "list", params] as const,
+        publicList: (params: unknown) =>
+            [...queryKeys.exams.all, "public", "list", params] as const,
+        adminList: (params: unknown) => [...queryKeys.exams.all, "admin", "list", params] as const,
+        detail: (publicId: string) => [...queryKeys.exams.all, "detail", publicId] as const,
+        publicDetail: (publicId: string) =>
+            [...queryKeys.exams.all, "public", "detail", publicId] as const,
+        adminDetail: (publicId: string) =>
+            [...queryKeys.exams.all, "admin", "detail", publicId] as const,
+        preview: (publicId: string) => [...queryKeys.exams.all, "preview", publicId] as const,
+    },
 } as const;

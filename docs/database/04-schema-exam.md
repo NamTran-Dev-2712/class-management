@@ -71,11 +71,12 @@ Khi tạo Assignment (MVP-5):
 ### Denormalized Cache Columns
 `total_point` và `total_questions` được tính lại khi `exam_questions` thay đổi.
 
-Cách maintain (chọn 1):
-1. **App layer**: recalculate sau mỗi INSERT/UPDATE/DELETE vào `exam_questions`
-2. **DB Trigger**: trigger trên `exam_questions` → UPDATE `exams.total_point`, `exams.total_questions`, `exams.version`
-
-> **Đề xuất**: Dùng DB trigger để đảm bảo consistency ngay cả khi app có bug.
+> **Quyết định (đã triển khai MVP-4)**: dùng **App layer** — KHÔNG dùng DB trigger.
+> `UpdateExamQuestionsCommandHandler` thay thế toàn bộ `exam_questions` (wholesale-replace), rồi tính
+> lại `total_point = Σ point`, `total_questions = count` và tăng `version += 1` trong **cùng một**
+> `SaveChangesAsync`. Lý do: dễ debug, đúng chuẩn Unit-of-Work hiện tại của repo, và `version` tăng
+> đúng **+1 mỗi lần lưu** (đúng spec MVP-4) thay vì nhảy nhiều như khi trigger chạy trên từng row.
+> Metadata (title/description/subject/visibility) sửa qua `UpdateExamCommand` **không** tăng version.
 
 ### Notes
 - Không xóa Exam đang có Assignment (app kiểm tra). Soft delete chỉ khi không còn reference.
@@ -125,28 +126,12 @@ idx_exam_questions_exam         (exam_id, display_order)       -- Load questions
 idx_exam_questions_question     (question_id)                  -- "Question này đang trong Exams nào?" (dùng khi check trước khi xóa question)
 ```
 
-### Trigger: Sync `exams` denormalized columns
+### Sync `exams` denormalized columns — App layer (KHÔNG dùng trigger)
 
-```sql
--- Sau mỗi INSERT/UPDATE/DELETE trên exam_questions → update exams
-CREATE OR REPLACE FUNCTION sync_exam_stats()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE exams
-  SET
-    total_point = (SELECT COALESCE(SUM(point), 0) FROM exam_questions WHERE exam_id = COALESCE(NEW.exam_id, OLD.exam_id)),
-    total_questions = (SELECT COUNT(*) FROM exam_questions WHERE exam_id = COALESCE(NEW.exam_id, OLD.exam_id)),
-    version = version + 1,
-    updated_at = NOW()
-  WHERE id = COALESCE(NEW.exam_id, OLD.exam_id);
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_exam_questions_sync
-  AFTER INSERT OR UPDATE OR DELETE ON exam_questions
-  FOR EACH ROW EXECUTE FUNCTION sync_exam_stats();
-```
+> Thiết kế ban đầu đề xuất một trigger `sync_exam_stats()`. **MVP-4 không dùng trigger** (xem mục
+> *Denormalized Cache Columns* ở trên). Thay vào đó application handler tính lại totals + version trong
+> một transaction khi lưu danh sách câu hỏi. Vì vậy migration `20260617150412_create_exams_and_views`
+> **không** tạo trigger/function nào trên `exam_questions`.
 
 ### Notes
 - ON DELETE RESTRICT trên `question_id`: đây là guard quan trọng — không cho soft delete question khi còn trong exam
@@ -169,6 +154,30 @@ exams (*) ──────────────────── (*) assig
 
 ---
 
+## Read-model view: `vw_exams`
+
+Một row mỗi exam **chưa xóa**, kèm tên hiển thị của owner + tên/public_id môn học còn sống. Cho phép
+list/detail queries dùng `BaseGetQueryHandler` mà không phải join thẳng vào `ApplicationUser`
+(Identity). `total_point`/`total_questions`/`version` lấy trực tiếp từ cột denormalized trên `exams`.
+
+```sql
+CREATE VIEW vw_exams AS
+SELECT e.id, e.public_id, e.title, e.description, e.visibility, e.version,
+       e.total_point, e.total_questions, e.created_at, e.updated_at,
+       e.subject_id, sub.public_id AS subject_public_id, sub.name AS subject_name,
+       e.teacher_id, t.public_id AS teacher_public_id, t.display_name AS teacher_name
+FROM exams e
+JOIN users t ON t.id = e.teacher_id
+LEFT JOIN subjects sub ON sub.id = e.subject_id AND sub.deleted_at IS NULL
+WHERE e.deleted_at IS NULL;
+```
+
+> Detail/preview reads load thêm `exam_questions` (theo `display_order`) rồi join `vw_questions` để
+> lấy nội dung/loại/độ khó/số phương án từng câu. Câu hỏi đã soft-delete (vắng mặt trong `vw_questions`)
+> được đánh dấu `is_available = false` để teacher thay trước khi publish (MVP-5).
+
+---
+
 ## Migration Dependencies
 
 Phụ thuộc:
@@ -176,17 +185,22 @@ Phụ thuộc:
 - `subjects` (từ 01-schema-auth.md — nullable FK, không bắt buộc)
 - `questions` (từ 03-schema-question-bank.md)
 
-### Migration order
+### Migration order (đã triển khai — `20260617150412_create_exams_and_views`)
 1. `CREATE TABLE exams` (phụ thuộc users; subjects nullable nên không bắt buộc tồn tại trước)
-2. Apply `set_updated_at` trigger cho `exams`
-3. `CREATE TABLE exam_questions` (phụ thuộc exams, questions)
-4. Create `sync_exam_stats` trigger function + trigger
+2. `CREATE TABLE exam_questions` (phụ thuộc exams, questions)
+3. `CREATE VIEW vw_exams`
+4. `updated_at` set qua `AuditableEntityInterceptor` (không trigger); **không** có `sync_exam_stats`
+   (totals + version sync ở app layer — xem mục *Denormalized Cache Columns*).
 
 ---
 
-## Open Questions
+## Open Questions (đã chốt cho MVP-4)
 
-- [ ] Nên dùng **DB trigger** hay **app layer** để sync `total_point`/`total_questions`/`version`? Trigger an toàn hơn nhưng khó debug hơn trong EF Core
-- [ ] **Reorder nhiều câu cùng lúc**: khi drag-and-drop nhiều câu, cần UPDATE nhiều rows display_order. Cách tốt: batch UPDATE trong 1 transaction với deferred unique constraint check
-- [ ] **Exam import**: future feature cho phép import đề từ DOCX/PDF → cần `exam_import_jobs` table. Cột `imported_from` TEXT nullable trong `exams`?
-- [ ] **Max questions per exam**: app validate hoặc CHECK constraint? Đề xuất: app validate với warning ở ~100 câu, hard limit ở 500 câu
+- [x] **DB trigger hay app layer** để sync `total_point`/`total_questions`/`version`? → **App layer**
+  (handler tính lại trong 1 transaction; `version += 1` mỗi lần lưu danh sách câu).
+- [x] **Reorder nhiều câu cùng lúc** → wholesale-replace toàn bộ `exam_questions` trong 1
+  `SaveChangesAsync`: xóa hết rồi insert lại theo thứ tự mới ⇒ không va chạm unique
+  `(exam_id, display_order)`, không cần deferred constraint.
+- [x] **Max questions per exam** → **app validate** (`UpdateExamQuestionsValidator`, hard limit 500),
+  không CHECK constraint cứng trên bảng.
+- [ ] **Exam import** (DOCX/PDF) → ROADMAP-FUTURE; sẽ cần `exam_import_jobs` + `imported_from`.

@@ -28,6 +28,8 @@ public sealed class ApplicationDbContext
     public DbSet<Question> Questions => Set<Question>();
     public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
     public DbSet<QuestionTag> QuestionTags => Set<QuestionTag>();
+    public DbSet<Exam> Exams => Set<Exam>();
+    public DbSet<ExamQuestion> ExamQuestions => Set<ExamQuestion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

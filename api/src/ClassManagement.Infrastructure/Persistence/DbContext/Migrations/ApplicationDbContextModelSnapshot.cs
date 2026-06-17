@@ -630,6 +630,262 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.ToView("vw_classes", (string)null);
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Exams.Entities.Exam", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<long?>("SubjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("subject_id");
+
+                    b.Property<long>("TeacherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("teacher_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<decimal>("TotalPoint")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(8,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("total_point");
+
+                    b.Property<int>("TotalQuestions")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("total_questions");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<int>("Version")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("version");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("visibility");
+
+                    b.HasKey("Id")
+                        .HasName("pk_exams");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("ix_exams_created_by");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_exams_public_id");
+
+                    b.HasIndex("SubjectId")
+                        .HasDatabaseName("idx_exams_subject")
+                        .HasFilter("subject_id IS NOT NULL AND deleted_at IS NULL");
+
+                    b.HasIndex("TeacherId")
+                        .HasDatabaseName("idx_exams_teacher")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("UpdatedBy")
+                        .HasDatabaseName("ix_exams_updated_by");
+
+                    b.HasIndex("Visibility")
+                        .HasDatabaseName("idx_exams_visibility_public")
+                        .HasFilter("visibility = 'Public' AND deleted_at IS NULL");
+
+                    b.HasIndex("TeacherId", "Visibility")
+                        .HasDatabaseName("idx_exams_teacher_visibility")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("exams", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_exams_description_length", "description IS NULL OR length(description) <= 1000");
+
+                            t.HasCheckConstraint("chk_exams_title_length", "length(title) >= 3 AND length(title) <= 300");
+
+                            t.HasCheckConstraint("chk_exams_total_point", "total_point >= 0");
+
+                            t.HasCheckConstraint("chk_exams_total_questions", "total_questions >= 0");
+
+                            t.HasCheckConstraint("chk_exams_version", "version >= 1");
+
+                            t.HasCheckConstraint("chk_exams_visibility", "visibility IN ('Private', 'Public')");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Exams.Entities.ExamQuestion", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("display_order");
+
+                    b.Property<long>("ExamId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("exam_id");
+
+                    b.Property<decimal>("Point")
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("point");
+
+                    b.Property<long>("QuestionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("question_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_exam_questions");
+
+                    b.HasIndex("QuestionId")
+                        .HasDatabaseName("idx_exam_questions_question");
+
+                    b.HasIndex("ExamId", "DisplayOrder")
+                        .IsUnique()
+                        .HasDatabaseName("uq_exam_questions_order");
+
+                    b.HasIndex("ExamId", "QuestionId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_exam_questions_unique");
+
+                    b.ToTable("exam_questions", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_exam_questions_display_order", "display_order >= 1");
+
+                            t.HasCheckConstraint("chk_exam_questions_point", "point > 0 AND point <= 100");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Exams.Entities.ExamView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<long?>("SubjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("subject_id");
+
+                    b.Property<string>("SubjectName")
+                        .HasColumnType("text")
+                        .HasColumnName("subject_name");
+
+                    b.Property<Guid?>("SubjectPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("subject_public_id");
+
+                    b.Property<long>("TeacherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("teacher_id");
+
+                    b.Property<string>("TeacherName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("teacher_name");
+
+                    b.Property<Guid>("TeacherPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("teacher_public_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<decimal>("TotalPoint")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_point");
+
+                    b.Property<int>("TotalQuestions")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_questions");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("visibility");
+
+                    b.HasKey("Id")
+                        .HasName("pk_exam_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_exams", (string)null);
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.Question", b =>
                 {
                     b.Property<long>("Id")
@@ -1471,6 +1727,51 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasConstraintName("fk_class_memberships_users_student_id");
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Exams.Entities.Exam", b =>
+                {
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_exams_users_created_by");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Catalog.Entities.Subject", null)
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_exams_subjects_subject_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_exams_users_teacher_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_exams_users_updated_by");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Exams.Entities.ExamQuestion", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Exams.Entities.Exam", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_exam_questions_exams_exam_id");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Questions.Entities.Question", null)
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_exam_questions_questions_question_id");
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.Question", b =>
                 {
                     b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
@@ -1606,6 +1907,11 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
             modelBuilder.Entity("ClassManagement.Domain.Modules.Classroom.Entities.Class", b =>
                 {
                     b.Navigation("Memberships");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Exams.Entities.Exam", b =>
+                {
+                    b.Navigation("Questions");
                 });
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.Question", b =>
