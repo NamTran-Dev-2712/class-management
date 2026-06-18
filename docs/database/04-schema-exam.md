@@ -12,6 +12,7 @@
 |---|---|
 | `exams` | Template đề thi — tập hợp có thứ tự của Questions |
 | `exam_questions` | Junction table: Exam ↔ Question với điểm và thứ tự |
+| `exam_tags` | Thẻ tự do (nhãn) gắn vào Exam để tìm kiếm/lọc — giống `question_tags` |
 
 ---
 
@@ -140,6 +141,35 @@ idx_exam_questions_question     (question_id)                  -- "Question này
 
 ---
 
+## Table: `exam_tags`
+
+**Purpose:** Thẻ tự do gắn vào Exam (chuẩn hóa lowercase `[a-z0-9-]`, ≤10 thẻ/đề) để giáo viên gắn nhãn,
+tìm kiếm và lọc đề khi giao bài. Append-only child của `exams` (cascade-delete, thay thế toàn bộ khi
+sửa). Là **metadata** — thẻ Exam **không** đi vào assignment snapshot (MVP-5). Mirror `question_tags`.
+
+### Columns
+
+| Column | Type | Nullable | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `id` | `BIGINT` | NO | identity | PK | |
+| `exam_id` | `BIGINT` | NO | — | FK → exams(id) CASCADE | |
+| `tag` | `VARCHAR(50)` | NO | — | CHECK (tag ~ `'^[a-z0-9-]{1,50}$'`) | Slug đã chuẩn hóa |
+| `created_at` | `TIMESTAMPTZ` | NO | `NOW()` | — | |
+
+### Indexes
+```
+pk_exam_tags                    PRIMARY KEY (id)
+uq_exam_tags_unique             UNIQUE (exam_id, tag)   -- không trùng thẻ trong 1 đề
+idx_exam_tags_tag               (tag)                   -- lọc theo thẻ
+```
+
+### Notes
+- Chuẩn hóa + cap ≤10 ở app (`ExamTagNormalizer`, `ExamAssembler.BuildTags`); validator chặn >10 thẻ thô.
+- `UpdateExamCommandHandler` thay thế toàn bộ tập thẻ (clear + re-add) trong cùng `SaveChangesAsync`,
+  **không** tăng `version` (chỉ là metadata). `DuplicateExamCommandHandler` copy luôn thẻ sang bản sao.
+
+---
+
 ## Relationships Diagram
 
 ```
@@ -148,6 +178,7 @@ subjects (0..1) ────────────── (*) exams        [nul
 
 exams (1) ──────────────────── (*) exam_questions
 questions (1) ──────────────── (*) exam_questions
+exams (1) ──────────────────── (*) exam_tags        [cascade]
 
 exams (*) ──────────────────── (*) assignments  [via assignments.exam_id — MVP-5]
 ```
@@ -160,17 +191,28 @@ Một row mỗi exam **chưa xóa**, kèm tên hiển thị của owner + tên/p
 list/detail queries dùng `BaseGetQueryHandler` mà không phải join thẳng vào `ApplicationUser`
 (Identity). `total_point`/`total_questions`/`version` lấy trực tiếp từ cột denormalized trên `exams`.
 
+`tags` là `text[]` gộp từ `exam_tags` (rỗng `{}` khi đề không có thẻ) để list/detail dùng chung, lọc
+bằng `tag = ANY(tags)`.
+
 ```sql
 CREATE VIEW vw_exams AS
 SELECT e.id, e.public_id, e.title, e.description, e.visibility, e.version,
        e.total_point, e.total_questions, e.created_at, e.updated_at,
        e.subject_id, sub.public_id AS subject_public_id, sub.name AS subject_name,
-       e.teacher_id, t.public_id AS teacher_public_id, t.display_name AS teacher_name
+       e.teacher_id, t.public_id AS teacher_public_id, t.display_name AS teacher_name,
+       COALESCE(tg.tags, '{}'::text[]) AS tags
 FROM exams e
 JOIN users t ON t.id = e.teacher_id
 LEFT JOIN subjects sub ON sub.id = e.subject_id AND sub.deleted_at IS NULL
+LEFT JOIN (
+    SELECT exam_id, array_agg(tag ORDER BY tag) AS tags
+    FROM exam_tags GROUP BY exam_id
+) tg ON tg.exam_id = e.id
 WHERE e.deleted_at IS NULL;
 ```
+
+> Thẻ Exam được thêm ở migration `20260618150808_add_exam_tags_and_update_view` (tạo bảng `exam_tags`
+> rồi DROP + tạo lại `vw_exams` kèm cột `tags`).
 
 > Detail/preview reads load thêm `exam_questions` (theo `display_order`) rồi join `vw_questions` để
 > lấy nội dung/loại/độ khó/số phương án từng câu. Câu hỏi đã soft-delete (vắng mặt trong `vw_questions`)

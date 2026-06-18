@@ -1732,9 +1732,9 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"title\": \"Chapter 1 - 15 minute quiz\",\n  \"description\": \"A reusable exam template.\",\n  \"visibility\": \"Private\"\n}"
+                            "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"title\": \"Chapter 1 - 15 minute quiz\",\n  \"description\": \"A reusable exam template.\",\n  \"visibility\": \"Private\",\n  \"tags\": [\"midterm\", \"chapter-1\"]\n}"
                         },
-                        "description": "Create an exam template (starts empty). subjectId is optional — send null to omit. Captures {{examId}}. Login as Teacher first."
+                        "description": "Create an exam template (starts empty). subjectId is optional — send null to omit. tags is optional free-form (normalized [a-z0-9-], <=10). Captures {{examId}}. Login as Teacher first."
                     }
                 },
                 {
@@ -1758,6 +1758,7 @@
                                 { "key": "sortOrder", "value": "desc" },
                                 { "key": "subjectId", "value": "{{subjectId}}", "disabled": true },
                                 { "key": "visibility", "value": "Private", "disabled": true },
+                                { "key": "tag", "value": "midterm", "disabled": true },
                                 { "key": "searchTerm", "value": "", "disabled": true }
                             ]
                         },
@@ -1806,9 +1807,9 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"title\": \"Chapter 1 - Updated\",\n  \"description\": \"Updated description.\",\n  \"visibility\": \"Private\"\n}"
+                            "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"title\": \"Chapter 1 - Updated\",\n  \"description\": \"Updated description.\",\n  \"visibility\": \"Private\",\n  \"tags\": [\"final\"]\n}"
                         },
-                        "description": "Edit title/description/subject/visibility. Does NOT bump the exam version."
+                        "description": "Edit title/description/subject/visibility/tags. Tags are replaced wholesale. Does NOT bump the exam version."
                     }
                 },
                 {

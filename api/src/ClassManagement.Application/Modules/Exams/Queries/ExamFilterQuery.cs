@@ -6,4 +6,5 @@ public abstract record ExamFilterQuery : BaseFilterQuery
 {
     public Guid? SubjectId { get; init; }
     public ExamVisibility? Visibility { get; init; }
+    public string? Tag { get; init; }
 }

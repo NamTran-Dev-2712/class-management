@@ -19,5 +19,10 @@ public abstract class ExamWriteValidator<T> : AbstractValidator<T>
             .MaximumLength(1000)
             .WithMessage("Validation.Exam.DescriptionMaxLength")
             .When(x => x.Description is not null);
+
+        RuleFor(x => x.Tags!)
+            .Must(tags => tags.Count <= ExamTagNormalizer.MaxTagsPerExam)
+            .WithMessage("Validation.Exam.TooManyTags")
+            .When(x => x.Tags is not null);
     }
 }

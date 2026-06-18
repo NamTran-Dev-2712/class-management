@@ -15,12 +15,15 @@ public sealed class ExamRepository : IExamRepository
     public Task<Exam?> GetByPublicIdAsync(
         Guid publicId,
         bool includeQuestions = false,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        bool includeTags = false
     )
     {
         var query = _context.Exams.AsQueryable();
         if (includeQuestions)
             query = query.Include(e => e.Questions);
+        if (includeTags)
+            query = query.Include(e => e.Tags);
 
         return query.FirstOrDefaultAsync(e => e.PublicId == publicId, cancellationToken);
     }

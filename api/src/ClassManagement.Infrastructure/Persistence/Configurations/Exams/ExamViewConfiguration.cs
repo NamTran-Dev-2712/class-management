@@ -14,5 +14,6 @@ public sealed class ExamViewConfiguration : IEntityTypeConfiguration<ExamView>
     {
         builder.ToView("vw_exams");
         builder.HasKey(e => e.Id);
+        builder.Property(e => e.Tags).HasColumnType("text[]");
     }
 }

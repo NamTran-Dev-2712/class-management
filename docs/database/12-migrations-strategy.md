@@ -137,6 +137,9 @@ Examples:
 20260617150412_create_exams_and_views
   -- Tạo bảng exams, exam_questions (check constraints + indexes theo doc 04)
   -- Tạo view vw_exams (exam + teacher display_name + live subject name/public_id)
+20260618150808_add_exam_tags_and_update_view
+  -- Tạo bảng exam_tags (CHECK '^[a-z0-9-]{1,50}$', unique (exam_id, tag), idx tag)
+  -- DROP + tạo lại vw_exams kèm cột tags text[] (array_agg từ exam_tags) — giống question_tags
 ```
 
 > Khác kế hoạch gốc: **không dùng DB trigger** để sync `total_point`/`total_questions`/`version`.

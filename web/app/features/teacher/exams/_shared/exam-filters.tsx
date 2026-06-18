@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +18,7 @@ export interface ExamFilterState {
     searchTerm: string;
     subjectId: string;
     visibility: string;
+    tag: string;
 }
 
 interface SubjectOption {
@@ -33,6 +34,7 @@ interface ExamFiltersProps {
     onSearchChange: (v: string) => void;
     onSubjectChange: (v: string) => void;
     onVisibilityChange: (v: string) => void;
+    onTagChange: (v: string) => void;
 }
 
 function useDebounced(value: string, commit: (v: string) => void) {
@@ -54,9 +56,11 @@ export function ExamFilters({
     onSearchChange,
     onSubjectChange,
     onVisibilityChange,
+    onTagChange,
 }: ExamFiltersProps) {
     const { t } = useTranslation("exam");
     const [search, setSearch] = useDebounced(state.searchTerm, onSearchChange);
+    const [tag, setTag] = useDebounced(state.tag, onTagChange);
 
     return (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -99,6 +103,16 @@ export function ExamFilters({
                     </SelectContent>
                 </Select>
             ) : null}
+
+            <div className="relative">
+                <Tag className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+                <Input
+                    value={tag}
+                    onChange={(e) => setTag(e.target.value)}
+                    placeholder={t("filters.tag")}
+                    className="pl-9"
+                />
+            </div>
         </div>
     );
 }

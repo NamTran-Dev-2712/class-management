@@ -26,4 +26,7 @@ public sealed class ExamView : BaseEntity, IHasPublicId
     public long TeacherId { get; set; }
     public Guid TeacherPublicId { get; set; }
     public string TeacherName { get; set; } = string.Empty;
+
+    // Aggregated from exam_tags (Postgres text[]); empty array when the exam has no tags.
+    public List<string> Tags { get; set; } = [];
 }

@@ -25,4 +25,5 @@ public sealed class Exam : AuditableEntity, IHasPublicId, ISoftDeletable
     public DateTime? DeletedAt { get; set; }
 
     public ICollection<ExamQuestion> Questions { get; set; } = [];
+    public ICollection<ExamTag> Tags { get; set; } = [];
 }

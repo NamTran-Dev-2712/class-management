@@ -17,6 +17,7 @@ internal static class ExamProjections
         SubjectName = e.SubjectName,
         TeacherPublicId = e.TeacherPublicId,
         TeacherName = e.TeacherName,
+        Tags = e.Tags,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt,
     };

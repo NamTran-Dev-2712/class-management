@@ -14,7 +14,11 @@ public class UpdateExamCommandHandler : IRequestHandler<UpdateExamCommand>
     public async Task Handle(UpdateExamCommand request, CancellationToken ct)
     {
         var exam = ExamGuard.EnsureOwned(
-            await _unitOfWork.Exams.GetByPublicIdAsync(request.PublicId, false, ct),
+            await _unitOfWork.Exams.GetByPublicIdAsync(
+                request.PublicId,
+                includeTags: true,
+                cancellationToken: ct
+            ),
             _currentUser.UserId
         );
 
@@ -37,6 +41,11 @@ public class UpdateExamCommandHandler : IRequestHandler<UpdateExamCommand>
             ? null
             : request.Description.Trim();
         exam.Visibility = request.Visibility;
+
+        // Replace the tag set wholesale (removed rows cascade-delete as orphans).
+        exam.Tags.Clear();
+        foreach (var tag in ExamAssembler.BuildTags(request.Tags))
+            exam.Tags.Add(tag);
 
         // Metadata-only change → version is intentionally left untouched.
         await _unitOfWork.SaveChangesAsync(ct);

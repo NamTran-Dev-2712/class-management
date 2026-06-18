@@ -36,6 +36,7 @@ export function useExamFilters(defaults?: { sortBy?: string; sortOrder?: "asc" |
         searchTerm: params.searchTerm ?? "",
         subjectId: get("subjectId"),
         visibility: get("visibility"),
+        tag: searchParams.get("tag") ?? "",
     };
 
     const toFacet = (value: string) => (value === FILTER_ALL ? undefined : value);
@@ -48,6 +49,7 @@ export function useExamFilters(defaults?: { sortBy?: string; sortOrder?: "asc" |
         searchTerm: params.searchTerm,
         subjectId: toFacet(state.subjectId),
         visibility: toFacet(state.visibility) as ExamVisibility | undefined,
+        tag: state.tag || undefined,
     };
 
     return {
@@ -60,5 +62,6 @@ export function useExamFilters(defaults?: { sortBy?: string; sortOrder?: "asc" |
         setSearch,
         setSubject: (v: string) => setFacet("subjectId", v),
         setVisibility: (v: string) => setFacet("visibility", v),
+        setTag: (v: string) => setFacet("tag", v),
     };
 }

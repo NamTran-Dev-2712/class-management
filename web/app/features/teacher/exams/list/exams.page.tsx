@@ -125,6 +125,7 @@ export default function ExamsPage() {
                 onSearchChange={filters.setSearch}
                 onSubjectChange={filters.setSubject}
                 onVisibilityChange={filters.setVisibility}
+                onTagChange={filters.setTag}
             />
 
             <DataTable

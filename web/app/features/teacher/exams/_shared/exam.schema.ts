@@ -6,6 +6,8 @@ export const VISIBILITIES = ["Private", "Public"] as const;
 /** Sentinel for the subject picker — subject is optional, so "none" maps to a null subjectId. */
 export const SUBJECT_NONE = "none";
 
+export const MAX_TAGS = 10;
+
 export function createExamSchema(t: TFunction) {
     return z.object({
         subjectId: z.string(),
@@ -16,6 +18,7 @@ export function createExamSchema(t: TFunction) {
             .min(3, t("form.validation.titleLength"))
             .max(300, t("form.validation.titleLength")),
         description: z.string().max(1000, t("form.validation.descriptionMax")).optional(),
+        tags: z.array(z.string()).max(MAX_TAGS, t("form.validation.tooManyTags")),
     });
 }
 

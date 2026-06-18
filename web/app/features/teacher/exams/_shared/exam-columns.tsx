@@ -85,6 +85,29 @@ export function getExamColumns({
             meta: { label: t("columns.totalPoint") },
             cell: ({ row }) => <span className="tabular-nums">{row.original.totalPoint}</span>,
         },
+        {
+            accessorKey: "tags",
+            header: () => t("columns.tags"),
+            enableSorting: false,
+            meta: { label: t("columns.tags") },
+            cell: ({ row }) =>
+                row.original.tags.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                        {row.original.tags.slice(0, 4).map((tag) => (
+                            <Badge key={tag} variant="secondary" className="text-xs">
+                                {tag}
+                            </Badge>
+                        ))}
+                        {row.original.tags.length > 4 ? (
+                            <span className="text-muted-foreground text-xs">
+                                +{row.original.tags.length - 4}
+                            </span>
+                        ) : null}
+                    </div>
+                ) : (
+                    <span className="text-muted-foreground">—</span>
+                ),
+        },
     ];
 
     if (showOwner) {

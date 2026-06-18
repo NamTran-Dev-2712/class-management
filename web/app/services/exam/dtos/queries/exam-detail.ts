@@ -27,6 +27,7 @@ export interface ExamDetail {
     subjectName: string | null;
     teacherPublicId: string;
     teacherName: string;
+    tags: string[];
     questions: ExamQuestionItem[];
     createdAt: string;
     updatedAt: string;

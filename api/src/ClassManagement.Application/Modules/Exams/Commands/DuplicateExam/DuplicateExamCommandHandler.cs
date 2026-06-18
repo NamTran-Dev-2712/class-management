@@ -23,7 +23,12 @@ public class DuplicateExamCommandHandler : IRequestHandler<DuplicateExamCommand,
         var teacherId = _currentUser.UserId ?? throw new UnauthorizedException("Auth.Unauthorized");
 
         var source = ExamGuard.EnsureReadable(
-            await _unitOfWork.Exams.GetByPublicIdAsync(request.PublicId, true, ct),
+            await _unitOfWork.Exams.GetByPublicIdAsync(
+                request.PublicId,
+                includeQuestions: true,
+                includeTags: true,
+                cancellationToken: ct
+            ),
             teacherId
         );
 
@@ -53,6 +58,7 @@ public class DuplicateExamCommandHandler : IRequestHandler<DuplicateExamCommand,
                     Point = q.Point,
                 })
                 .ToList(),
+            Tags = source.Tags.Select(t => new ExamTag { Tag = t.Tag }).ToList(),
         };
 
         await _unitOfWork.Exams.AddAsync(copy, ct);

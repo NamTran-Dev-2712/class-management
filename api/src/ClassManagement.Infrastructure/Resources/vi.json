@@ -147,6 +147,7 @@
   "Validation.Exam.TooManyQuestions": "Một đề thi chỉ được tối đa 500 câu hỏi.",
   "Validation.Exam.DuplicateQuestion": "Câu hỏi này đã có trong đề thi.",
   "Validation.Exam.PointInvalid": "Điểm mỗi câu hỏi phải lớn hơn 0 và tối đa 100.",
+  "Validation.Exam.TooManyTags": "Một đề thi chỉ được tối đa 10 thẻ.",
 
   "Exam.Created": "Tạo đề thi thành công.",
   "Exam.Updated": "Cập nhật đề thi thành công.",

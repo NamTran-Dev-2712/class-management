@@ -5,6 +5,7 @@ export interface CreateExamRequest {
     title: string;
     description: string | null;
     visibility: ExamVisibility;
+    tags: string[];
 }
 
 export type UpdateExamRequest = CreateExamRequest;

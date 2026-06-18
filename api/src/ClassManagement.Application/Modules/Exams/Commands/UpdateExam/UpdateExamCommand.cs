@@ -7,5 +7,6 @@ public record UpdateExamCommand(
     Guid? SubjectId,
     string Title,
     string? Description,
-    ExamVisibility Visibility
+    ExamVisibility Visibility,
+    List<string>? Tags
 ) : IRequest, IExamWriteCommand;

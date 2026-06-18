@@ -69,6 +69,7 @@ internal static class ExamDetailLoader
             SubjectName = view.SubjectName,
             TeacherPublicId = view.TeacherPublicId,
             TeacherName = view.TeacherName,
+            Tags = view.Tags,
             Questions = [.. questions],
             CreatedAt = view.CreatedAt,
             UpdatedAt = view.UpdatedAt,

@@ -8,7 +8,8 @@ public interface IExamRepository
     Task<Exam?> GetByPublicIdAsync(
         Guid publicId,
         bool includeQuestions = false,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        bool includeTags = false
     );
 
     Task<int> CountByTeacherAsync(long teacherId, CancellationToken cancellationToken = default);

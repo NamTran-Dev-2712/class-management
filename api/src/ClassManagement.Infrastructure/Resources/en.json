@@ -147,6 +147,7 @@
   "Validation.Exam.TooManyQuestions": "An exam can have at most 500 questions.",
   "Validation.Exam.DuplicateQuestion": "This question is already in the exam.",
   "Validation.Exam.PointInvalid": "Each question's point must be greater than 0 and at most 100.",
+  "Validation.Exam.TooManyTags": "An exam can have at most 10 tags.",
 
   "Exam.Created": "Exam created successfully.",
   "Exam.Updated": "Exam updated successfully.",

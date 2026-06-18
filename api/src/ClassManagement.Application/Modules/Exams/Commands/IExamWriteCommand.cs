@@ -8,4 +8,5 @@ public interface IExamWriteCommand
     string Title { get; }
     string? Description { get; }
     ExamVisibility Visibility { get; }
+    List<string>? Tags { get; }
 }
