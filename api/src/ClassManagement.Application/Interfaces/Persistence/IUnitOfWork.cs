@@ -7,6 +7,8 @@ public interface IUnitOfWork
     IClassMembershipRepository ClassMemberships { get; }
     IQuestionRepository Questions { get; }
     IExamRepository Exams { get; }
+    IAssignmentRepository Assignments { get; }
+    IAttemptRepository Attempts { get; }
 
     // Generic fallback for entities without a dedicated repository.
     IGenericRepository<T> Repository<T>()

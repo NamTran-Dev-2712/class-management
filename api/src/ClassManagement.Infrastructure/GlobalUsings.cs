@@ -3,6 +3,7 @@ global using ClassManagement.Application.Interfaces.Email;
 global using ClassManagement.Application.Interfaces.Identity;
 global using ClassManagement.Application.Interfaces.Messaging;
 global using ClassManagement.Domain.Common.Interfaces;
+global using ClassManagement.Domain.Modules.Assignments.Entities;
 global using ClassManagement.Domain.Modules.Auth.Entities;
 global using ClassManagement.Domain.Modules.Catalog.Entities;
 global using ClassManagement.Domain.Modules.Classroom.Entities;

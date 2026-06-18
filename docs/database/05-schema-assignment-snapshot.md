@@ -66,9 +66,9 @@ Exam/Question gốc có thể tự do thay đổi → không ảnh hưởng
 | `closes_at` | `TIMESTAMPTZ` | YES | NULL | CHECK (closes_at > opens_at OR opens_at IS NULL) | NULL = không deadline |
 | `time_limit_minutes` | `INT` | YES | NULL | CHECK (time_limit_minutes > 0 AND time_limit_minutes <= 1440) | NULL = không giới hạn thời gian. Max 24h |
 | `max_attempts` | `INT` | NO | `1` | CHECK (max_attempts >= 1 AND max_attempts <= 100) | Số lần thi tối đa |
-| `score_policy` | `TEXT` | NO | `'highest'` | CHECK (score_policy IN ('highest', 'latest')) | Với max_attempts > 1: dùng điểm nào |
+| `score_policy` | `TEXT` | NO | `'Highest'` | CHECK (score_policy IN ('Highest', 'Latest')) | Với max_attempts > 1: dùng điểm nào (enum lưu PascalCase, xem "as built") |
 | `allow_late` | `BOOLEAN` | NO | `false` | — | Cho phép nộp sau closes_at |
-| `grade_publish_policy` | `TEXT` | NO | `'after_deadline'` | CHECK (grade_publish_policy IN ('immediate', 'after_deadline', 'manual')) | Khi nào student xem được điểm |
+| `grade_publish_policy` | `TEXT` | NO | `'AfterDeadline'` | CHECK (grade_publish_policy IN ('Immediate', 'AfterDeadline', 'Manual')) | Khi nào student xem được điểm (enum PascalCase) |
 | `shuffle_questions` | `BOOLEAN` | NO | `false` | — | Random thứ tự câu hỏi per-attempt |
 | `shuffle_options` | `BOOLEAN` | NO | `false` | — | Random thứ tự options per-attempt |
 | `show_answers_after_grade` | `BOOLEAN` | NO | `false` | — | Hiện đáp án đúng sau khi chấm |
@@ -295,3 +295,36 @@ Phụ thuộc:
 - [ ] **Background job**: Dùng gì để chạy Scheduled→Open và Open→Closed transitions? Hangfire (cho .NET), Quartz.NET, hay PostgreSQL `pg_cron`?
 - [ ] **Atomic snapshot**: Nếu snapshot creation fails midway (network, timeout), Assignment vẫn Draft. Cần retry mechanism. Idempotent snapshot creation?
 - [ ] **closes_at nullable**: Assignment không có deadline (NULL) có hợp lý không? Phải thêm constraint: nếu `time_limit_minutes` có giá trị thì `closes_at` cần có hoặc app tự auto-close
+
+---
+
+## Implementation notes (MVP-5, as built)
+
+Migration `20260617173525_create_assignments_attempts_and_views`. Deviations from the design above,
+kept here as the authoritative record:
+
+- **Enum casing**: `score_policy`/`grade_publish_policy`/`status` are stored as the **PascalCase**
+  enum member names (`Highest`/`Latest`; `Immediate`/`AfterDeadline`/`Manual`;
+  `Draft`/`Scheduled`/`Open`/`Closed`/`Archived`) to match the app-wide `JsonStringEnumConverter` +
+  EF `.HasConversion<string>()` convention. CHECK constraints use these values.
+- **Snapshot tables expose `public_id`**: `snapshot_questions` and `snapshot_options` each have a
+  `public_id UUID UNIQUE DEFAULT gen_random_uuid()`. The attempt-taking/answer API references questions
+  and options by their public id (never the internal `long id`), consistent with the rest of the system.
+- **Atomic snapshot**: publish builds the snapshot + flips status in a **single `SaveChangesAsync`**
+  (one EF transaction) in `PublishAssignmentCommandHandler`. If any step fails the assignment stays
+  `Draft` (publish is idempotent — rejected once status ≠ Draft).
+- **Background job (resolved)**: a single **Hangfire recurring job** `assignment-lifecycle`
+  (cron from `Assignment:LifecycleSweepCron`, default every minute) runs
+  `RunAssignmentLifecycleCommand`: `Scheduled→Open`, `Open→Closed` (+auto-submit), and auto-submit of
+  attempts past `deadline_at`. Plus a **lazy server-side check** on every attempt request. See
+  `docs/database/14-background-jobs.md`.
+- **Snapshot cleanup (resolved)**: snapshots are **never deleted** (append-only); assignments are
+  soft-deleted and deletion is blocked while any attempt exists.
+
+### Read-model views (created via raw SQL in the migration)
+- `vw_assignments` — teacher/admin lists + detail: assignment + class/exam/owner names + snapshot
+  totals + attempt counts; excludes soft-deleted assignments.
+- `vw_student_assignments` — one row per (published assignment, **approved** student of its class) with
+  that student's attempt stats (`used_attempts`, `has_in_progress`, `in_progress_attempt_public_id`,
+  `best_score`). Only `Scheduled/Open/Closed` assignments appear.
+- `vw_attempts` — one row per attempt (+ student name, assignment title, snapshot total point).

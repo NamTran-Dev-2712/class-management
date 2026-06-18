@@ -253,3 +253,26 @@ Phụ thuộc:
 - [ ] **attempt_answers partitioning**: Khi có nhiều users, table này sẽ phình rất nhanh. Partition theo `attempt_id` range hoặc `created_at` (monthly). Khi nào cần?
 - [ ] **Draft answers retention**: Auto-save lưu draft khi InProgress. Khi Attempt expire và không submit, draft answers có xóa không? Đề xuất: giữ lại (debug + evidence)
 - [ ] **Reconnect support**: Student mất mạng → reconnect → `GET /attempts/{id}` trả về current draft. Server validate deadline_at và trả về remaining time. OK với schema hiện tại.
+
+---
+
+## Implementation notes (MVP-5, as built)
+
+Migration `20260617173525_create_assignments_attempts_and_views`. Authoritative record of deviations:
+
+- **`question_order` shape**: stored as a JSONB **ordered array of `snapshot_question_id`** (e.g.
+  `[101, 98, 105]`) rather than an array of objects — the display position is the array index + 1.
+  Simpler and carries the same information.
+- **`selected_option_ids` shape**: JSONB array of `snapshot_option_id` (e.g. `[51, 52]`); `null`/absent
+  while unanswered. Mapped in EF via a value converter to `List<long>`.
+- **`status` enum casing**: PascalCase member names
+  (`InProgress`/`Submitted`/`AutoGraded`/`NeedManualGrading`/`Graded`), matching the app convention.
+- **Not soft-deletable**: `attempts` and `attempt_answers` are kept permanently (history/evidence);
+  there is no `deleted_at`. **Draft answers are retained** even if an attempt expires unsubmitted (the
+  lifecycle sweep auto-submits it instead of discarding).
+- **Auto-grade + finalize** is a single shared routine (`AttemptGrading.FinalizeAsync`) used by both the
+  student `SubmitAttempt` handler and the system lifecycle handler, committed in one `SaveChangesAsync`.
+  Submit is idempotent (rejected unless `status = InProgress`), guarding the client/server auto-submit
+  race; the partial unique index `uq_attempts_one_in_progress` is the DB backstop for one InProgress
+  attempt per (assignment, student).
+- The teacher roster + student history read from the `vw_attempts` view (see 05).

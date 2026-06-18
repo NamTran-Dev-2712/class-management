@@ -3,6 +3,7 @@ import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGE_CODES } from "@/config/languages";
 /** i18next namespaces — one JSON file per namespace under public/locales/<lng>/. */
 export const I18N_NAMESPACES = [
     "common",
+    "assignment",
     "auth",
     "booking",
     "classroom",

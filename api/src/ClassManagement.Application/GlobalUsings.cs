@@ -2,6 +2,7 @@ global using ClassManagement.Application.Common.Pagination;
 global using ClassManagement.Application.Interfaces.Cache;
 global using ClassManagement.Application.Interfaces.Identity;
 global using ClassManagement.Domain.Common.Interfaces;
+global using ClassManagement.Domain.Modules.Assignments.Entities;
 global using ClassManagement.Domain.Modules.Auth.Entities;
 global using ClassManagement.Domain.Modules.Catalog.Entities;
 global using ClassManagement.Domain.Modules.Classroom.Entities;

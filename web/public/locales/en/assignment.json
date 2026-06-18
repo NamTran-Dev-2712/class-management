@@ -1,0 +1,172 @@
+{
+    "title": "Assignments",
+    "subtitle": "Assign exams to your classes and track submissions.",
+    "actions": {
+        "create": "New assignment",
+        "open": "Open",
+        "delete": "Delete",
+        "publish": "Publish",
+        "close": "Close early",
+        "archive": "Archive"
+    },
+    "columns": {
+        "title": "Title",
+        "class": "Class",
+        "status": "Status",
+        "closesAt": "Closes",
+        "submissions": "Submissions",
+        "owner": "Teacher",
+        "actions": "Actions"
+    },
+    "status": {
+        "Draft": "Draft",
+        "Scheduled": "Scheduled",
+        "Open": "Open",
+        "Closed": "Closed",
+        "Archived": "Archived"
+    },
+    "filters": {
+        "search": "Search assignments…",
+        "allStatuses": "All statuses"
+    },
+    "deleteConfirm": {
+        "title": "Delete assignment?",
+        "description": "This permanently removes the draft assignment. This cannot be undone."
+    },
+    "closeConfirm": {
+        "title": "Close assignment early?",
+        "description": "Students can no longer start or continue; any in-progress attempts are submitted automatically."
+    },
+    "archiveConfirm": {
+        "title": "Archive assignment?",
+        "description": "Archived assignments are hidden from active lists. Attempts are preserved."
+    },
+    "toast": {
+        "created": "Assignment created.",
+        "updated": "Assignment updated.",
+        "published": "Assignment published.",
+        "closed": "Assignment closed.",
+        "archived": "Assignment archived.",
+        "deleted": "Assignment deleted.",
+        "submitted": "Attempt submitted.",
+        "error": "Something went wrong."
+    },
+    "create": {
+        "title": "New assignment",
+        "subtitle": "Pick an exam and class, then set the schedule and rules."
+    },
+    "form": {
+        "exam": "Exam",
+        "examPlaceholder": "Select an exam",
+        "class": "Class",
+        "classPlaceholder": "Select a class",
+        "title": "Title",
+        "titlePlaceholder": "e.g. Chapter 1 quiz",
+        "description": "Description",
+        "opensAt": "Opens at",
+        "closesAt": "Closes at",
+        "timeLimit": "Time limit (minutes)",
+        "timeLimitPlaceholder": "No limit",
+        "timeLimitHint": "Leave empty for no per-attempt time limit.",
+        "maxAttempts": "Max attempts",
+        "scorePolicy": "Score policy",
+        "gradePublishPolicy": "Grade visibility",
+        "allowLate": "Allow late submission",
+        "allowLateHint": "Accept submissions after the close time.",
+        "shuffleQuestions": "Shuffle questions",
+        "shuffleQuestionsHint": "Randomize question order per attempt.",
+        "shuffleOptions": "Shuffle options",
+        "shuffleOptionsHint": "Randomize answer order per attempt.",
+        "showAnswers": "Show answers after grading",
+        "showAnswersHint": "Reveal correct answers once grades are released.",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saveAndContinue": "Create",
+        "validation": {
+            "examRequired": "Please select an exam.",
+            "classRequired": "Please select a class.",
+            "titleLength": "Title must be 3–300 characters.",
+            "descriptionMax": "Description must not exceed 1000 characters.",
+            "maxAttempts": "Attempts must be between 1 and 100.",
+            "timeWindow": "The close time must be after the open time."
+        }
+    },
+    "scorePolicy": {
+        "Highest": "Highest attempt",
+        "Latest": "Latest attempt"
+    },
+    "gradePublishPolicy": {
+        "Immediate": "Immediately after submit",
+        "AfterDeadline": "After the deadline",
+        "Manual": "When I release grades"
+    },
+    "summary": {
+        "title": "Configuration",
+        "totalQuestions": "Questions",
+        "totalPoint": "Total points",
+        "maxAttempts": "Max attempts",
+        "timeLimit": "Time limit (min)",
+        "submissions": "Submissions",
+        "questions": "Questions (snapshot)"
+    },
+    "roster": {
+        "title": "Submissions",
+        "empty": "No attempts yet.",
+        "student": "Student",
+        "attempt": "Attempt",
+        "status": "Status",
+        "submittedAt": "Submitted",
+        "score": "Score",
+        "prev": "Previous",
+        "next": "Next"
+    },
+    "admin": {
+        "title": "Assignments",
+        "subtitle": "Read-only overview of all assignments."
+    },
+    "student": {
+        "title": "Assignments",
+        "subtitle": "Tests assigned to your classes.",
+        "empty": "No assignments yet.",
+        "due": "Due: {{date}}",
+        "attemptsLeft": "{{count}} attempt(s) left",
+        "teacher": "Teacher: {{name}}",
+        "actions": {
+            "continue": "Continue",
+            "view": "View",
+            "start": "Start",
+            "unavailable": "Unavailable"
+        },
+        "fields": {
+            "opensAt": "Opens",
+            "closesAt": "Closes",
+            "timeLimit": "Time limit",
+            "minutes": "{{count}} min",
+            "noLimit": "No limit",
+            "questions": "Questions",
+            "totalPoint": "Total points",
+            "attemptsLeft": "Attempts left"
+        }
+    },
+    "attempt": {
+        "attemptNumber": "Attempt #{{number}}",
+        "questionLabel": "Question {{order}}",
+        "points": "{{count}} pt",
+        "answerPlaceholder": "Type your answer…",
+        "saving": "Saving…",
+        "autoSaveHint": "Your answers are saved automatically.",
+        "submit": "Submit",
+        "autoSubmitted": "Time is up — your attempt was submitted automatically.",
+        "submitConfirm": {
+            "title": "Submit attempt?",
+            "description": "You cannot change your answers after submitting."
+        }
+    },
+    "result": {
+        "title": "Result",
+        "autoSubmitted": "This attempt was submitted automatically (time limit reached).",
+        "pending": "Your score will be available later.",
+        "manualPending": "Some questions need manual grading by your teacher.",
+        "backToList": "Back to assignments"
+    }
+}

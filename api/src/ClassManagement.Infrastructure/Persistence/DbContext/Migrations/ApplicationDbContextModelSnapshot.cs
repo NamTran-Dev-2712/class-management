@@ -24,6 +24,966 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.Assignment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("AllowLate")
+                        .HasColumnType("boolean")
+                        .HasColumnName("allow_late");
+
+                    b.Property<long>("ClassId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("class_id");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closed_at");
+
+                    b.Property<DateTime?>("ClosesAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closes_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<long>("ExamId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("exam_id");
+
+                    b.Property<int?>("ExamVersionAtPublish")
+                        .HasColumnType("integer")
+                        .HasColumnName("exam_version_at_publish");
+
+                    b.Property<string>("GradePublishPolicy")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("grade_publish_policy");
+
+                    b.Property<DateTime?>("GradesReleasedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("grades_released_at");
+
+                    b.Property<int>("MaxAttempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("max_attempts");
+
+                    b.Property<DateTime?>("OpensAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("opens_at");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("published_at");
+
+                    b.Property<string>("ScorePolicy")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("score_policy");
+
+                    b.Property<bool>("ShowAnswersAfterGrade")
+                        .HasColumnType("boolean")
+                        .HasColumnName("show_answers_after_grade");
+
+                    b.Property<bool>("ShuffleOptions")
+                        .HasColumnType("boolean")
+                        .HasColumnName("shuffle_options");
+
+                    b.Property<bool>("ShuffleQuestions")
+                        .HasColumnType("boolean")
+                        .HasColumnName("shuffle_questions");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("status");
+
+                    b.Property<long>("TeacherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("teacher_id");
+
+                    b.Property<int?>("TimeLimitMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("time_limit_minutes");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_assignments");
+
+                    b.HasIndex("ClosesAt")
+                        .HasDatabaseName("idx_assignments_closes_at")
+                        .HasFilter("status = 'Open' AND deleted_at IS NULL");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("ix_assignments_created_by");
+
+                    b.HasIndex("ExamId")
+                        .HasDatabaseName("idx_assignments_exam")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("OpensAt")
+                        .HasDatabaseName("idx_assignments_scheduled")
+                        .HasFilter("status = 'Scheduled' AND deleted_at IS NULL");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_assignments_public_id");
+
+                    b.HasIndex("UpdatedBy")
+                        .HasDatabaseName("ix_assignments_updated_by");
+
+                    b.HasIndex("TeacherId", "Status")
+                        .HasDatabaseName("idx_assignments_teacher")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("ClassId", "Status", "OpensAt")
+                        .HasDatabaseName("idx_assignments_class_status_opens")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("assignments", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_assignments_description_length", "description IS NULL OR length(description) <= 1000");
+
+                            t.HasCheckConstraint("chk_assignments_grade_publish_policy", "grade_publish_policy IN ('Immediate', 'AfterDeadline', 'Manual')");
+
+                            t.HasCheckConstraint("chk_assignments_max_attempts", "max_attempts >= 1 AND max_attempts <= 100");
+
+                            t.HasCheckConstraint("chk_assignments_score_policy", "score_policy IN ('Highest', 'Latest')");
+
+                            t.HasCheckConstraint("chk_assignments_status", "status IN ('Draft', 'Scheduled', 'Open', 'Closed', 'Archived')");
+
+                            t.HasCheckConstraint("chk_assignments_time_limit", "time_limit_minutes IS NULL OR (time_limit_minutes > 0 AND time_limit_minutes <= 1440)");
+
+                            t.HasCheckConstraint("chk_assignments_title_length", "length(title) >= 3 AND length(title) <= 300");
+
+                            t.HasCheckConstraint("chk_assignments_window", "opens_at IS NULL OR closes_at IS NULL OR closes_at > opens_at");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AssignmentSnapshot", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AssignmentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("assignment_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("SnapshotCreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("snapshot_created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<decimal>("TotalPoint")
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("total_point");
+
+                    b.Property<int>("TotalQuestions")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_questions");
+
+                    b.HasKey("Id")
+                        .HasName("pk_assignment_snapshots");
+
+                    b.HasIndex("AssignmentId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_assignment_snapshots_assignment");
+
+                    b.ToTable("assignment_snapshots", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_assignment_snapshots_total_point", "total_point > 0");
+
+                            t.HasCheckConstraint("chk_assignment_snapshots_total_questions", "total_questions > 0");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AssignmentView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("AllowLate")
+                        .HasColumnType("boolean")
+                        .HasColumnName("allow_late");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_count");
+
+                    b.Property<long>("ClassId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("class_id");
+
+                    b.Property<string>("ClassName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("class_name");
+
+                    b.Property<Guid>("ClassPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("class_public_id");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closed_at");
+
+                    b.Property<DateTime?>("ClosesAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closes_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<long>("ExamId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("exam_id");
+
+                    b.Property<Guid>("ExamPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exam_public_id");
+
+                    b.Property<string>("ExamTitle")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("exam_title");
+
+                    b.Property<int?>("ExamVersionAtPublish")
+                        .HasColumnType("integer")
+                        .HasColumnName("exam_version_at_publish");
+
+                    b.Property<string>("GradePublishPolicy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("grade_publish_policy");
+
+                    b.Property<DateTime?>("GradesReleasedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("grades_released_at");
+
+                    b.Property<int>("MaxAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_attempts");
+
+                    b.Property<DateTime?>("OpensAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("opens_at");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("published_at");
+
+                    b.Property<string>("ScorePolicy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("score_policy");
+
+                    b.Property<bool>("ShowAnswersAfterGrade")
+                        .HasColumnType("boolean")
+                        .HasColumnName("show_answers_after_grade");
+
+                    b.Property<bool>("ShuffleOptions")
+                        .HasColumnType("boolean")
+                        .HasColumnName("shuffle_options");
+
+                    b.Property<bool>("ShuffleQuestions")
+                        .HasColumnType("boolean")
+                        .HasColumnName("shuffle_questions");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<int>("SubmittedCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("submitted_count");
+
+                    b.Property<long>("TeacherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("teacher_id");
+
+                    b.Property<string>("TeacherName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("teacher_name");
+
+                    b.Property<Guid>("TeacherPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("teacher_public_id");
+
+                    b.Property<int?>("TimeLimitMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("time_limit_minutes");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<decimal?>("TotalPoint")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_point");
+
+                    b.Property<int?>("TotalQuestions")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_questions");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_assignment_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_assignments", (string)null);
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.Attempt", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AssignmentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("assignment_id");
+
+                    b.Property<int>("AttemptNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_number");
+
+                    b.Property<bool>("AutoSubmitted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("auto_submitted");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DeadlineAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deadline_at");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("text")
+                        .HasColumnName("ip_address");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("QuestionOrder")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("question_order");
+
+                    b.Property<DateTime>("StartedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<long>("StudentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("student_id");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<decimal?>("TotalAutoScore")
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("total_auto_score");
+
+                    b.Property<decimal?>("TotalManualScore")
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("total_manual_score");
+
+                    b.Property<decimal?>("TotalScore")
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("total_score");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_attempts");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("ix_attempts_created_by");
+
+                    b.HasIndex("DeadlineAt")
+                        .HasDatabaseName("idx_attempts_deadline")
+                        .HasFilter("status = 'InProgress'");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_attempts_public_id");
+
+                    b.HasIndex("UpdatedBy")
+                        .HasDatabaseName("ix_attempts_updated_by");
+
+                    b.HasIndex("AssignmentId", "Status")
+                        .HasDatabaseName("idx_attempts_assignment_status");
+
+                    b.HasIndex("AssignmentId", "StudentId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_attempts_one_in_progress")
+                        .HasFilter("status = 'InProgress'");
+
+                    b.HasIndex("StudentId", "AssignmentId")
+                        .HasDatabaseName("idx_attempts_student_assignment");
+
+                    b.HasIndex("AssignmentId", "StudentId", "AttemptNumber")
+                        .IsUnique()
+                        .HasDatabaseName("uq_attempts_sequence");
+
+                    b.ToTable("attempts", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_attempts_number", "attempt_number >= 1");
+
+                            t.HasCheckConstraint("chk_attempts_status", "status IN ('InProgress', 'Submitted', 'AutoGraded', 'NeedManualGrading', 'Graded')");
+
+                            t.HasCheckConstraint("chk_attempts_submitted_after_started", "submitted_at IS NULL OR submitted_at >= started_at");
+
+                            t.HasCheckConstraint("chk_attempts_total_auto_score", "total_auto_score IS NULL OR total_auto_score >= 0");
+
+                            t.HasCheckConstraint("chk_attempts_total_manual_score", "total_manual_score IS NULL OR total_manual_score >= 0");
+
+                            t.HasCheckConstraint("chk_attempts_total_score", "total_score IS NULL OR total_score >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AttemptAnswer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AttemptId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("attempt_id");
+
+                    b.Property<decimal?>("AutoScore")
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("auto_score");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsAutoGraded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_auto_graded");
+
+                    b.Property<DateTime>("LastSavedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_saved_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("SelectedOptionIds")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("selected_option_ids");
+
+                    b.Property<long>("SnapshotQuestionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("snapshot_question_id");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("TextAnswer")
+                        .HasColumnType("text")
+                        .HasColumnName("text_answer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_attempt_answers");
+
+                    b.HasIndex("AttemptId")
+                        .HasDatabaseName("idx_attempt_answers_attempt");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("ix_attempt_answers_created_by");
+
+                    b.HasIndex("SnapshotQuestionId")
+                        .HasDatabaseName("ix_attempt_answers_snapshot_question_id");
+
+                    b.HasIndex("UpdatedBy")
+                        .HasDatabaseName("ix_attempt_answers_updated_by");
+
+                    b.HasIndex("AttemptId", "SnapshotQuestionId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_attempt_answers_unique");
+
+                    b.ToTable("attempt_answers", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_attempt_answers_auto_score", "auto_score IS NULL OR auto_score >= 0");
+
+                            t.HasCheckConstraint("chk_attempt_answers_text_length", "text_answer IS NULL OR length(text_answer) <= 50000");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AttemptView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("AssignmentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("assignment_id");
+
+                    b.Property<Guid>("AssignmentPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assignment_public_id");
+
+                    b.Property<string>("AssignmentTitle")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("assignment_title");
+
+                    b.Property<int>("AttemptNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_number");
+
+                    b.Property<bool>("AutoSubmitted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("auto_submitted");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeadlineAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deadline_at");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<long>("StudentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("student_id");
+
+                    b.Property<string>("StudentName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("student_name");
+
+                    b.Property<Guid>("StudentPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("student_public_id");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<decimal?>("TotalAutoScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_auto_score");
+
+                    b.Property<decimal?>("TotalManualScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_manual_score");
+
+                    b.Property<decimal?>("TotalPoint")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_point");
+
+                    b.Property<decimal?>("TotalScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_score");
+
+                    b.HasKey("Id")
+                        .HasName("pk_attempt_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_attempts", (string)null);
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotOption", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("display_order");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_correct");
+
+                    b.Property<long?>("OriginalOptionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("original_option_id");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("SnapshotCreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("snapshot_created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long>("SnapshotQuestionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("snapshot_question_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_snapshot_options");
+
+                    b.HasIndex("OriginalOptionId")
+                        .HasDatabaseName("ix_snapshot_options_original_option_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_snapshot_options_public_id");
+
+                    b.HasIndex("SnapshotQuestionId", "DisplayOrder")
+                        .IsUnique()
+                        .HasDatabaseName("uq_snapshot_options_order");
+
+                    b.ToTable("snapshot_options", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_snapshot_options_display_order", "display_order >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotQuestion", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("display_order");
+
+                    b.Property<string>("Explanation")
+                        .HasColumnType("text")
+                        .HasColumnName("explanation");
+
+                    b.Property<long?>("OriginalQuestionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("original_question_id");
+
+                    b.Property<decimal>("Point")
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("point");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("SnapshotCreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("snapshot_created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long>("SnapshotId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("snapshot_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_snapshot_questions");
+
+                    b.HasIndex("OriginalQuestionId")
+                        .HasDatabaseName("idx_snapshot_questions_original");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_snapshot_questions_public_id");
+
+                    b.HasIndex("SnapshotId", "DisplayOrder")
+                        .IsUnique()
+                        .HasDatabaseName("uq_snapshot_questions_order");
+
+                    b.ToTable("snapshot_questions", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_snapshot_questions_display_order", "display_order >= 1");
+
+                            t.HasCheckConstraint("chk_snapshot_questions_point", "point > 0");
+
+                            t.HasCheckConstraint("chk_snapshot_questions_type", "type IN ('SingleChoice', 'MultipleChoice', 'TrueFalse', 'ShortWriting', 'LongWriting')");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.StudentAssignmentView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("StudentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("student_id");
+
+                    b.Property<bool>("AllowLate")
+                        .HasColumnType("boolean")
+                        .HasColumnName("allow_late");
+
+                    b.Property<decimal?>("BestScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("best_score");
+
+                    b.Property<string>("ClassName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("class_name");
+
+                    b.Property<Guid>("ClassPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("class_public_id");
+
+                    b.Property<DateTime?>("ClosesAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closes_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("GradePublishPolicy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("grade_publish_policy");
+
+                    b.Property<bool>("HasInProgress")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_in_progress");
+
+                    b.Property<Guid?>("InProgressAttemptPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("in_progress_attempt_public_id");
+
+                    b.Property<int>("MaxAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_attempts");
+
+                    b.Property<DateTime?>("OpensAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("opens_at");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("StudentPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("student_public_id");
+
+                    b.Property<string>("TeacherName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("teacher_name");
+
+                    b.Property<int?>("TimeLimitMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("time_limit_minutes");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<decimal?>("TotalPoint")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_point");
+
+                    b.Property<int?>("TotalQuestions")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_questions");
+
+                    b.Property<int>("UsedAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("used_attempts");
+
+                    b.HasKey("Id", "StudentId");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_student_assignments", (string)null);
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Auth.Entities.PasswordResetToken", b =>
                 {
                     b.Property<long>("Id")
@@ -1635,6 +2595,142 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.ToTable("user_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.Assignment", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Classroom.Entities.Class", null)
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_assignments_classes_class_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_assignments_asp_net_users_created_by");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Exams.Entities.Exam", null)
+                        .WithMany()
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_assignments_exams_exam_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_assignments_asp_net_users_teacher_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_assignments_asp_net_users_updated_by");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AssignmentSnapshot", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.Assignment", null)
+                        .WithOne("Snapshot")
+                        .HasForeignKey("ClassManagement.Domain.Modules.Assignments.Entities.AssignmentSnapshot", "AssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_assignment_snapshots_assignments_assignment_id");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.Attempt", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.Assignment", null)
+                        .WithMany()
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_attempts_assignments_assignment_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_attempts_asp_net_users_created_by");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_attempts_asp_net_users_student_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_attempts_asp_net_users_updated_by");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AttemptAnswer", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.Attempt", null)
+                        .WithMany("Answers")
+                        .HasForeignKey("AttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_attempt_answers_attempts_attempt_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_attempt_answers_asp_net_users_created_by");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotQuestion", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotQuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_attempt_answers_snapshot_questions_snapshot_question_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_attempt_answers_asp_net_users_updated_by");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotOption", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Questions.Entities.QuestionOption", null)
+                        .WithMany()
+                        .HasForeignKey("OriginalOptionId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_snapshot_options_question_options_original_option_id");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotQuestion", null)
+                        .WithMany("Options")
+                        .HasForeignKey("SnapshotQuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_snapshot_options_snapshot_questions_snapshot_question_id");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotQuestion", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Questions.Entities.Question", null)
+                        .WithMany()
+                        .HasForeignKey("OriginalQuestionId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_snapshot_questions_questions_original_question_id");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.AssignmentSnapshot", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_snapshot_questions_assignment_snapshots_snapshot_id");
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Auth.Entities.PasswordResetToken", b =>
                 {
                     b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
@@ -1902,6 +2998,26 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_tokens_asp_net_users_user_id");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.Assignment", b =>
+                {
+                    b.Navigation("Snapshot");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AssignmentSnapshot", b =>
+                {
+                    b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.Attempt", b =>
+                {
+                    b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotQuestion", b =>
+                {
+                    b.Navigation("Options");
                 });
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Classroom.Entities.Class", b =>

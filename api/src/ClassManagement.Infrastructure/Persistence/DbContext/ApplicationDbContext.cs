@@ -30,6 +30,12 @@ public sealed class ApplicationDbContext
     public DbSet<QuestionTag> QuestionTags => Set<QuestionTag>();
     public DbSet<Exam> Exams => Set<Exam>();
     public DbSet<ExamQuestion> ExamQuestions => Set<ExamQuestion>();
+    public DbSet<Assignment> Assignments => Set<Assignment>();
+    public DbSet<AssignmentSnapshot> AssignmentSnapshots => Set<AssignmentSnapshot>();
+    public DbSet<SnapshotQuestion> SnapshotQuestions => Set<SnapshotQuestion>();
+    public DbSet<SnapshotOption> SnapshotOptions => Set<SnapshotOption>();
+    public DbSet<Attempt> Attempts => Set<Attempt>();
+    public DbSet<AttemptAnswer> AttemptAnswers => Set<AttemptAnswer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

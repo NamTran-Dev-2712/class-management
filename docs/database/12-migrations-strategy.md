@@ -148,13 +148,18 @@ Examples:
 ### MVP-5: Assignment & Testing
 
 ```
-202602120900_create_assignments_table       -- + triggers
-202602120910_create_assignment_snapshots_table
-202602120920_create_snapshot_questions_table
-202602120930_create_snapshot_options_table
-202602120940_create_attempts_table          -- + triggers
-202602120950_create_attempt_answers_table   -- + triggers
+20260617173525_create_assignments_and_views
+  -- Tạo bảng assignments, assignment_snapshots, snapshot_questions, snapshot_options,
+  --   attempts, attempt_answers (check constraints + indexes theo doc 05 & 06)
+  -- question_order / selected_option_ids = JSONB (mảng id), value-converter sang List<long>
+  -- snapshot_questions/snapshot_options có public_id (uuid) để API tham chiếu
+  -- Tạo 3 view: vw_assignments, vw_student_assignments, vw_attempts (raw SQL)
 ```
+
+> Gộp toàn bộ MVP-5 vào **một migration** (giống cách Exams/Questions làm). Enum lưu PascalCase.
+> **Không dùng DB trigger**: `total_point`/`total_questions` của snapshot tính trong publish handler;
+> auto-grade + auto-submit do **Hangfire recurring job** `assignment-lifecycle` + app-layer xử lý
+> (xem 05/06 "as built" và [14-background-jobs.md](./14-background-jobs.md)). `updated_at` qua interceptor.
 
 ### MVP-6: Grading
 

@@ -12,7 +12,9 @@ public class UnitOfWork : IUnitOfWork
         IClassRepository classes,
         IClassMembershipRepository classMemberships,
         IQuestionRepository questions,
-        IExamRepository exams
+        IExamRepository exams,
+        IAssignmentRepository assignments,
+        IAttemptRepository attempts
     )
     {
         _context = context;
@@ -21,6 +23,8 @@ public class UnitOfWork : IUnitOfWork
         ClassMemberships = classMemberships;
         Questions = questions;
         Exams = exams;
+        Assignments = assignments;
+        Attempts = attempts;
     }
 
     public ISubjectRepository Subjects { get; }
@@ -28,6 +32,8 @@ public class UnitOfWork : IUnitOfWork
     public IClassMembershipRepository ClassMemberships { get; }
     public IQuestionRepository Questions { get; }
     public IExamRepository Exams { get; }
+    public IAssignmentRepository Assignments { get; }
+    public IAttemptRepository Attempts { get; }
 
     public IGenericRepository<T> Repository<T>()
         where T : class

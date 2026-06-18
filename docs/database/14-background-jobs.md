@@ -62,3 +62,17 @@ Khi backup/restore: schema `hangfire` chứa state job tạm thời, có thể t
 `GET {DashboardPath}` (mặc định `/hangfire`) — chỉ **Admin** truy cập, bảo vệ bằng
 `HangfireAdminAuthorizationFilter` (kiểm tra `User.IsInRole("Admin")`). Authentication (cookie/JWT) chạy
 trong pipeline trước filter nên `HttpContext.User` đã có sẵn.
+
+## 5. Recurring job — Assignment lifecycle (MVP-5)
+
+Job định kỳ `assignment-lifecycle` (đăng ký trong `Program.cs` qua `IRecurringJobManager`, gated bởi
+`Hangfire:Enabled` + `EnableServer`; cron lấy từ `Assignment:LifecycleSweepCron`, mặc định mỗi phút).
+
+- Class mỏng `AssignmentLifecycleJob.ExecuteAsync()` chỉ gửi `RunAssignmentLifecycleCommand` qua MediatR
+  (toàn bộ logic ở Application — dùng chung đường finalize + auto-grade với luồng học sinh nộp bài).
+- Mỗi lần chạy (idempotent, có giới hạn `Assignment:LifecycleBatchSize`):
+  1. `Scheduled → Open` khi `opens_at ≤ now`.
+  2. `Open → Closed` khi `closes_at ≤ now` (+ auto-submit mọi attempt `InProgress` của assignment đó).
+  3. Auto-submit các attempt `InProgress` đã qua `deadline_at`.
+- **Phòng thủ nhiều lớp**: ngoài job, mỗi request làm bài còn kiểm tra thời gian phía server (lazy
+  check) nên deadline vẫn được tôn trọng kể cả khi Hangfire tắt (vd: trong test).
