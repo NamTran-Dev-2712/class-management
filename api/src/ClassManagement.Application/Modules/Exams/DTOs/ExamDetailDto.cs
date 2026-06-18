@@ -17,6 +17,7 @@ public sealed record ExamDetailDto
     public string? SubjectName { get; init; }
     public Guid TeacherPublicId { get; init; }
     public string TeacherName { get; init; } = string.Empty;
+    public List<string> Tags { get; init; } = [];
     public IReadOnlyList<ExamQuestionDto> Questions { get; init; } = [];
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }

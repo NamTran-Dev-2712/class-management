@@ -121,6 +121,26 @@ public static class DependencyInjection
                         )
                 );
 
+            // Per-user fixed window for authenticated student actions (start/save/submit). Partitioned
+            // by the user id claim (falling back to IP) so many students behind one school NAT don't
+            // share a bucket, while a single student is still throttled. See MVP-5 §12 auto-save risk.
+            void AddUserFixedWindow(string name, RateLimitPolicyOptions policy) =>
+                opts.AddPolicy(
+                    name,
+                    ctx =>
+                        RateLimitPartition.GetFixedWindowLimiter(
+                            partitionKey: ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                                ?? ctx.Connection.RemoteIpAddress?.ToString()
+                                ?? "unknown",
+                            factory: _ => new FixedWindowRateLimiterOptions
+                            {
+                                PermitLimit = policy.PermitLimit,
+                                Window = TimeSpan.FromSeconds(policy.WindowSeconds),
+                                QueueLimit = 0,
+                            }
+                        )
+                );
+
             AddIpFixedWindow(RateLimitOptions.Policies.Login, rl.Login);
             AddIpFixedWindow(RateLimitOptions.Policies.Register, rl.Register);
             AddIpFixedWindow(RateLimitOptions.Policies.Refresh, rl.Refresh);
@@ -135,6 +155,10 @@ public static class DependencyInjection
             AddIpFixedWindow(RateLimitOptions.Policies.ClassJoin, rl.ClassJoin);
             AddIpFixedWindow(RateLimitOptions.Policies.QuestionWrite, rl.QuestionWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.ExamWrite, rl.ExamWrite);
+            AddIpFixedWindow(RateLimitOptions.Policies.AssignmentWrite, rl.AssignmentWrite);
+            AddUserFixedWindow(RateLimitOptions.Policies.AttemptStart, rl.AttemptStart);
+            AddUserFixedWindow(RateLimitOptions.Policies.AttemptSave, rl.AttemptSave);
+            AddUserFixedWindow(RateLimitOptions.Policies.AttemptSubmit, rl.AttemptSubmit);
             AddIpFixedWindow(RateLimitOptions.Policies.Read, rl.Read);
         });
 
@@ -217,6 +241,28 @@ public static class DependencyInjection
             options.AddPolicy(
                 OutputCachePolicies.AdminExamsRead,
                 b => Shared(b, OutputCacheTags.Exams)
+            );
+
+            // Assignment & online testing (MVP-5): teacher's own assignments + student's own list +
+            // attempt rosters/history are personalized (PerUser); the admin-wide list is Shared. All
+            // tagged "assignments" so any assignment/attempt write evicts every related read. NOTE: the
+            // live attempt-taking GET and the attempt-result GET are deliberately NOT output-cached —
+            // they are time-sensitive (remaining time) / score-gated and must always be fresh.
+            options.AddPolicy(
+                OutputCachePolicies.TeacherAssignmentsRead,
+                b => PerUser(b, OutputCacheTags.Assignments)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.StudentAssignmentsRead,
+                b => PerUser(b, OutputCacheTags.Assignments)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminAssignmentsRead,
+                b => Shared(b, OutputCacheTags.Assignments)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AttemptsRead,
+                b => PerUser(b, OutputCacheTags.Assignments)
             );
         });
 

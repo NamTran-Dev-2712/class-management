@@ -54,6 +54,7 @@ public class CreateExamCommandHandler : IRequestHandler<CreateExamCommand, Guid>
             Version = 1,
             TotalPoint = 0,
             TotalQuestions = 0,
+            Tags = ExamAssembler.BuildTags(request.Tags),
         };
 
         await _unitOfWork.Exams.AddAsync(entity, ct);

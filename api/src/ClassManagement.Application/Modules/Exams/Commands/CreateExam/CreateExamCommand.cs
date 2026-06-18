@@ -7,5 +7,6 @@ public record CreateExamCommand(
     Guid? SubjectId,
     string Title,
     string? Description,
-    ExamVisibility Visibility
+    ExamVisibility Visibility,
+    List<string>? Tags
 ) : IRequest<Guid>, IExamWriteCommand;

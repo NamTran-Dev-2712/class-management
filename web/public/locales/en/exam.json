@@ -21,6 +21,7 @@
         "owner": "Author",
         "visibility": "Visibility",
         "version": "Version",
+        "tags": "Tags",
         "updatedAt": "Updated",
         "actions": "Actions"
     },
@@ -33,7 +34,8 @@
         "subject": "Subject",
         "allSubjects": "All subjects",
         "visibility": "Visibility",
-        "allVisibility": "All visibility"
+        "allVisibility": "All visibility",
+        "tag": "Filter by tag…"
     },
     "form": {
         "createTitle": "New exam",
@@ -49,12 +51,16 @@
         "subjectNone": "No subject",
         "makePublic": "Make public",
         "makePublicHint": "Public exams can be viewed and duplicated by other teachers.",
+        "tags": "Tags",
+        "tagsPlaceholder": "Type a tag and press Enter…",
+        "tagsHint": "Free-form labels for search, normalized to lowercase. Up to 10.",
         "cancel": "Cancel",
         "save": "Save",
         "saveAndContinue": "Save and add questions",
         "validation": {
             "titleLength": "Title must be between 3 and 300 characters.",
-            "descriptionMax": "Description must not exceed 1000 characters."
+            "descriptionMax": "Description must not exceed 1000 characters.",
+            "tooManyTags": "An exam can have at most 10 tags."
         }
     },
     "builder": {

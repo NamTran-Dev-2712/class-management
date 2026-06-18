@@ -82,6 +82,7 @@ export default function PublicExamsPage() {
                 onSearchChange={filters.setSearch}
                 onSubjectChange={filters.setSubject}
                 onVisibilityChange={filters.setVisibility}
+                onTagChange={filters.setTag}
             />
 
             <DataTable

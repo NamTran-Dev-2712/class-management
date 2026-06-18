@@ -157,6 +157,18 @@ public static class DependencyInjection
         services.AddScoped<IExamRepository, ExamRepository>();
         services.AddSingleton<IExamPolicy, Services.Exams.ExamPolicy>();
 
+        // Assignment & online testing (MVP-5)
+        services.Configure<AssignmentOptions>(
+            configuration.GetSection(AssignmentOptions.SectionName)
+        );
+        services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+        services.AddScoped<IAttemptRepository, AttemptRepository>();
+        services.AddSingleton<IAssignmentPolicy, Services.Assignments.AssignmentPolicy>();
+        services.AddSingleton<
+            Application.Modules.Assignments.Interfaces.IAutoGradingService,
+            Services.Assignments.AutoGradingService
+        >();
+
         // Admin user management
         services.AddScoped<IPasswordGenerator, PasswordGenerator>();
         services.AddScoped<IUserAdminRepository, UserAdminRepository>();

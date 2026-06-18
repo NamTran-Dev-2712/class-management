@@ -1,0 +1,172 @@
+{
+    "title": "Bài giao",
+    "subtitle": "Giao đề thi cho lớp của bạn và theo dõi bài nộp.",
+    "actions": {
+        "create": "Bài giao mới",
+        "open": "Mở",
+        "delete": "Xóa",
+        "publish": "Phát hành",
+        "close": "Đóng sớm",
+        "archive": "Lưu trữ"
+    },
+    "columns": {
+        "title": "Tiêu đề",
+        "class": "Lớp",
+        "status": "Trạng thái",
+        "closesAt": "Đóng lúc",
+        "submissions": "Bài nộp",
+        "owner": "Giáo viên",
+        "actions": "Thao tác"
+    },
+    "status": {
+        "Draft": "Nháp",
+        "Scheduled": "Đã lên lịch",
+        "Open": "Đang mở",
+        "Closed": "Đã đóng",
+        "Archived": "Đã lưu trữ"
+    },
+    "filters": {
+        "search": "Tìm bài giao…",
+        "allStatuses": "Tất cả trạng thái"
+    },
+    "deleteConfirm": {
+        "title": "Xóa bài giao?",
+        "description": "Thao tác này xóa vĩnh viễn bài giao nháp và không thể hoàn tác."
+    },
+    "closeConfirm": {
+        "title": "Đóng bài giao sớm?",
+        "description": "Học sinh không thể bắt đầu hoặc tiếp tục; mọi lượt đang làm sẽ được nộp tự động."
+    },
+    "archiveConfirm": {
+        "title": "Lưu trữ bài giao?",
+        "description": "Bài giao lưu trữ sẽ ẩn khỏi danh sách đang hoạt động. Các lượt làm bài vẫn được giữ lại."
+    },
+    "toast": {
+        "created": "Đã tạo bài giao.",
+        "updated": "Đã cập nhật bài giao.",
+        "published": "Đã phát hành bài giao.",
+        "closed": "Đã đóng bài giao.",
+        "archived": "Đã lưu trữ bài giao.",
+        "deleted": "Đã xóa bài giao.",
+        "submitted": "Đã nộp bài.",
+        "error": "Đã xảy ra lỗi."
+    },
+    "create": {
+        "title": "Bài giao mới",
+        "subtitle": "Chọn đề thi và lớp, sau đó đặt lịch và quy tắc."
+    },
+    "form": {
+        "exam": "Đề thi",
+        "examPlaceholder": "Chọn đề thi",
+        "class": "Lớp",
+        "classPlaceholder": "Chọn lớp",
+        "title": "Tiêu đề",
+        "titlePlaceholder": "vd: Kiểm tra chương 1",
+        "description": "Mô tả",
+        "opensAt": "Mở lúc",
+        "closesAt": "Đóng lúc",
+        "timeLimit": "Thời gian làm bài (phút)",
+        "timeLimitPlaceholder": "Không giới hạn",
+        "timeLimitHint": "Để trống nếu không giới hạn thời gian mỗi lượt.",
+        "maxAttempts": "Số lần làm tối đa",
+        "scorePolicy": "Chính sách điểm",
+        "gradePublishPolicy": "Hiển thị điểm",
+        "allowLate": "Cho phép nộp trễ",
+        "allowLateHint": "Nhận bài nộp sau thời gian đóng.",
+        "shuffleQuestions": "Xáo trộn câu hỏi",
+        "shuffleQuestionsHint": "Ngẫu nhiên thứ tự câu hỏi mỗi lượt.",
+        "shuffleOptions": "Xáo trộn đáp án",
+        "shuffleOptionsHint": "Ngẫu nhiên thứ tự đáp án mỗi lượt.",
+        "showAnswers": "Hiện đáp án sau khi chấm",
+        "showAnswersHint": "Hiển thị đáp án đúng khi điểm được công bố.",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "saveAndContinue": "Tạo",
+        "validation": {
+            "examRequired": "Vui lòng chọn đề thi.",
+            "classRequired": "Vui lòng chọn lớp.",
+            "titleLength": "Tiêu đề phải từ 3–300 ký tự.",
+            "descriptionMax": "Mô tả không được vượt quá 1000 ký tự.",
+            "maxAttempts": "Số lần làm phải từ 1 đến 100.",
+            "timeWindow": "Thời gian đóng phải sau thời gian mở."
+        }
+    },
+    "scorePolicy": {
+        "Highest": "Lần làm điểm cao nhất",
+        "Latest": "Lần làm gần nhất"
+    },
+    "gradePublishPolicy": {
+        "Immediate": "Ngay sau khi nộp",
+        "AfterDeadline": "Sau hạn nộp",
+        "Manual": "Khi tôi công bố điểm"
+    },
+    "summary": {
+        "title": "Cấu hình",
+        "totalQuestions": "Số câu",
+        "totalPoint": "Tổng điểm",
+        "maxAttempts": "Số lần tối đa",
+        "timeLimit": "Thời gian (phút)",
+        "submissions": "Bài nộp",
+        "questions": "Câu hỏi (bản chụp)"
+    },
+    "roster": {
+        "title": "Bài nộp",
+        "empty": "Chưa có lượt làm bài nào.",
+        "student": "Học sinh",
+        "attempt": "Lượt",
+        "status": "Trạng thái",
+        "submittedAt": "Đã nộp",
+        "score": "Điểm",
+        "prev": "Trước",
+        "next": "Sau"
+    },
+    "admin": {
+        "title": "Bài giao",
+        "subtitle": "Tổng quan tất cả bài giao (chỉ xem)."
+    },
+    "student": {
+        "title": "Bài giao",
+        "subtitle": "Các bài kiểm tra được giao cho lớp của bạn.",
+        "empty": "Chưa có bài giao nào.",
+        "due": "Hạn: {{date}}",
+        "attemptsLeft": "Còn {{count}} lượt làm",
+        "teacher": "Giáo viên: {{name}}",
+        "actions": {
+            "continue": "Tiếp tục",
+            "view": "Xem",
+            "start": "Bắt đầu",
+            "unavailable": "Không khả dụng"
+        },
+        "fields": {
+            "opensAt": "Mở",
+            "closesAt": "Đóng",
+            "timeLimit": "Thời gian làm bài",
+            "minutes": "{{count}} phút",
+            "noLimit": "Không giới hạn",
+            "questions": "Số câu",
+            "totalPoint": "Tổng điểm",
+            "attemptsLeft": "Số lượt còn lại"
+        }
+    },
+    "attempt": {
+        "attemptNumber": "Lượt #{{number}}",
+        "questionLabel": "Câu {{order}}",
+        "points": "{{count}} điểm",
+        "answerPlaceholder": "Nhập câu trả lời…",
+        "saving": "Đang lưu…",
+        "autoSaveHint": "Câu trả lời của bạn được lưu tự động.",
+        "submit": "Nộp bài",
+        "autoSubmitted": "Đã hết giờ — bài của bạn được nộp tự động.",
+        "submitConfirm": {
+            "title": "Nộp bài?",
+            "description": "Bạn không thể thay đổi câu trả lời sau khi nộp."
+        }
+    },
+    "result": {
+        "title": "Kết quả",
+        "autoSubmitted": "Lượt này được nộp tự động (đã hết thời gian).",
+        "pending": "Điểm của bạn sẽ có sau.",
+        "manualPending": "Một số câu cần giáo viên chấm thủ công.",
+        "backToList": "Về danh sách bài giao"
+    }
+}

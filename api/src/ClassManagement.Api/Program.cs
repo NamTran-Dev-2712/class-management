@@ -4,6 +4,7 @@ using ClassManagement.Application;
 using ClassManagement.Infrastructure;
 using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Persistence.DbContext;
+using ClassManagement.Infrastructure.Services.Assignments.Jobs;
 using Hangfire;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -30,6 +31,21 @@ if (hangfireOptions.Enabled)
         hangfireOptions.DashboardPath,
         new DashboardOptions { Authorization = [new HangfireAdminAuthorizationFilter()] }
     );
+
+    // Recurring assignment/attempt lifecycle sweep (Scheduled→Open, Open→Closed, auto-submit). Cron is
+    // config-driven; the handler is idempotent so a re-run is safe.
+    if (hangfireOptions.EnableServer)
+    {
+        var assignmentOptions =
+            app.Configuration.GetSection(AssignmentOptions.SectionName).Get<AssignmentOptions>()
+            ?? new AssignmentOptions();
+        var recurringJobs = app.Services.GetRequiredService<IRecurringJobManager>();
+        recurringJobs.AddOrUpdate<AssignmentLifecycleJob>(
+            "assignment-lifecycle",
+            job => job.ExecuteAsync(),
+            assignmentOptions.LifecycleSweepCron
+        );
+    }
 }
 
 // Health check endpoints:

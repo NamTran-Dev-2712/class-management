@@ -96,5 +96,11 @@ public sealed class ExamConfiguration : IEntityTypeConfiguration<Exam>
             .WithOne()
             .HasForeignKey(q => q.ExamId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasMany(e => e.Tags)
+            .WithOne()
+            .HasForeignKey(t => t.ExamId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

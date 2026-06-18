@@ -15,6 +15,7 @@ export interface ExamListItem {
     subjectName: string | null;
     teacherPublicId: string;
     teacherName: string;
+    tags: string[];
     createdAt: string;
     updatedAt: string;
 }
@@ -22,4 +23,5 @@ export interface ExamListItem {
 export interface ExamListQuery extends PageQuery {
     subjectId?: string;
     visibility?: ExamVisibility;
+    tag?: string;
 }

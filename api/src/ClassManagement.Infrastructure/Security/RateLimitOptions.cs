@@ -47,6 +47,23 @@ public sealed class RateLimitOptions
     public RateLimitPolicyOptions ExamWrite { get; init; } =
         new() { PermitLimit = 30, WindowSeconds = 60 };
 
+    // Assignment create/update/publish/close/archive/delete actions (MVP-5, per-IP teacher writes).
+    public RateLimitPolicyOptions AssignmentWrite { get; init; } =
+        new() { PermitLimit = 30, WindowSeconds = 60 };
+
+    // Starting an attempt (MVP-5) — tight; partitioned per-user (snapshot read + insert is costly).
+    public RateLimitPolicyOptions AttemptStart { get; init; } =
+        new() { PermitLimit = 10, WindowSeconds = 60 };
+
+    // Auto-save of attempt answers (MVP-5) — partitioned per-user so shared-NAT classrooms don't
+    // collide; generous enough for a 30s client debounce + save-on-change, blocks per-student spam.
+    public RateLimitPolicyOptions AttemptSave { get; init; } =
+        new() { PermitLimit = 20, WindowSeconds = 60 };
+
+    // Submitting an attempt (MVP-5) — partitioned per-user.
+    public RateLimitPolicyOptions AttemptSubmit { get; init; } =
+        new() { PermitLimit = 10, WindowSeconds = 60 };
+
     // Generous per-IP cap for GET list endpoints — output cache absorbs repeated identical reads, but
     // this throttles param-varying spam that would otherwise bypass the cache and hit the database.
     public RateLimitPolicyOptions Read { get; init; } =
@@ -68,6 +85,10 @@ public sealed class RateLimitOptions
         public const string ClassJoin = "classJoin";
         public const string QuestionWrite = "questionWrite";
         public const string ExamWrite = "examWrite";
+        public const string AssignmentWrite = "assignmentWrite";
+        public const string AttemptStart = "attemptStart";
+        public const string AttemptSave = "attemptSave";
+        public const string AttemptSubmit = "attemptSubmit";
         public const string Read = "read";
     }
 }

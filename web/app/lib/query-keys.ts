@@ -59,4 +59,23 @@ export const queryKeys = {
             [...queryKeys.exams.all, "admin", "detail", publicId] as const,
         preview: (publicId: string) => [...queryKeys.exams.all, "preview", publicId] as const,
     },
+    assignments: {
+        all: ["assignments"] as const,
+        teacherList: (params: unknown) =>
+            [...queryKeys.assignments.all, "teacher", "list", params] as const,
+        adminList: (params: unknown) =>
+            [...queryKeys.assignments.all, "admin", "list", params] as const,
+        studentList: (params: unknown) =>
+            [...queryKeys.assignments.all, "student", "list", params] as const,
+        detail: (publicId: string) => [...queryKeys.assignments.all, "detail", publicId] as const,
+        studentDetail: (publicId: string) =>
+            [...queryKeys.assignments.all, "student", "detail", publicId] as const,
+        preview: (publicId: string) => [...queryKeys.assignments.all, "preview", publicId] as const,
+        attempts: (publicId: string, params: unknown) =>
+            [...queryKeys.assignments.all, "attempts", publicId, params] as const,
+        myAttempts: (params: unknown) =>
+            [...queryKeys.assignments.all, "my-attempts", params] as const,
+        taking: (attemptId: string) => [...queryKeys.assignments.all, "taking", attemptId] as const,
+        result: (attemptId: string) => [...queryKeys.assignments.all, "result", attemptId] as const,
+    },
 } as const;

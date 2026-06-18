@@ -31,6 +31,12 @@ public abstract class ExamListHandlerBase<TQuery>
             query = query.Where(e => e.Visibility == visibility);
         }
 
+        if (!string.IsNullOrWhiteSpace(request.Tag))
+        {
+            var tag = request.Tag.Trim().ToLower();
+            query = query.Where(e => e.Tags.Contains(tag));
+        }
+
         return query;
     }
 

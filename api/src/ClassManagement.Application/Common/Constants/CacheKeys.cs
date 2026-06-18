@@ -28,6 +28,10 @@ public static class OutputCachePolicies
     public const string TeacherExamsRead = "teacher-exams-read";
     public const string PublicExamsRead = "public-exams-read";
     public const string AdminExamsRead = "admin-exams-read";
+    public const string TeacherAssignmentsRead = "teacher-assignments-read";
+    public const string StudentAssignmentsRead = "student-assignments-read";
+    public const string AdminAssignmentsRead = "admin-assignments-read";
+    public const string AttemptsRead = "attempts-read";
 }
 
 /// <summary>
@@ -41,4 +45,5 @@ public static class OutputCacheTags
     public const string Classrooms = "classrooms";
     public const string Questions = "questions";
     public const string Exams = "exams";
+    public const string Assignments = "assignments";
 }

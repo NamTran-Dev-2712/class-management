@@ -1,10 +1,36 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
+import axios, {
+    type AxiosInstance,
+    type AxiosRequestConfig,
+    type InternalAxiosRequestConfig,
+} from "axios";
 import i18next from "i18next";
 
 import { ApiError } from "@/lib/api-error";
+import { useAuthStore } from "@/stores/auth.store";
 import type { ApiResponse } from "@/types/global/api.response";
 
 const baseURL = import.meta.env.VITE_API_URL ?? "/api";
+
+// Auth endpoints must never trigger the refresh-retry (avoids recursion / pointless retries).
+const AUTH_PATHS = [
+    "/auth/refresh",
+    "/auth/login",
+    "/auth/register",
+    "/auth/me",
+    "/auth/logout",
+    "/auth/forgot-password",
+    "/auth/reset-password",
+];
+
+type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+// Shared single-flight refresh: concurrent 401s wait on one POST /auth/refresh. Declared before the
+// instance so the response interceptor (added in createInstance) can close over it.
+let refreshPromise: Promise<void> | null = null;
+
+function isAuthPath(url: string | undefined): boolean {
+    return !!url && AUTH_PATHS.some((p) => url.includes(p));
+}
 
 function createInstance(): AxiosInstance {
     const instance = axios.create({
@@ -24,7 +50,44 @@ function createInstance(): AxiosInstance {
 
     instance.interceptors.response.use(
         (response) => response,
-        (error) => Promise.reject(ApiError.fromAxios(error)),
+        async (error) => {
+            const config = error?.config as RetriableConfig | undefined;
+            const status = error?.response?.status;
+
+            // Browser-only silent refresh: on a 401 from a non-auth request that hasn't been retried
+            // yet, refresh the access token once (single-flight) and replay the original request. The
+            // rotated cookies ride along automatically via `withCredentials`. SSR requests skip this —
+            // the root middleware (auth.server.ts) already refreshes there.
+            if (
+                typeof window !== "undefined" &&
+                status === 401 &&
+                config &&
+                !config._retry &&
+                !isAuthPath(config.url)
+            ) {
+                config._retry = true;
+                try {
+                    refreshPromise ??= apiClient
+                        .post("/auth/refresh")
+                        .then(() => undefined)
+                        .finally(() => {
+                            refreshPromise = null;
+                        });
+                    await refreshPromise;
+                    return apiClient(config);
+                } catch {
+                    // Refresh failed → the session is truly gone. Clear client state and bounce to
+                    // login (guards would do the same on the next navigation).
+                    useAuthStore.getState().clear();
+                    if (!window.location.pathname.startsWith("/login")) {
+                        window.location.href = "/login";
+                    }
+                    return Promise.reject(ApiError.fromAxios(error));
+                }
+            }
+
+            return Promise.reject(ApiError.fromAxios(error));
+        },
     );
 
     return instance;

@@ -61,6 +61,7 @@ export default function AdminExamsPage() {
                 onSearchChange={filters.setSearch}
                 onSubjectChange={filters.setSubject}
                 onVisibilityChange={filters.setVisibility}
+                onTagChange={filters.setTag}
             />
 
             <DataTable

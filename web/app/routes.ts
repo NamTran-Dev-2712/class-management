@@ -29,6 +29,7 @@ export default [
             route("classrooms", "features/admin/classrooms/classrooms.page.tsx"),
             route("questions", "features/admin/questions/questions.page.tsx"),
             route("exams", "features/admin/exams/exams.page.tsx"),
+            route("assignments", "features/admin/assignments/assignments.page.tsx"),
         ]),
     ]),
     layout("layouts/teacher.layout.tsx", [
@@ -61,6 +62,15 @@ export default [
             route("exams/new", "features/teacher/exams/create/exam-create.page.tsx"),
             route("exams/public", "features/teacher/exams/public/public-exams.page.tsx"),
             route("exams/:publicId", "features/teacher/exams/edit/exam-edit.page.tsx"),
+            route("assignments", "features/teacher/assignments/list/assignments.page.tsx"),
+            route(
+                "assignments/new",
+                "features/teacher/assignments/create/assignment-create.page.tsx",
+            ),
+            route(
+                "assignments/:publicId",
+                "features/teacher/assignments/edit/assignment-edit.page.tsx",
+            ),
         ]),
     ]),
     layout("layouts/student.layout.tsx", [
@@ -72,6 +82,15 @@ export default [
             route(
                 "classes/:publicId/members",
                 "features/student/classes/members/class-members.page.tsx",
+            ),
+            route("assignments", "features/student/assignments/list/assignments.page.tsx"),
+            route(
+                "assignments/:publicId",
+                "features/student/assignments/detail/assignment-detail.page.tsx",
+            ),
+            route(
+                "assignments/attempts/:attemptId",
+                "features/student/assignments/attempt/attempt.page.tsx",
             ),
         ]),
     ]),

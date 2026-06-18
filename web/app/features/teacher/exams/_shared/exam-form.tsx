@@ -28,10 +28,11 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput } from "@/components/shared/tag-input";
 import { ApiError } from "@/lib/api-error";
 import type { CreateExamRequest } from "@/services/exam/dtos/commands/exam-commands";
 import type { ExamDetail } from "@/services/exam/dtos/queries/exam-detail";
-import { createExamSchema, SUBJECT_NONE, type ExamFormValues } from "./exam.schema";
+import { createExamSchema, MAX_TAGS, SUBJECT_NONE, type ExamFormValues } from "./exam.schema";
 import { useCreateExam, useUpdateExam } from "./exams.hook";
 
 interface ExamFormProps {
@@ -55,6 +56,7 @@ export function ExamForm({ exam }: ExamFormProps) {
             visibility: exam?.visibility ?? "Private",
             title: exam?.title ?? "",
             description: exam?.description ?? "",
+            tags: exam?.tags ?? [],
         },
     });
 
@@ -78,6 +80,7 @@ export function ExamForm({ exam }: ExamFormProps) {
             title: values.title.trim(),
             description: values.description?.trim() ? values.description.trim() : null,
             visibility: values.visibility,
+            tags: values.tags,
         };
 
         const onError = (error: unknown) =>
@@ -192,6 +195,26 @@ export function ExamForm({ exam }: ExamFormProps) {
                                             }
                                         />
                                     </FormControl>
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="tags"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t("form.tags")}</FormLabel>
+                                    <FormControl>
+                                        <TagInput
+                                            value={field.value ?? []}
+                                            onChange={field.onChange}
+                                            maxTags={MAX_TAGS}
+                                            placeholder={t("form.tagsPlaceholder")}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>{t("form.tagsHint")}</FormDescription>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />

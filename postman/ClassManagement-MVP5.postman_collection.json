@@ -1,0 +1,361 @@
+{
+    "info": {
+        "name": "Class Management API — MVP-5 (Assignments & Online Testing)",
+        "_postman_id": "b1a7e2c0-0005-4000-9000-classmgmt0005",
+        "description": "End-to-end MVP-5 flow: a teacher builds an exam, creates + publishes an assignment, a student takes it (start → auto-save → submit) and views the result, plus the admin read-only overview. Auth is cookie-based (Postman's cookie jar carries access_token). Run the folders top-to-bottom: 'Setup (Teacher)' first, then 'Teacher — Assignments', then log in as the student in 'Student — Online Test'. Reuse the 'Class Management — Local' environment ({{baseUrl}}, teacher/student creds).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        { "key": "subjectId", "value": "" },
+        { "key": "questionId", "value": "" },
+        { "key": "examId", "value": "" },
+        { "key": "classId", "value": "" },
+        { "key": "inviteCode", "value": "" },
+        { "key": "assignmentId", "value": "" },
+        { "key": "attemptId", "value": "" },
+        { "key": "snapshotQuestionId", "value": "" },
+        { "key": "optionId", "value": "" }
+    ],
+    "item": [
+        {
+            "name": "Setup (Teacher)",
+            "item": [
+                {
+                    "name": "Register Teacher",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.environment.set('teacherEmail', 'teacher_' + Date.now() + '@example.com');"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"displayName\": \"MVP5 Teacher\",\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\",\n  \"role\": \"Teacher\"\n}" }
+                    }
+                },
+                {
+                    "name": "Login Teacher",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "Get active subject",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const items = pm.response.json().data.items;",
+                                    "if (items && items.length) pm.collectionVariables.set('subjectId', items[0].publicId);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/subjects?pageSize=1&isActive=true&sortBy=name", "host": ["{{baseUrl}}"], "path": ["subjects"], "query": [{ "key": "pageSize", "value": "1" }, { "key": "isActive", "value": "true" }, { "key": "sortBy", "value": "name" }] }
+                    }
+                },
+                {
+                    "name": "Create question (SingleChoice)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('questionId', pm.response.json().data.publicId);"] }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/questions", "host": ["{{baseUrl}}"], "path": ["teacher", "questions"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"type\": \"SingleChoice\",\n  \"content\": \"What is 2 + 2?\",\n  \"difficulty\": \"Easy\",\n  \"suggestedPoint\": 2.0,\n  \"visibility\": \"Private\",\n  \"explanation\": null,\n  \"options\": [\n    { \"content\": \"4\", \"isCorrect\": true },\n    { \"content\": \"5\", \"isCorrect\": false }\n  ],\n  \"tags\": []\n}" }
+                    }
+                },
+                {
+                    "name": "Create exam",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('examId', pm.response.json().data.publicId);"] }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/exams", "host": ["{{baseUrl}}"], "path": ["teacher", "exams"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"title\": \"MVP5 Sample Exam\",\n  \"description\": \"Demo exam for assignments\",\n  \"visibility\": \"Private\"\n}" }
+                    }
+                },
+                {
+                    "name": "Save exam questions",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/exams/{{examId}}/questions", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{examId}}", "questions"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"questions\": [\n    { \"questionId\": \"{{questionId}}\", \"point\": 2.0 }\n  ]\n}" }
+                    }
+                },
+                {
+                    "name": "Create class",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('classId', pm.response.json().data.publicId);"] }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/classes", "host": ["{{baseUrl}}"], "path": ["teacher", "classes"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"name\": \"MVP5 Class\",\n  \"description\": null,\n  \"subjectId\": null,\n  \"subjectName\": \"General\",\n  \"coverImageUrl\": null\n}" }
+                    }
+                },
+                {
+                    "name": "Get class (capture invite code)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('inviteCode', pm.response.json().data.inviteCode);"] }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}"] }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Teacher — Assignments",
+            "item": [
+                {
+                    "name": "Create assignment",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('assignmentId', pm.response.json().data.publicId);"] }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/assignments", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"examId\": \"{{examId}}\",\n  \"classId\": \"{{classId}}\",\n  \"title\": \"MVP5 Assignment\",\n  \"description\": \"Take this quiz\",\n  \"opensAt\": null,\n  \"closesAt\": null,\n  \"timeLimitMinutes\": 30,\n  \"maxAttempts\": 1,\n  \"scorePolicy\": \"Highest\",\n  \"allowLate\": false,\n  \"gradePublishPolicy\": \"Immediate\",\n  \"shuffleQuestions\": false,\n  \"shuffleOptions\": false,\n  \"showAnswersAfterGrade\": true\n}" }
+                    }
+                },
+                {
+                    "name": "Publish assignment",
+                    "request": {
+                        "method": "POST",
+                        "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}/publish", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}", "publish"] }
+                    }
+                },
+                {
+                    "name": "List assignments",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/teacher/assignments?pageSize=20", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments"], "query": [{ "key": "pageSize", "value": "20" }] }
+                    }
+                },
+                {
+                    "name": "Get assignment detail",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}"] }
+                    }
+                },
+                {
+                    "name": "Preview assignment (as student)",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}/preview", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}", "preview"] }
+                    }
+                },
+                {
+                    "name": "List attempts (roster)",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}/attempts?pageSize=50", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}", "attempts"], "query": [{ "key": "pageSize", "value": "50" }] }
+                    }
+                },
+                {
+                    "name": "Close assignment (early)",
+                    "request": {
+                        "method": "POST",
+                        "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}/close", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}", "close"] }
+                    }
+                },
+                {
+                    "name": "Archive assignment",
+                    "request": {
+                        "method": "POST",
+                        "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}/archive", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}", "archive"] }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Student — Online Test",
+            "item": [
+                {
+                    "name": "Register Student",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": { "type": "text/javascript", "exec": ["pm.environment.set('studentEmail', 'student_' + Date.now() + '@example.com');"] }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"displayName\": \"MVP5 Student\",\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\",\n  \"role\": \"Student\"\n}" }
+                    }
+                },
+                {
+                    "name": "Login Student",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "Join class (by invite code)",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/student/classes/join", "host": ["{{baseUrl}}"], "path": ["student", "classes", "join"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"inviteCode\": \"{{inviteCode}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "[Teacher] approve the pending member",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members?status=Pending&pageSize=50", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members"], "query": [{ "key": "status", "value": "Pending" }, { "key": "pageSize", "value": "50" }] },
+                        "description": "Log in as the teacher first; capture a pending membership publicId, then POST /teacher/classes/{{classId}}/members/{id}/approve. (Cross-actor step — the cookie jar holds one session at a time.)"
+                    }
+                },
+                {
+                    "name": "List my assignments",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/student/assignments?pageSize=20", "host": ["{{baseUrl}}"], "path": ["student", "assignments"], "query": [{ "key": "pageSize", "value": "20" }] }
+                    }
+                },
+                {
+                    "name": "Get assignment detail",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/student/assignments/{{assignmentId}}", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "{{assignmentId}}"] }
+                    }
+                },
+                {
+                    "name": "Start attempt",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('attemptId', pm.response.json().data.attemptId);"] }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": { "raw": "{{baseUrl}}/student/assignments/{{assignmentId}}/attempts", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "{{assignmentId}}", "attempts"] }
+                    }
+                },
+                {
+                    "name": "Get taking (capture question + option)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const q = pm.response.json().data.questions[0];",
+                                    "pm.collectionVariables.set('snapshotQuestionId', q.publicId);",
+                                    "if (q.options && q.options.length) pm.collectionVariables.set('optionId', q.options[0].publicId);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/student/assignments/attempts/{{attemptId}}/taking", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts", "{{attemptId}}", "taking"] }
+                    }
+                },
+                {
+                    "name": "Auto-save answers",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/student/assignments/attempts/{{attemptId}}/answers", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts", "{{attemptId}}", "answers"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"answers\": [\n    {\n      \"questionId\": \"{{snapshotQuestionId}}\",\n      \"selectedOptionIds\": [\"{{optionId}}\"],\n      \"textAnswer\": null\n    }\n  ]\n}" }
+                    }
+                },
+                {
+                    "name": "Submit attempt",
+                    "request": {
+                        "method": "POST",
+                        "url": { "raw": "{{baseUrl}}/student/assignments/attempts/{{attemptId}}/submit", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts", "{{attemptId}}", "submit"] }
+                    }
+                },
+                {
+                    "name": "Get attempt result",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/student/assignments/attempts/{{attemptId}}/result", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts", "{{attemptId}}", "result"] }
+                    }
+                },
+                {
+                    "name": "My attempt history",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/student/assignments/attempts?pageSize=20", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts"], "query": [{ "key": "pageSize", "value": "20" }] }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin — Read-only",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "List all assignments",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/admin/assignments?pageSize=50", "host": ["{{baseUrl}}"], "path": ["admin", "assignments"], "query": [{ "key": "pageSize", "value": "50" }] }
+                    }
+                },
+                {
+                    "name": "Get assignment detail",
+                    "request": {
+                        "method": "GET",
+                        "url": { "raw": "{{baseUrl}}/admin/assignments/{{assignmentId}}", "host": ["{{baseUrl}}"], "path": ["admin", "assignments", "{{assignmentId}}"] }
+                    }
+                }
+            ]
+        }
+    ]
+}

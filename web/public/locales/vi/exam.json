@@ -21,6 +21,7 @@
         "owner": "Tác giả",
         "visibility": "Hiển thị",
         "version": "Phiên bản",
+        "tags": "Thẻ",
         "updatedAt": "Cập nhật",
         "actions": "Hành động"
     },
@@ -33,7 +34,8 @@
         "subject": "Môn học",
         "allSubjects": "Tất cả môn học",
         "visibility": "Hiển thị",
-        "allVisibility": "Tất cả trạng thái"
+        "allVisibility": "Tất cả trạng thái",
+        "tag": "Lọc theo thẻ…"
     },
     "form": {
         "createTitle": "Đề thi mới",
@@ -49,12 +51,16 @@
         "subjectNone": "Không có môn",
         "makePublic": "Đặt công khai",
         "makePublicHint": "Đề công khai có thể được giáo viên khác xem và nhân bản.",
+        "tags": "Thẻ",
+        "tagsPlaceholder": "Nhập thẻ rồi nhấn Enter…",
+        "tagsHint": "Nhãn tự do để tìm kiếm, được chuẩn hóa thành chữ thường. Tối đa 10.",
         "cancel": "Hủy",
         "save": "Lưu",
         "saveAndContinue": "Lưu và thêm câu hỏi",
         "validation": {
             "titleLength": "Tên đề phải từ 3 đến 300 ký tự.",
-            "descriptionMax": "Mô tả không được vượt quá 1000 ký tự."
+            "descriptionMax": "Mô tả không được vượt quá 1000 ký tự.",
+            "tooManyTags": "Một đề thi chỉ được tối đa 10 thẻ."
         }
     },
     "builder": {
