@@ -12,10 +12,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useCountdown } from "@/hooks/use-countdown";
 import { ApiError } from "@/lib/api-error";
-import type { TakingQuestion } from "@/services/assignment/dtos/queries/assignment-detail";
+import type {
+    AttemptAnswerResult,
+    TakingQuestion,
+} from "@/services/assignment/dtos/queries/assignment-detail";
 import {
     useAttemptResult,
     useAttemptTaking,
+    useMyAttempts,
     useSaveAttemptAnswers,
     useSubmitAttempt,
 } from "../_shared/assignments.hook";
@@ -266,11 +270,25 @@ function QuestionCard({
 }
 
 function AttemptResultView({ attemptId }: { attemptId: string }) {
-    const { t } = useTranslation("assignment");
+    const { t, i18n } = useTranslation("assignment");
     const navigate = useNavigate();
     const { data: result, isLoading } = useAttemptResult(attemptId);
+    const { data: history } = useMyAttempts({ pageNumber: 1, pageSize: 50 }, !!result);
 
     if (isLoading || !result) return <Skeleton className="h-64 w-full" />;
+
+    const sameAssignment =
+        history?.items
+            .filter((a) => a.assignmentPublicId === result.assignmentPublicId)
+            .sort((a, b) => a.attemptNumber - b.attemptNumber) ?? [];
+
+    const fmt = (iso: string | null) =>
+        iso
+            ? new Intl.DateTimeFormat(i18n.language, {
+                  dateStyle: "short",
+                  timeStyle: "short",
+              }).format(new Date(iso))
+            : "—";
 
     return (
         <div className="mx-auto max-w-2xl space-y-6">
@@ -306,9 +324,114 @@ function AttemptResultView({ attemptId }: { attemptId: string }) {
                 </CardContent>
             </Card>
 
+            {result.scoreReleased && result.answers.length > 0 ? (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">{t("result.review")}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {!result.showAnswers ? (
+                            <p className="text-muted-foreground text-xs">
+                                {t("result.answersHidden")}
+                            </p>
+                        ) : null}
+                        {result.answers.map((a) => (
+                            <AnswerReview key={a.questionPublicId} answer={a} t={t} />
+                        ))}
+                    </CardContent>
+                </Card>
+            ) : null}
+
+            {sameAssignment.length > 1 ? (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">{t("result.history")}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm">
+                        {sameAssignment.map((a) => (
+                            <div
+                                key={a.publicId}
+                                className="flex items-center justify-between border-b py-1 last:border-0"
+                            >
+                                <span>
+                                    {t("attempt.attemptNumber", { number: a.attemptNumber })}
+                                </span>
+                                <span className="text-muted-foreground">{fmt(a.submittedAt)}</span>
+                                <span className="font-medium tabular-nums">
+                                    {a.totalScore ?? "—"}
+                                    {a.totalPoint != null ? ` / ${a.totalPoint}` : ""}
+                                </span>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            ) : null}
+
             <Button variant="outline" onClick={() => navigate("/student/assignments")}>
                 {t("result.backToList")}
             </Button>
+        </div>
+    );
+}
+
+function AnswerReview({
+    answer,
+    t,
+}: {
+    answer: AttemptAnswerResult;
+    t: (k: string, o?: Record<string, unknown>) => string;
+}) {
+    const score = answer.isWriting ? answer.manualScore : answer.autoScore;
+    return (
+        <div className="rounded-md border p-3">
+            <div className="text-muted-foreground mb-1 flex justify-between text-xs">
+                <span>{answer.displayPosition}.</span>
+                <span className="tabular-nums">
+                    {t("result.score")}: {score ?? "—"} / {answer.point}
+                </span>
+            </div>
+            <MarkdownContent>{answer.content}</MarkdownContent>
+
+            {answer.isWriting ? (
+                <div className="mt-2 space-y-2">
+                    <div>
+                        <p className="text-muted-foreground text-xs">{t("result.yourAnswer")}</p>
+                        {answer.textAnswer && answer.textAnswer.trim() !== "" ? (
+                            <MarkdownContent>{answer.textAnswer}</MarkdownContent>
+                        ) : (
+                            <p className="text-muted-foreground text-sm italic">
+                                {t("result.noAnswer")}
+                            </p>
+                        )}
+                    </div>
+                    {answer.feedback ? (
+                        <div className="bg-muted/30 rounded-md border p-2">
+                            <p className="text-muted-foreground text-xs">{t("result.feedback")}</p>
+                            <MarkdownContent>{answer.feedback}</MarkdownContent>
+                        </div>
+                    ) : null}
+                </div>
+            ) : (
+                <ul className="mt-2 space-y-1 text-sm">
+                    {answer.options.map((o) => (
+                        <li
+                            key={o.publicId}
+                            className={`flex items-center gap-2 ${
+                                o.isCorrect ? "text-green-600" : ""
+                            }`}
+                        >
+                            <span>
+                                {o.isSelected ? "☑" : "☐"} {o.content}
+                            </span>
+                            {o.isCorrect ? (
+                                <span className="text-green-600 text-xs">
+                                    ✓ {t("result.correctMark")}
+                                </span>
+                            ) : null}
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 }

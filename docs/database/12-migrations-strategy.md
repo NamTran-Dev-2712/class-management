@@ -164,12 +164,24 @@ Examples:
 > auto-grade + auto-submit do **Hangfire recurring job** `assignment-lifecycle` + app-layer xử lý
 > (xem 05/06 "as built" và [14-background-jobs.md](./14-background-jobs.md)). `updated_at` qua interceptor.
 
-### MVP-6: Grading
+### MVP-6: Grading (as built)
 
 ```
-202602190900_create_manual_grades_table     -- + triggers + grading completion trigger
-202602190910_create_assignment_grade_releases_table
+20260618213719_create_manual_grades
+  -- Tạo bảng manual_grades (score numeric(8,2) CHECK >= 0, feedback CHECK length <= 5000,
+  --   unique (attempt_id, snapshot_question_id), idx attempt_id + created_by)
+  -- FK: attempt_id → attempts CASCADE, snapshot_question_id → snapshot_questions RESTRICT,
+  --   created_by/updated_by → users SET NULL (cột auditable chuẩn = graded_by/graded_at semantics)
 ```
+
+> Khác kế hoạch gốc trong [07-schema-grading.md](./07-schema-grading.md): **không dùng DB trigger**
+> `check_attempt_grading_complete`. Việc chuyển attempt sang `Graded` + tính lại `total_manual_score`/
+> `total_score` được làm ở **application layer** (`ManualGradeFinalizer`, dùng chung bởi GradeAttempt
+> handler) cùng một `SaveChangesAsync` — đồng bộ với cách auto-grade (`AttemptGrading`) đã làm ở MVP-5,
+> dễ debug hơn. **Không tạo bảng `assignment_grade_releases`**: việc công bố điểm (Manual policy) chỉ
+> set cột `assignments.grades_released_at` đã có sẵn từ MVP-5 (released_by luôn là teacher chủ sở hữu;
+> audit đầy đủ ai/khi nào để dành cho MVP-7 `audit_logs`). Không có view mới — tổng điểm nằm trên
+> bảng `attempts`, đã được `vw_attempts`/`vw_student_assignments` đọc.
 
 ### MVP-7: Admin
 

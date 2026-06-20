@@ -3,7 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 import { studentAssignmentService } from "@/services/assignment/assignment.service";
 import type { SaveAttemptAnswersRequest } from "@/services/assignment/dtos/commands/assignment-commands";
-import type { StudentAssignmentListQuery } from "@/services/assignment/dtos/queries/assignment-list";
+import type {
+    AttemptListQuery,
+    StudentAssignmentListQuery,
+} from "@/services/assignment/dtos/queries/assignment-list";
 
 export function useStudentAssignments(query: StudentAssignmentListQuery) {
     return useQuery({
@@ -29,6 +32,14 @@ export function useAttemptTaking(attemptId: string | undefined) {
         // Always refetch on mount so the remaining-time + draft answers are fresh after a reload.
         staleTime: 0,
         refetchOnWindowFocus: false,
+    });
+}
+
+export function useMyAttempts(query: AttemptListQuery, enabled = true) {
+    return useQuery({
+        queryKey: queryKeys.assignments.myAttempts(query),
+        queryFn: () => studentAssignmentService.myAttempts(query),
+        enabled,
     });
 }
 

@@ -150,4 +150,56 @@ internal static class AssignmentsApi
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
         return await AuthHelper.ReadDataAsync(resp);
     }
+
+    public static Task<HttpResponseMessage> GetResultRawAsync(
+        HttpClient student,
+        string attemptId
+    ) => student.GetAsync($"/api/student/assignments/attempts/{attemptId}/result");
+
+    // ── MVP-6: grading / reports ─────────────────────────────────────────────────────────────
+
+    public static async Task<JsonElement> GetAttemptsAsync(HttpClient teacher, string assignmentId)
+    {
+        var resp = await teacher.GetAsync($"/api/teacher/assignments/{assignmentId}/attempts");
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        return await AuthHelper.ReadDataAsync(resp);
+    }
+
+    public static async Task<JsonElement> GetGradingAsync(HttpClient teacher, string attemptId)
+    {
+        var resp = await teacher.GetAsync($"/api/teacher/assignments/attempts/{attemptId}/grading");
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        return await AuthHelper.ReadDataAsync(resp);
+    }
+
+    public static Task<HttpResponseMessage> GradeRawAsync(
+        HttpClient teacher,
+        string attemptId,
+        object grades
+    ) =>
+        teacher.PostAsJsonAsync(
+            $"/api/teacher/assignments/attempts/{attemptId}/grade",
+            new { grades }
+        );
+
+    public static Task<HttpResponseMessage> ReleaseGradesRawAsync(
+        HttpClient teacher,
+        string assignmentId
+    ) => teacher.PostAsync($"/api/teacher/assignments/{assignmentId}/release-grades", null);
+
+    public static async Task<JsonElement> GetReportAsync(HttpClient teacher, string assignmentId)
+    {
+        var resp = await teacher.GetAsync($"/api/teacher/assignments/{assignmentId}/report");
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        return await AuthHelper.ReadDataAsync(resp);
+    }
+
+    public static Task<HttpResponseMessage> ExportRawAsync(
+        HttpClient teacher,
+        string assignmentId
+    ) => teacher.GetAsync($"/api/teacher/assignments/{assignmentId}/export");
+
+    // The first attempt's single writing question id (taking view exposes one question per attempt).
+    public static string WritingQuestionId(JsonElement taking) =>
+        taking.GetProperty("questions")[0].GetProperty("publicId").GetString()!;
 }

@@ -14,7 +14,8 @@ public class UnitOfWork : IUnitOfWork
         IQuestionRepository questions,
         IExamRepository exams,
         IAssignmentRepository assignments,
-        IAttemptRepository attempts
+        IAttemptRepository attempts,
+        IManualGradeRepository manualGrades
     )
     {
         _context = context;
@@ -25,6 +26,7 @@ public class UnitOfWork : IUnitOfWork
         Exams = exams;
         Assignments = assignments;
         Attempts = attempts;
+        ManualGrades = manualGrades;
     }
 
     public ISubjectRepository Subjects { get; }
@@ -34,6 +36,7 @@ public class UnitOfWork : IUnitOfWork
     public IExamRepository Exams { get; }
     public IAssignmentRepository Assignments { get; }
     public IAttemptRepository Attempts { get; }
+    public IManualGradeRepository ManualGrades { get; }
 
     public IGenericRepository<T> Repository<T>()
         where T : class

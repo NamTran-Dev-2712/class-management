@@ -77,5 +77,8 @@ export const queryKeys = {
             [...queryKeys.assignments.all, "my-attempts", params] as const,
         taking: (attemptId: string) => [...queryKeys.assignments.all, "taking", attemptId] as const,
         result: (attemptId: string) => [...queryKeys.assignments.all, "result", attemptId] as const,
+        grading: (attemptId: string) =>
+            [...queryKeys.assignments.all, "grading", attemptId] as const,
+        report: (publicId: string) => [...queryKeys.assignments.all, "report", publicId] as const,
     },
 } as const;

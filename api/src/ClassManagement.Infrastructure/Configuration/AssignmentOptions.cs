@@ -29,4 +29,10 @@ public sealed class AssignmentOptions
 
     /// <summary>Max expired attempts auto-submitted per lifecycle sweep (keeps one run bounded).</summary>
     public int LifecycleBatchSize { get; init; } = 200;
+
+    /// <summary>Number of equal-width buckets in the assignment report's score histogram (MVP-6).</summary>
+    public int ReportHistogramBuckets { get; init; } = 10;
+
+    /// <summary>Soft cap on rows in a CSV grade export (MVP-6 §12 risk: large export → timeout).</summary>
+    public int MaxExportRows { get; init; } = 500;
 }

@@ -1,13 +1,16 @@
-import { http } from "@/lib/axios.config";
+import { apiClient, http } from "@/lib/axios.config";
 import type { Paginated } from "@/types/global/paginated";
 import type {
     CreateAssignmentRequest,
+    GradeAttemptRequest,
     SaveAttemptAnswersRequest,
     UpdateAssignmentRequest,
 } from "./dtos/commands/assignment-commands";
 import type {
     AssignmentDetail,
     AssignmentPreview,
+    AssignmentReport,
+    AttemptGrading,
     AttemptResult,
     AttemptTaking,
     StudentAssignmentDetail,
@@ -34,6 +37,9 @@ export const teacherAssignmentService = {
     attempts: (publicId: string, query: AttemptListQuery) =>
         http.get<Paginated<AttemptListItem>>(`${TEACHER}/${publicId}/attempts`, { params: query }),
     attempt: (attemptId: string) => http.get<AttemptResult>(`${TEACHER}/attempts/${attemptId}`),
+    grading: (attemptId: string) =>
+        http.get<AttemptGrading>(`${TEACHER}/attempts/${attemptId}/grading`),
+    report: (publicId: string) => http.get<AssignmentReport>(`${TEACHER}/${publicId}/report`),
     create: (payload: CreateAssignmentRequest) => http.post<{ publicId: string }>(TEACHER, payload),
     update: (publicId: string, payload: UpdateAssignmentRequest) =>
         http.put<null>(`${TEACHER}/${publicId}`, payload),
@@ -41,6 +47,16 @@ export const teacherAssignmentService = {
     close: (publicId: string) => http.post<null>(`${TEACHER}/${publicId}/close`),
     archive: (publicId: string) => http.post<null>(`${TEACHER}/${publicId}/archive`),
     remove: (publicId: string) => http.delete<null>(`${TEACHER}/${publicId}`),
+    grade: (attemptId: string, payload: GradeAttemptRequest) =>
+        http.post<null>(`${TEACHER}/attempts/${attemptId}/grade`, payload),
+    releaseGrades: (publicId: string) => http.post<null>(`${TEACHER}/${publicId}/release-grades`),
+    // Raw blob download (CSV file, not the ApiResponse envelope).
+    exportGrades: async (publicId: string) => {
+        const res = await apiClient.get<Blob>(`${TEACHER}/${publicId}/export`, {
+            responseType: "blob",
+        });
+        return res.data;
+    },
 };
 
 /** Student assignment list + online test-taking. */

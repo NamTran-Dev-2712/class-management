@@ -37,6 +37,7 @@ public sealed class ApplicationDbContext
     public DbSet<SnapshotOption> SnapshotOptions => Set<SnapshotOption>();
     public DbSet<Attempt> Attempts => Set<Attempt>();
     public DbSet<AttemptAnswer> AttemptAnswers => Set<AttemptAnswer>();
+    public DbSet<ManualGrade> ManualGrades => Set<ManualGrade>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -204,5 +204,22 @@
   "Attempt.AlreadySubmitted": "Lượt làm bài này đã được nộp.",
   "Attempt.DeadlinePassed": "Đã hết thời gian làm bài cho lượt này.",
   "Attempt.QuestionNotInAttempt": "Câu hỏi đó không thuộc lượt làm bài này.",
-  "Attempt.OptionNotInQuestion": "Một lựa chọn đã chọn không thuộc câu hỏi."
+  "Attempt.OptionNotInQuestion": "Một lựa chọn đã chọn không thuộc câu hỏi.",
+
+  "Attempt.Graded": "Đã chấm điểm lượt làm bài.",
+  "Assignment.GradesReleased": "Đã công bố điểm thành công.",
+  "Grade.AttemptNotSubmitted": "Lượt làm bài này chưa được nộp.",
+  "Grade.NoWritingQuestions": "Lượt làm bài này không có câu tự luận để chấm.",
+  "Grade.QuestionNotGradable": "Câu hỏi đó không thể chấm thủ công.",
+  "Grade.ScoreOutOfRange": "Điểm phải nằm trong khoảng từ 0 đến điểm tối đa của câu hỏi.",
+  "Validation.Grade.GradesRequired": "Cần ít nhất một điểm chấm.",
+  "Validation.Grade.DuplicateQuestion": "Mỗi câu hỏi chỉ được chấm một lần trong mỗi yêu cầu.",
+  "Validation.Grade.ScoreNegative": "Điểm không được âm.",
+  "Validation.Grade.FeedbackTooLong": "Nhận xét không được vượt quá 5000 ký tự.",
+  "Report.NotSubmitted": "Chưa nộp",
+  "Report.NotGraded": "Chưa chấm",
+  "Report.Student": "Học sinh",
+  "Report.Score": "Điểm",
+  "Report.Total": "Tổng điểm",
+  "Report.Attempts": "Số lượt"
 }

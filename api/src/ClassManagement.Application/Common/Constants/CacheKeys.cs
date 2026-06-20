@@ -32,6 +32,7 @@ public static class OutputCachePolicies
     public const string StudentAssignmentsRead = "student-assignments-read";
     public const string AdminAssignmentsRead = "admin-assignments-read";
     public const string AttemptsRead = "attempts-read";
+    public const string AssignmentReportRead = "assignment-report-read";
 }
 
 /// <summary>

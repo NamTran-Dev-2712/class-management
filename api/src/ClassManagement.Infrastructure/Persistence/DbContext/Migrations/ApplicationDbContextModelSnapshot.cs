@@ -732,6 +732,78 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.ToView("vw_attempts", (string)null);
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.ManualGrade", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AttemptId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("attempt_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Feedback")
+                        .HasColumnType("text")
+                        .HasColumnName("feedback");
+
+                    b.Property<decimal>("Score")
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("score");
+
+                    b.Property<long>("SnapshotQuestionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("snapshot_question_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_manual_grades");
+
+                    b.HasIndex("AttemptId")
+                        .HasDatabaseName("idx_manual_grades_attempt");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("idx_manual_grades_graded_by");
+
+                    b.HasIndex("SnapshotQuestionId")
+                        .HasDatabaseName("ix_manual_grades_snapshot_question_id");
+
+                    b.HasIndex("UpdatedBy")
+                        .HasDatabaseName("ix_manual_grades_updated_by");
+
+                    b.HasIndex("AttemptId", "SnapshotQuestionId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_manual_grades_attempt_question");
+
+                    b.ToTable("manual_grades", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_manual_grades_feedback_length", "feedback IS NULL OR length(feedback) <= 5000");
+
+                            t.HasCheckConstraint("chk_manual_grades_score", "score >= 0");
+                        });
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotOption", b =>
                 {
                     b.Property<long>("Id")
@@ -2743,6 +2815,35 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_attempt_answers_asp_net_users_updated_by");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.ManualGrade", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.Attempt", null)
+                        .WithMany()
+                        .HasForeignKey("AttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_manual_grades_attempts_attempt_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_manual_grades_asp_net_users_created_by");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotQuestion", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotQuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_manual_grades_snapshot_questions_snapshot_question_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_manual_grades_asp_net_users_updated_by");
                 });
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotOption", b =>
