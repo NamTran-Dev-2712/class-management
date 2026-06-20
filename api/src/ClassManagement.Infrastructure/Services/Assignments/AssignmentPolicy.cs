@@ -17,4 +17,6 @@ public sealed class AssignmentPolicy : IAssignmentPolicy
     public int MaxTimeLimitMinutes => _options.MaxTimeLimitMinutes;
     public int MaxAttemptsCap => _options.MaxAttemptsCap;
     public int LifecycleBatchSize => _options.LifecycleBatchSize;
+    public int ReportHistogramBuckets => _options.ReportHistogramBuckets;
+    public int MaxExportRows => _options.MaxExportRows;
 }

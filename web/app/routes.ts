@@ -71,6 +71,14 @@ export default [
                 "assignments/:publicId",
                 "features/teacher/assignments/edit/assignment-edit.page.tsx",
             ),
+            route(
+                "assignments/:publicId/report",
+                "features/teacher/assignments/report/report.page.tsx",
+            ),
+            route(
+                "assignments/:publicId/attempts/:attemptId/grade",
+                "features/teacher/assignments/grade/grade-attempt.page.tsx",
+            ),
         ]),
     ]),
     layout("layouts/student.layout.tsx", [

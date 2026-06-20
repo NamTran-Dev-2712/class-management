@@ -29,3 +29,13 @@ export interface AttemptAnswerInput {
 export interface SaveAttemptAnswersRequest {
     answers: AttemptAnswerInput[];
 }
+
+export interface GradeItemInput {
+    questionPublicId: string;
+    score: number;
+    feedback: string | null;
+}
+
+export interface GradeAttemptRequest {
+    grades: GradeItemInput[];
+}

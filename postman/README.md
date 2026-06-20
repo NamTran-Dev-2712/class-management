@@ -5,7 +5,22 @@ integration tests (`api/tests/ClassManagement.IntegrationTests`).
 
 ## Files
 - `ClassManagement.postman_collection.json` — all endpoints (Auth, Admin Subjects, Admin Users).
-- `ClassManagement.postman_environment.json` — `baseUrl` + admin credentials.
+- `ClassManagement-MVP5.postman_collection.json` — end-to-end Assignment & online-testing flow.
+- `ClassManagement-MVP6.postman_collection.json` — end-to-end Manual Grading & Reports flow
+  (grade a writing answer → report/CSV export → publish grades → student sees score + feedback).
+- `ClassManagement.postman_environment.json` — `baseUrl` + admin/teacher/student credentials.
+
+## Feature flows (MVP-5 / MVP-6)
+The MVP collections are **self-contained**: each registers its own teacher/student, builds the exam →
+class → assignment chain, and captures ids into collection variables as you go. Run the numbered
+folders **top to bottom**. Because auth is cookie-based and the jar holds one session per host, the
+folders deliberately re-log-in when they switch actor (teacher ↔ student ↔ admin).
+
+**MVP-6 order**: `1. Setup (Teacher)` → `2. Student — Join` → `3. Teacher — Approve member` →
+`4. Student — Take & Submit` → `5. Teacher — Grade & Report` → `6. Student — View released result` →
+`7. Admin — Report`. The assignment uses the **Manual** grade-publish policy, so the student's score
+stays hidden until step 5 publishes it; the writing answer (4/5) + the auto-graded objective (4/4)
+make a released total of 8.
 
 ## Import
 1. Postman → **Import** → select both JSON files.

@@ -1,4 +1,4 @@
-import { ArrowLeft, Loader2, Archive, Lock, Send } from "lucide-react";
+import { ArrowLeft, Loader2, Archive, BarChart3, Lock, Megaphone, Send } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
@@ -9,6 +9,13 @@ import { MarkdownContent } from "@/components/shared/markdown/markdown-content";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
     Table,
@@ -20,6 +27,7 @@ import {
 } from "@/components/ui/table";
 import { useTableParams } from "@/hooks/use-table-params";
 import { ApiError } from "@/lib/api-error";
+import type { AttemptStatus } from "@/services/assignment/dtos/queries/assignment-list";
 import { AssignmentForm } from "../_shared/assignment-form";
 import { AssignmentStatusBadge } from "../_shared/assignment-status-badge";
 import {
@@ -29,7 +37,15 @@ import {
     usePublishAssignment,
     useTeacherAssignment,
 } from "../_shared/assignments.hook";
+import { usePublishGrades } from "../_shared/grading.hook";
 import type { Route } from "./+types/assignment-edit.page";
+
+const GRADABLE_STATUSES: AttemptStatus[] = [
+    "NeedManualGrading",
+    "Graded",
+    "AutoGraded",
+    "Submitted",
+];
 
 export function meta(_: Route.MetaArgs) {
     return [{ title: "Assignment · Class Management" }];
@@ -44,7 +60,8 @@ export default function AssignmentEditPage() {
     const publish = usePublishAssignment();
     const close = useCloseAssignment();
     const archive = useArchiveAssignment();
-    const [confirm, setConfirm] = useState<"close" | "archive" | null>(null);
+    const publishGrades = usePublishGrades();
+    const [confirm, setConfirm] = useState<"close" | "archive" | "publishGrades" | null>(null);
 
     if (isLoading || !assignment) {
         return <Skeleton className="h-96 w-full" />;
@@ -56,6 +73,11 @@ export default function AssignmentEditPage() {
     const isDraft = assignment.status === "Draft";
     const canClose = assignment.status === "Open" || assignment.status === "Scheduled";
     const canArchive = assignment.status !== "Archived";
+    const canManageGrades = !isDraft;
+    const canPublishGrades =
+        canManageGrades &&
+        assignment.gradePublishPolicy === "Manual" &&
+        assignment.publishedAt != null;
 
     return (
         <div className="mx-auto max-w-4xl space-y-6">
@@ -103,6 +125,23 @@ export default function AssignmentEditPage() {
                             {t("actions.close")}
                         </Button>
                     ) : null}
+                    {canManageGrades ? (
+                        <Button
+                            variant="outline"
+                            onClick={() =>
+                                navigate(`/teacher/assignments/${assignment.publicId}/report`)
+                            }
+                        >
+                            <BarChart3 className="size-4" />
+                            {t("report.title")}
+                        </Button>
+                    ) : null}
+                    {canPublishGrades ? (
+                        <Button variant="outline" onClick={() => setConfirm("publishGrades")}>
+                            <Megaphone className="size-4" />
+                            {t("publishing.button")}
+                        </Button>
+                    ) : null}
                     {canArchive ? (
                         <Button variant="outline" onClick={() => setConfirm("archive")}>
                             <Archive className="size-4" />
@@ -118,7 +157,16 @@ export default function AssignmentEditPage() {
                 <>
                     <PublishedSummary assignment={assignment} t={t} />
                     <SnapshotQuestions assignment={assignment} t={t} />
-                    <AttemptsRoster publicId={assignment.publicId} locale={i18n.language} t={t} />
+                    <AttemptsRoster
+                        publicId={assignment.publicId}
+                        locale={i18n.language}
+                        onGrade={(attemptId) =>
+                            navigate(
+                                `/teacher/assignments/${assignment.publicId}/attempts/${attemptId}/grade`,
+                            )
+                        }
+                        t={t}
+                    />
                 </>
             )}
 
@@ -150,6 +198,23 @@ export default function AssignmentEditPage() {
                     archive.mutate(assignment.publicId, {
                         onSuccess: () => {
                             toast.success(t("toast.archived"));
+                            setConfirm(null);
+                        },
+                        onError,
+                    })
+                }
+            />
+            <ConfirmDialog
+                open={confirm === "publishGrades"}
+                onOpenChange={(open) => !open && setConfirm(null)}
+                title={t("publishing.confirm.title")}
+                description={t("publishing.confirm.description")}
+                confirmLabel={t("publishing.confirm.action")}
+                isPending={publishGrades.isPending}
+                onConfirm={() =>
+                    publishGrades.mutate(assignment.publicId, {
+                        onSuccess: () => {
+                            toast.success(t("publishing.published"));
                             setConfirm(null);
                         },
                         onError,
@@ -234,16 +299,20 @@ function SnapshotQuestions({ assignment, t }: { assignment: Detail; t: (k: strin
 function AttemptsRoster({
     publicId,
     locale,
+    onGrade,
     t,
 }: {
     publicId: string;
     locale: string;
-    t: (k: string) => string;
+    onGrade: (attemptId: string) => void;
+    t: (k: string, o?: Record<string, unknown>) => string;
 }) {
     const { params, setPage } = useTableParams({ pageSize: 20 });
+    const [status, setStatus] = useState<AttemptStatus | "all">("all");
     const { data, isLoading } = useAssignmentAttempts(publicId, {
         pageNumber: params.pageNumber,
         pageSize: params.pageSize,
+        status: status === "all" ? undefined : status,
     });
     const fmt = (iso: string | null) =>
         iso
@@ -254,8 +323,23 @@ function AttemptsRoster({
 
     return (
         <Card>
-            <CardHeader>
+            <CardHeader className="flex-row items-center justify-between gap-3 space-y-0">
                 <CardTitle className="text-base">{t("roster.title")}</CardTitle>
+                <Select value={status} onValueChange={(v) => setStatus(v as AttemptStatus | "all")}>
+                    <SelectTrigger className="w-44" size="sm">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{t("roster.filterStatus")}</SelectItem>
+                        {(["NeedManualGrading", "Graded", "AutoGraded", "Submitted"] as const).map(
+                            (s) => (
+                                <SelectItem key={s} value={s}>
+                                    {t(`attemptStatus.${s}`)}
+                                </SelectItem>
+                            ),
+                        )}
+                    </SelectContent>
+                </Select>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -273,6 +357,7 @@ function AttemptsRoster({
                                 <TableHead>{t("roster.status")}</TableHead>
                                 <TableHead>{t("roster.submittedAt")}</TableHead>
                                 <TableHead className="text-right">{t("roster.score")}</TableHead>
+                                <TableHead className="text-right">{t("roster.actions")}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -281,7 +366,9 @@ function AttemptsRoster({
                                     <TableCell className="font-medium">{a.studentName}</TableCell>
                                     <TableCell>#{a.attemptNumber}</TableCell>
                                     <TableCell>
-                                        <Badge variant="outline">{a.status}</Badge>
+                                        <Badge variant="outline">
+                                            {t(`attemptStatus.${a.status}`)}
+                                        </Badge>
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {fmt(a.submittedAt)}
@@ -289,6 +376,17 @@ function AttemptsRoster({
                                     <TableCell className="text-right tabular-nums">
                                         {a.totalScore ?? "—"}
                                         {a.totalPoint != null ? ` / ${a.totalPoint}` : ""}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {GRADABLE_STATUSES.includes(a.status) ? (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => onGrade(a.publicId)}
+                                            >
+                                                {t("roster.grade")}
+                                            </Button>
+                                        ) : null}
                                     </TableCell>
                                 </TableRow>
                             ))}

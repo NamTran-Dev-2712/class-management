@@ -163,10 +163,15 @@ public static class DependencyInjection
         );
         services.AddScoped<IAssignmentRepository, AssignmentRepository>();
         services.AddScoped<IAttemptRepository, AttemptRepository>();
+        services.AddScoped<IManualGradeRepository, ManualGradeRepository>();
         services.AddSingleton<IAssignmentPolicy, Services.Assignments.AssignmentPolicy>();
         services.AddSingleton<
             Application.Modules.Assignments.Interfaces.IAutoGradingService,
             Services.Assignments.AutoGradingService
+        >();
+        services.AddScoped<
+            Application.Modules.Assignments.Interfaces.IGradeExportService,
+            Services.Assignments.CsvGradeExportService
         >();
 
         // Admin user management

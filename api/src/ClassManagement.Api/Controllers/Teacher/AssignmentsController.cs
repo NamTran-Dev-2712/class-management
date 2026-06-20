@@ -1,4 +1,6 @@
 using ClassManagement.Application.Common.Constants;
+using ClassManagement.Application.Interfaces.Localization;
+using ClassManagement.Application.Modules.Assignments.Interfaces;
 using ClassManagement.Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -13,10 +15,18 @@ namespace ClassManagement.Api.Controllers.Teacher;
 public class TeacherAssignmentsController : BaseApiController
 {
     private readonly ISender _mediator;
+    private readonly IGradeExportService _exportService;
+    private readonly ILocalizationService _localization;
 
-    public TeacherAssignmentsController(ISender mediator)
+    public TeacherAssignmentsController(
+        ISender mediator,
+        IGradeExportService exportService,
+        ILocalizationService localization
+    )
     {
         _mediator = mediator;
+        _exportService = exportService;
+        _localization = localization;
     }
 
     // ── Reads ────────────────────────────────────────────────────────────────────────────────
@@ -91,6 +101,60 @@ public class TeacherAssignmentsController : BaseApiController
         return ApiOk(result);
     }
 
+    // Full per-question breakdown of one attempt for manual grading (T6-03). Not cached (edit workflow).
+    [HttpGet("attempts/{attemptId:guid}/grading")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    public async Task<IActionResult> GetAttemptForGrading(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await _mediator.Send(
+            new GetAttemptForGradingQuery(attemptId),
+            cancellationToken
+        );
+        return ApiOk(result);
+    }
+
+    // Aggregate report (stats + histogram + per-student grades) for one assignment (T6-08).
+    [HttpGet("{publicId:guid}/report")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.AssignmentReportRead)]
+    public async Task<IActionResult> GetReport(Guid publicId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetAssignmentReportQuery(publicId),
+            cancellationToken
+        );
+        return ApiOk(result);
+    }
+
+    // CSV grade export (T6-09). Server-generated file; not cached.
+    [HttpGet("{publicId:guid}/export")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Export)]
+    public async Task<IActionResult> ExportGrades(
+        Guid publicId,
+        CancellationToken cancellationToken
+    )
+    {
+        var report = await _mediator.Send(
+            new GetAssignmentReportQuery(publicId),
+            cancellationToken
+        );
+
+        var labels = new GradeExportLabels(
+            _localization.Translate("Report.Student"),
+            _localization.Translate("Report.Score"),
+            _localization.Translate("Report.Total"),
+            _localization.Translate("Report.Attempts"),
+            _localization.Translate("Report.NotSubmitted"),
+            _localization.Translate("Report.NotGraded")
+        );
+
+        var bytes = _exportService.BuildCsv(report, labels);
+        return File(bytes, "text/csv", $"grades-{publicId}.csv");
+    }
+
     // ── Writes ───────────────────────────────────────────────────────────────────────────────
 
     [HttpPost]
@@ -157,5 +221,33 @@ public class TeacherAssignmentsController : BaseApiController
         await _mediator.Send(new DeleteAssignmentCommand(publicId), cancellationToken);
         await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
         return ApiOk("Assignment.Deleted");
+    }
+
+    // Manually grade the writing answers of an attempt (T6-04). Batch upsert; transitions the attempt to
+    // Graded once every writing question is scored.
+    [HttpPost("attempts/{attemptId:guid}/grade")]
+    [EnableRateLimiting(RateLimitOptions.Policies.GradeWrite)]
+    public async Task<IActionResult> GradeAttempt(
+        Guid attemptId,
+        GradeAttemptCommand command,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(command with { AttemptId = attemptId }, cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Attempt.Graded");
+    }
+
+    // Publish grades to students (T6-07, Manual policy). Sets grades_released_at.
+    [HttpPost("{publicId:guid}/release-grades")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AssignmentWrite)]
+    public async Task<IActionResult> ReleaseGrades(
+        Guid publicId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(new ReleaseAssignmentGradesCommand(publicId), cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Assignment.GradesReleased");
     }
 }

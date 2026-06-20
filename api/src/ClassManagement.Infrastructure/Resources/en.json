@@ -204,5 +204,22 @@
   "Attempt.AlreadySubmitted": "This attempt has already been submitted.",
   "Attempt.DeadlinePassed": "The time limit for this attempt has passed.",
   "Attempt.QuestionNotInAttempt": "That question is not part of this attempt.",
-  "Attempt.OptionNotInQuestion": "A selected option does not belong to the question."
+  "Attempt.OptionNotInQuestion": "A selected option does not belong to the question.",
+
+  "Attempt.Graded": "Attempt graded.",
+  "Assignment.GradesReleased": "Grades published successfully.",
+  "Grade.AttemptNotSubmitted": "This attempt has not been submitted yet.",
+  "Grade.NoWritingQuestions": "This attempt has no writing questions to grade.",
+  "Grade.QuestionNotGradable": "That question cannot be manually graded.",
+  "Grade.ScoreOutOfRange": "The score must be between 0 and the question's maximum points.",
+  "Validation.Grade.GradesRequired": "At least one grade is required.",
+  "Validation.Grade.DuplicateQuestion": "Each question may be graded only once per request.",
+  "Validation.Grade.ScoreNegative": "The score must not be negative.",
+  "Validation.Grade.FeedbackTooLong": "The feedback must not exceed 5000 characters.",
+  "Report.NotSubmitted": "Not submitted",
+  "Report.NotGraded": "Not graded",
+  "Report.Student": "Student",
+  "Report.Score": "Score",
+  "Report.Total": "Total",
+  "Report.Attempts": "Attempts"
 }

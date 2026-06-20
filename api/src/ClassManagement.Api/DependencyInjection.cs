@@ -159,6 +159,8 @@ public static class DependencyInjection
             AddUserFixedWindow(RateLimitOptions.Policies.AttemptStart, rl.AttemptStart);
             AddUserFixedWindow(RateLimitOptions.Policies.AttemptSave, rl.AttemptSave);
             AddUserFixedWindow(RateLimitOptions.Policies.AttemptSubmit, rl.AttemptSubmit);
+            AddIpFixedWindow(RateLimitOptions.Policies.GradeWrite, rl.GradeWrite);
+            AddIpFixedWindow(RateLimitOptions.Policies.Export, rl.Export);
             AddIpFixedWindow(RateLimitOptions.Policies.Read, rl.Read);
         });
 
@@ -262,6 +264,12 @@ public static class DependencyInjection
             );
             options.AddPolicy(
                 OutputCachePolicies.AttemptsRead,
+                b => PerUser(b, OutputCacheTags.Assignments)
+            );
+            // Assignment report (MVP-6): owner-scoped (PerUser); evicted by grade/release writes via the
+            // shared "assignments" tag. The CSV export + grading-detail GETs are NOT cached.
+            options.AddPolicy(
+                OutputCachePolicies.AssignmentReportRead,
                 b => PerUser(b, OutputCacheTags.Assignments)
             );
         });

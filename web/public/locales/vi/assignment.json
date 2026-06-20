@@ -117,8 +117,81 @@
         "status": "Trạng thái",
         "submittedAt": "Đã nộp",
         "score": "Điểm",
+        "actions": "Thao tác",
+        "grade": "Chấm",
+        "filterStatus": "Tất cả trạng thái",
+        "viewReport": "Báo cáo",
         "prev": "Trước",
         "next": "Sau"
+    },
+    "attemptStatus": {
+        "InProgress": "Đang làm",
+        "Submitted": "Đã nộp",
+        "AutoGraded": "Đã chấm tự động",
+        "NeedManualGrading": "Cần chấm",
+        "Graded": "Đã chấm",
+        "NotSubmitted": "Chưa nộp"
+    },
+    "grading": {
+        "title": "Chấm bài",
+        "subtitle": "Chấm điểm các câu tự luận và để lại nhận xét.",
+        "student": "Học sinh",
+        "attempt": "Lượt #{{number}}",
+        "autoGraded": "Chấm tự động",
+        "writing": "Câu trả lời tự luận",
+        "noAnswer": "Không có câu trả lời.",
+        "correct": "Đáp án đúng",
+        "selected": "Bạn đã chọn",
+        "score": "Điểm",
+        "feedback": "Nhận xét",
+        "feedbackPlaceholder": "Nhận xét cho học sinh (tùy chọn)…",
+        "outOf": "/ {{point}} điểm",
+        "save": "Lưu điểm",
+        "saved": "Đã lưu điểm.",
+        "total": "Tổng",
+        "allGraded": "Đã chấm tất cả câu tự luận.",
+        "pending": "Còn {{count}} câu tự luận chưa có điểm.",
+        "back": "Về bài giao",
+        "empty": "Lượt làm bài này không có câu hỏi.",
+        "scoreRange": "Điểm phải nằm trong khoảng từ 0 đến {{max}}."
+    },
+    "publishing": {
+        "button": "Công bố điểm",
+        "published": "Đã công bố điểm.",
+        "releasedOn": "Đã công bố điểm ngày {{date}}",
+        "confirm": {
+            "title": "Công bố điểm cho học sinh?",
+            "description": "Học sinh sẽ xem được điểm và nhận xét.",
+            "warning": "Còn {{count}} bài chưa chấm xong và sẽ hiển thị \"Chưa chấm\".",
+            "action": "Công bố"
+        }
+    },
+    "report": {
+        "title": "Báo cáo",
+        "subtitle": "Kết quả của lớp cho bài giao này.",
+        "back": "Về bài giao",
+        "stats": {
+            "totalStudents": "Học sinh",
+            "submitted": "Đã nộp",
+            "notSubmitted": "Chưa nộp",
+            "graded": "Đã chấm",
+            "pending": "Chờ chấm",
+            "average": "Trung bình",
+            "min": "Thấp nhất",
+            "max": "Cao nhất"
+        },
+        "distribution": "Phân phối điểm",
+        "studentsAxis": "Học sinh",
+        "table": {
+            "title": "Điểm học sinh",
+            "student": "Học sinh",
+            "status": "Trạng thái",
+            "score": "Điểm",
+            "attempts": "Số lượt",
+            "empty": "Lớp này chưa có học sinh nào."
+        },
+        "export": "Xuất CSV",
+        "exportError": "Không thể xuất điểm."
     },
     "admin": {
         "title": "Bài giao",
@@ -167,6 +240,17 @@
         "autoSubmitted": "Lượt này được nộp tự động (đã hết thời gian).",
         "pending": "Điểm của bạn sẽ có sau.",
         "manualPending": "Một số câu cần giáo viên chấm thủ công.",
-        "backToList": "Về danh sách bài giao"
+        "waitingPublish": "Điểm của bạn sẽ có sau khi giáo viên công bố.",
+        "waitingDeadline": "Điểm của bạn sẽ có sau khi hết hạn làm bài.",
+        "backToList": "Về danh sách bài giao",
+        "score": "Điểm",
+        "review": "Xem lại bài làm",
+        "yourAnswer": "Câu trả lời của bạn",
+        "noAnswer": "Không có câu trả lời.",
+        "feedback": "Nhận xét của giáo viên",
+        "correctMark": "Đáp án đúng",
+        "answersHidden": "Đáp án đúng được ẩn cho bài giao này.",
+        "history": "Các lượt làm của bạn",
+        "historyEmpty": "Chưa có lượt làm bài nào."
     }
 }

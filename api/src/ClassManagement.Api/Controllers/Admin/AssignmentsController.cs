@@ -44,4 +44,18 @@ public class AdminAssignmentsController : BaseApiController
         );
         return ApiOk(result);
     }
+
+    // Admin may view any assignment's report (permission matrix). OwnerScoped = false skips the owner
+    // guard (role-gated by [Authorize(Admin)] above).
+    [HttpGet("{publicId:guid}/report")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.AssignmentReportRead)]
+    public async Task<IActionResult> GetReport(Guid publicId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetAssignmentReportQuery(publicId, OwnerScoped: false),
+            cancellationToken
+        );
+        return ApiOk(result);
+    }
 }

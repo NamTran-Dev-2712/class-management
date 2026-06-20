@@ -117,8 +117,81 @@
         "status": "Status",
         "submittedAt": "Submitted",
         "score": "Score",
+        "actions": "Actions",
+        "grade": "Grade",
+        "filterStatus": "All statuses",
+        "viewReport": "Report",
         "prev": "Previous",
         "next": "Next"
+    },
+    "attemptStatus": {
+        "InProgress": "In progress",
+        "Submitted": "Submitted",
+        "AutoGraded": "Auto-graded",
+        "NeedManualGrading": "Needs grading",
+        "Graded": "Graded",
+        "NotSubmitted": "Not submitted"
+    },
+    "grading": {
+        "title": "Grade attempt",
+        "subtitle": "Score the writing answers and leave feedback.",
+        "student": "Student",
+        "attempt": "Attempt #{{number}}",
+        "autoGraded": "Auto-graded",
+        "writing": "Writing answer",
+        "noAnswer": "No answer provided.",
+        "correct": "Correct",
+        "selected": "Your selection",
+        "score": "Score",
+        "feedback": "Feedback",
+        "feedbackPlaceholder": "Optional feedback for the student…",
+        "outOf": "/ {{point}} pt",
+        "save": "Save grades",
+        "saved": "Grades saved.",
+        "total": "Total",
+        "allGraded": "All writing answers graded.",
+        "pending": "{{count}} writing answer(s) still need a score.",
+        "back": "Back to assignment",
+        "empty": "This attempt has no questions.",
+        "scoreRange": "Score must be between 0 and {{max}}."
+    },
+    "publishing": {
+        "button": "Publish grades",
+        "published": "Grades published.",
+        "releasedOn": "Grades published on {{date}}",
+        "confirm": {
+            "title": "Publish grades to students?",
+            "description": "Students will be able to see their scores and feedback.",
+            "warning": "{{count}} attempt(s) still need grading and will show as \"Not graded\".",
+            "action": "Publish"
+        }
+    },
+    "report": {
+        "title": "Report",
+        "subtitle": "Class performance for this assignment.",
+        "back": "Back to assignment",
+        "stats": {
+            "totalStudents": "Students",
+            "submitted": "Submitted",
+            "notSubmitted": "Not submitted",
+            "graded": "Graded",
+            "pending": "Pending grading",
+            "average": "Average",
+            "min": "Lowest",
+            "max": "Highest"
+        },
+        "distribution": "Score distribution",
+        "studentsAxis": "Students",
+        "table": {
+            "title": "Student grades",
+            "student": "Student",
+            "status": "Status",
+            "score": "Score",
+            "attempts": "Attempts",
+            "empty": "No students in this class yet."
+        },
+        "export": "Export CSV",
+        "exportError": "Could not export grades."
     },
     "admin": {
         "title": "Assignments",
@@ -167,6 +240,17 @@
         "autoSubmitted": "This attempt was submitted automatically (time limit reached).",
         "pending": "Your score will be available later.",
         "manualPending": "Some questions need manual grading by your teacher.",
-        "backToList": "Back to assignments"
+        "waitingPublish": "Your score will be available once your teacher publishes grades.",
+        "waitingDeadline": "Your score will be available after the deadline.",
+        "backToList": "Back to assignments",
+        "score": "Score",
+        "review": "Answer review",
+        "yourAnswer": "Your answer",
+        "noAnswer": "No answer.",
+        "feedback": "Teacher feedback",
+        "correctMark": "Correct answer",
+        "answersHidden": "Correct answers are hidden for this assignment.",
+        "history": "Your attempts",
+        "historyEmpty": "No attempts yet."
     }
 }

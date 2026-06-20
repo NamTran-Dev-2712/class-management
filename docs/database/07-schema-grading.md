@@ -210,6 +210,35 @@ Phụ thuộc:
 
 ## Open Questions
 
-- [ ] **Trigger vs App**: Trigger `check_attempt_grading_complete` có thể phức tạp khi debug. Alternative: app kiểm tra mỗi lần Teacher save manual_grade. Nên chọn app approach nếu muốn đơn giản hơn.
-- [ ] **Score history**: Khi Teacher sửa điểm, hiện tại chỉ ghi audit_log. Nếu muốn hiển thị "điểm đã được sửa từ X thành Y" cho Student, cần thêm `manual_grade_history` table.
-- [ ] **Partial grading**: Nếu Assignment có 3 câu tự luận và Teacher mới chấm 2, Student có xem được điểm tạm thời không? Hiện tại: không. Cần `show_partial_grade BOOLEAN` trong assignments?
+- [ ] **Score history**: Khi Teacher sửa điểm, hiện tại chỉ ghi audit_log (MVP-7). Nếu muốn hiển thị "điểm đã được sửa từ X thành Y" cho Student, cần thêm `manual_grade_history` table.
+- [ ] **Partial grading**: Nếu Assignment có 3 câu tự luận và Teacher mới chấm 2, Student có xem được điểm tạm thời không? Hiện tại: không (attempt vẫn `NeedManualGrading`, `total_score = NULL`). Cần `show_partial_grade BOOLEAN` trong assignments?
+
+---
+
+## Implementation notes (MVP-6, as built)
+
+Migration `20260618213719_create_manual_grades`. Authoritative record of deviations from the design above:
+
+- **Chỉ tạo bảng `manual_grades`** — dùng các cột **auditable chuẩn** thay cho `graded_by`/`graded_at`:
+  `created_at`/`created_by` = lần chấm đầu (graded_at/graded_by), `updated_at`/`updated_by` = lần sửa gần
+  nhất, set tự động bởi `AuditableEntityInterceptor`. Không có cột `public_id` (không expose qua id).
+  Unique `(attempt_id, snapshot_question_id)` → mỗi câu tự luận 1 grade/attempt (upsert khi sửa).
+  FK: `attempt_id` CASCADE, `snapshot_question_id` RESTRICT, `created_by`/`updated_by` SET NULL.
+- **KHÔNG dùng DB trigger** `check_attempt_grading_complete`. Logic hoàn tất chấm điểm nằm ở
+  **application layer** (`ManualGradeFinalizer`, gọi từ `GradeAttemptCommandHandler`): sau khi upsert
+  manual_grades, tính `total_manual_score = SUM(score)`; nếu **mọi** câu tự luận đã có điểm →
+  `status = Graded`, `total_score = (total_auto_score ?? 0) + total_manual_score`; ngược lại giữ
+  `NeedManualGrading` + `total_score = NULL`. Cùng một `SaveChangesAsync`, idempotent, đúng cả khi Teacher
+  sửa điểm sau khi đã `Graded` (BR-6-03). Đồng bộ với `AttemptGrading` của MVP-5. Validate
+  `0 ≤ score ≤ snapshot_question.point` ở handler.
+- **KHÔNG tạo bảng `assignment_grade_releases`**. Công bố điểm (Manual policy, BR-6-04) chỉ set cột
+  `assignments.grades_released_at` (đã có từ MVP-5) qua `ReleaseAssignmentGradesCommand` (idempotent).
+  `released_by` luôn là teacher chủ sở hữu assignment; audit đầy đủ ai/khi nào → MVP-7 `audit_logs`.
+- **Grade visibility** (đọc) đã có sẵn ở `AttemptResultLoader.IsReleased` (MVP-5): Immediate luôn hiện;
+  AfterDeadline hiện khi assignment Closed hoặc `closes_at <= now`; Manual hiện khi `grades_released_at`
+  khác NULL. Teacher/Admin luôn thấy điểm thật (force release). `show_answers_after_grade` quyết định có
+  lộ đáp án đúng câu khách quan cho Student hay không (chỉ khi đã release).
+- **Báo cáo + export** không thêm bảng/view: `GetAssignmentReportQuery` tính trực tiếp từ
+  `vw_class_members` (roster đã duyệt) + `vw_attempts` (điểm theo `score_policy` Highest/Latest), histogram
+  buckets cấu hình qua `Assignment:ReportHistogramBuckets`. CSV export sinh server-side
+  (`CsvGradeExportService`, UTF-8 BOM, RFC-4180), soft-cap `Assignment:MaxExportRows`.

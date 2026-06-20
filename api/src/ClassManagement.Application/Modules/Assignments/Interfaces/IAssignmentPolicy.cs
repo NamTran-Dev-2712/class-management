@@ -13,4 +13,10 @@ public interface IAssignmentPolicy
 
     /// <summary>Max expired attempts auto-submitted per lifecycle sweep.</summary>
     int LifecycleBatchSize { get; }
+
+    /// <summary>Number of equal-width buckets in the assignment report's score histogram.</summary>
+    int ReportHistogramBuckets { get; }
+
+    /// <summary>Soft cap on rows in a CSV grade export.</summary>
+    int MaxExportRows { get; }
 }

@@ -64,6 +64,14 @@ public sealed class RateLimitOptions
     public RateLimitPolicyOptions AttemptSubmit { get; init; } =
         new() { PermitLimit = 10, WindowSeconds = 60 };
 
+    // Manual grading / publish-grades (MVP-6, per-IP teacher writes) — bursty (grade many attempts).
+    public RateLimitPolicyOptions GradeWrite { get; init; } =
+        new() { PermitLimit = 60, WindowSeconds = 60 };
+
+    // CSV grade export (MVP-6) — tight: each call materializes the full roster + serializes a file.
+    public RateLimitPolicyOptions Export { get; init; } =
+        new() { PermitLimit = 10, WindowSeconds = 60 };
+
     // Generous per-IP cap for GET list endpoints — output cache absorbs repeated identical reads, but
     // this throttles param-varying spam that would otherwise bypass the cache and hit the database.
     public RateLimitPolicyOptions Read { get; init; } =
@@ -89,6 +97,8 @@ public sealed class RateLimitOptions
         public const string AttemptStart = "attemptStart";
         public const string AttemptSave = "attemptSave";
         public const string AttemptSubmit = "attemptSubmit";
+        public const string GradeWrite = "gradeWrite";
+        public const string Export = "export";
         public const string Read = "read";
     }
 }
