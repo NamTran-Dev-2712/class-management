@@ -11,7 +11,9 @@ import {
 } from "react-router";
 import type { Route } from "./+types/root";
 import "./app.css";
+import { AppConfigProvider } from "@/components/providers/app-config-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { NotificationRealtimeProvider } from "@/components/providers/notification-realtime-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { userContext } from "@/lib/auth-context";
 import { authenticateRequest } from "@/lib/auth.server";
@@ -77,7 +79,11 @@ export default function App({ loaderData }: Route.ComponentProps) {
     return (
         <QueryClientProvider client={queryClient}>
             <AuthProvider user={loaderData.user}>
-                <Outlet />
+                <AppConfigProvider>
+                    <NotificationRealtimeProvider>
+                        <Outlet />
+                    </NotificationRealtimeProvider>
+                </AppConfigProvider>
             </AuthProvider>
         </QueryClientProvider>
     );

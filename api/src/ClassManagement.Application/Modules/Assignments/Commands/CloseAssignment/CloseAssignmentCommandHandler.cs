@@ -1,5 +1,6 @@
 using ClassManagement.Application.Exceptions;
 using ClassManagement.Application.Modules.Assignments.Interfaces;
+using ClassManagement.Domain.Modules.Admin.Constants;
 using ClassManagement.Domain.Modules.Assignments.Enums;
 
 public class CloseAssignmentCommandHandler : IRequestHandler<CloseAssignmentCommand>
@@ -7,16 +8,19 @@ public class CloseAssignmentCommandHandler : IRequestHandler<CloseAssignmentComm
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
     private readonly IAutoGradingService _grader;
+    private readonly IAuditLogger _auditLogger;
 
     public CloseAssignmentCommandHandler(
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
-        IAutoGradingService grader
+        IAutoGradingService grader,
+        IAuditLogger auditLogger
     )
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
         _grader = grader;
+        _auditLogger = auditLogger;
     }
 
     public async Task Handle(CloseAssignmentCommand request, CancellationToken ct)
@@ -42,6 +46,21 @@ public class CloseAssignmentCommandHandler : IRequestHandler<CloseAssignmentComm
         );
         foreach (var attempt in inProgress)
             await AttemptGrading.FinalizeAsync(_unitOfWork, _grader, attempt, now, true, ct);
+
+        await _auditLogger.LogAsync(
+            new AuditEntry
+            {
+                Action = AuditActions.AssignmentClosed,
+                TargetType = AuditTargetTypes.Assignment,
+                TargetId = assignment.Id,
+                TargetPublicId = assignment.PublicId,
+                Metadata = new Dictionary<string, object?>
+                {
+                    ["auto_submitted_attempts"] = inProgress.Count,
+                },
+            },
+            ct
+        );
 
         await _unitOfWork.SaveChangesAsync(ct);
     }

@@ -30,6 +30,9 @@ export default [
             route("questions", "features/admin/questions/questions.page.tsx"),
             route("exams", "features/admin/exams/exams.page.tsx"),
             route("assignments", "features/admin/assignments/assignments.page.tsx"),
+            route("audit-logs", "features/admin/audit-logs/audit-logs.page.tsx"),
+            route("reports", "features/admin/reports/reports.page.tsx"),
+            route("settings", "features/admin/settings/settings.page.tsx"),
         ]),
     ]),
     layout("layouts/teacher.layout.tsx", [

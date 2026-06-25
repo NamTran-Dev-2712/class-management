@@ -22,11 +22,12 @@ public class CreateExamCommandHandler : IRequestHandler<CreateExamCommand, Guid>
     {
         var teacherId = _currentUser.UserId ?? throw new UnauthorizedException("Auth.Unauthorized");
 
-        // BR-4-09: optional cap on exams per teacher (0 = unlimited).
-        if (_policy.MaxExamsPerTeacher > 0)
+        // BR-4-09: optional cap on exams per teacher (0 = unlimited). Read live from system_settings.
+        var maxExams = await _policy.GetMaxExamsPerTeacherAsync(ct);
+        if (maxExams > 0)
         {
             var count = await _unitOfWork.Exams.CountByTeacherAsync(teacherId, ct);
-            if (count >= _policy.MaxExamsPerTeacher)
+            if (count >= maxExams)
                 throw new BadException("Exam.MaxExamsReached");
         }
 

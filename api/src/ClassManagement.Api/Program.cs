@@ -1,10 +1,12 @@
 using ClassManagement.Api;
+using ClassManagement.Api.Hubs;
 using ClassManagement.Api.Security;
 using ClassManagement.Application;
 using ClassManagement.Infrastructure;
 using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Persistence.DbContext;
 using ClassManagement.Infrastructure.Services.Assignments.Jobs;
+using ClassManagement.Infrastructure.Services.Notifications.Jobs;
 using Hangfire;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -20,6 +22,7 @@ var app = builder.Build();
 
 app.UseApiMiddleware();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 // Hangfire dashboard — Admin-only (gated by config; authentication runs in UseApiMiddleware)
 var hangfireOptions =
@@ -44,6 +47,22 @@ if (hangfireOptions.Enabled)
             "assignment-lifecycle",
             job => job.ExecuteAsync(),
             assignmentOptions.LifecycleSweepCron
+        );
+
+        // Notification background jobs (MVP-7): due-soon reminders + retention cleanup. Crons are
+        // config-driven; both handlers are idempotent so a re-run is safe.
+        var notificationOptions =
+            app.Configuration.GetSection(NotificationOptions.SectionName).Get<NotificationOptions>()
+            ?? new NotificationOptions();
+        recurringJobs.AddOrUpdate<AssignmentDueSoonJob>(
+            "assignment-due-soon",
+            job => job.ExecuteAsync(),
+            notificationOptions.DueSoonSweepCron
+        );
+        recurringJobs.AddOrUpdate<NotificationCleanupJob>(
+            "notification-cleanup",
+            job => job.ExecuteAsync(),
+            notificationOptions.CleanupCron
         );
     }
 }

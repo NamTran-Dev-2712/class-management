@@ -58,4 +58,14 @@ public class AdminAssignmentsController : BaseApiController
         );
         return ApiOk(result);
     }
+
+    // Emergency force-close (A7-07): closes the assignment + auto-submits any in-progress attempts.
+    [HttpPost("{publicId:guid}/force-close")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AdminAction)]
+    public async Task<IActionResult> ForceClose(Guid publicId, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new ForceCloseAssignmentCommand(publicId), cancellationToken);
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Assignment.ForceClosed");
+    }
 }

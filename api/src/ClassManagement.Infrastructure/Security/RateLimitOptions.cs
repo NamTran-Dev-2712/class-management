@@ -72,6 +72,22 @@ public sealed class RateLimitOptions
     public RateLimitPolicyOptions Export { get; init; } =
         new() { PermitLimit = 10, WindowSeconds = 60 };
 
+    // Submitting a report (MVP-7) — per-user; a hard daily cap (anti-spam) is enforced in the handler.
+    public RateLimitPolicyOptions ReportWrite { get; init; } =
+        new() { PermitLimit = 10, WindowSeconds = 60 };
+
+    // Admin moderation actions (MVP-7, per-IP): review report, force-close assignment, announcements.
+    public RateLimitPolicyOptions AdminAction { get; init; } =
+        new() { PermitLimit = 30, WindowSeconds = 60 };
+
+    // Marking notifications read/archived (MVP-7) — per-user; generous (UI may batch).
+    public RateLimitPolicyOptions NotificationWrite { get; init; } =
+        new() { PermitLimit = 60, WindowSeconds = 60 };
+
+    // Changing a system setting (MVP-7, per-IP admin) — rare but sensitive.
+    public RateLimitPolicyOptions SystemSettingWrite { get; init; } =
+        new() { PermitLimit = 20, WindowSeconds = 60 };
+
     // Generous per-IP cap for GET list endpoints — output cache absorbs repeated identical reads, but
     // this throttles param-varying spam that would otherwise bypass the cache and hit the database.
     public RateLimitPolicyOptions Read { get; init; } =
@@ -99,6 +115,10 @@ public sealed class RateLimitOptions
         public const string AttemptSubmit = "attemptSubmit";
         public const string GradeWrite = "gradeWrite";
         public const string Export = "export";
+        public const string ReportWrite = "reportWrite";
+        public const string AdminAction = "adminAction";
+        public const string NotificationWrite = "notificationWrite";
+        public const string SystemSettingWrite = "systemSettingWrite";
         public const string Read = "read";
     }
 }

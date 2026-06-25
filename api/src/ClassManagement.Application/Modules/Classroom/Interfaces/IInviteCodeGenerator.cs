@@ -1,6 +1,7 @@
-// Generates a class invite code: 8-char crypto-random [A-Z0-9]. Uniqueness is ensured by the handler
-// retrying against IClassRepository.InviteCodeExistsAsync.
+// Generates a class invite code: crypto-random [A-Z0-9] of the given length (live-configurable via
+// IClassroomPolicy.GetInviteCodeLengthAsync). Uniqueness is ensured by the handler retrying against
+// IClassRepository.InviteCodeExistsAsync.
 public interface IInviteCodeGenerator
 {
-    string Generate();
+    string Generate(int length);
 }

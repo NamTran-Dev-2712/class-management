@@ -108,13 +108,27 @@ public static class DependencyInjection
                         ClockSkew = TimeSpan.Zero,
                     };
 
-                    // Read access token from cookie when Authorization header is absent
+                    // Read the access token from the cookie when the Authorization header is absent; for
+                    // SignalR WebSocket upgrades (where custom headers aren't possible) also accept it from
+                    // the `access_token` query string on /hubs paths.
                     bearer.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = ctx =>
                         {
                             if (string.IsNullOrEmpty(ctx.Token))
-                                ctx.Token = ctx.Request.Cookies["access_token"];
+                            {
+                                var path = ctx.HttpContext.Request.Path;
+                                if (path.StartsWithSegments("/hubs"))
+                                {
+                                    var queryToken = ctx.Request.Query["access_token"];
+                                    if (!string.IsNullOrEmpty(queryToken))
+                                        ctx.Token = queryToken;
+                                }
+
+                                if (string.IsNullOrEmpty(ctx.Token))
+                                    ctx.Token = ctx.Request.Cookies["access_token"];
+                            }
+
                             return Task.CompletedTask;
                         },
                     };
@@ -143,19 +157,20 @@ public static class DependencyInjection
         services.AddScoped<IClassRepository, ClassRepository>();
         services.AddScoped<IClassMembershipRepository, ClassMembershipRepository>();
         services.AddSingleton<IInviteCodeGenerator, Services.Classroom.InviteCodeGenerator>();
-        services.AddSingleton<IClassroomPolicy, Services.Classroom.ClassroomPolicy>();
+        // Scoped (not Singleton): the policy now reads the live, cached system_settings value.
+        services.AddScoped<IClassroomPolicy, Services.Classroom.ClassroomPolicy>();
 
         // Question bank (MVP-3)
         services.Configure<QuestionBankOptions>(
             configuration.GetSection(QuestionBankOptions.SectionName)
         );
         services.AddScoped<IQuestionRepository, QuestionRepository>();
-        services.AddSingleton<IQuestionPolicy, Services.Questions.QuestionPolicy>();
+        services.AddScoped<IQuestionPolicy, Services.Questions.QuestionPolicy>();
 
         // Exam builder (MVP-4)
         services.Configure<ExamOptions>(configuration.GetSection(ExamOptions.SectionName));
         services.AddScoped<IExamRepository, ExamRepository>();
-        services.AddSingleton<IExamPolicy, Services.Exams.ExamPolicy>();
+        services.AddScoped<IExamPolicy, Services.Exams.ExamPolicy>();
 
         // Assignment & online testing (MVP-5)
         services.Configure<AssignmentOptions>(
@@ -164,7 +179,8 @@ public static class DependencyInjection
         services.AddScoped<IAssignmentRepository, AssignmentRepository>();
         services.AddScoped<IAttemptRepository, AttemptRepository>();
         services.AddScoped<IManualGradeRepository, ManualGradeRepository>();
-        services.AddSingleton<IAssignmentPolicy, Services.Assignments.AssignmentPolicy>();
+        // Scoped (not Singleton): the policy now reads the live, cached system_settings value.
+        services.AddScoped<IAssignmentPolicy, Services.Assignments.AssignmentPolicy>();
         services.AddSingleton<
             Application.Modules.Assignments.Interfaces.IAutoGradingService,
             Services.Assignments.AutoGradingService
@@ -177,6 +193,18 @@ public static class DependencyInjection
         // Admin user management
         services.AddScoped<IPasswordGenerator, PasswordGenerator>();
         services.AddScoped<IUserAdminRepository, UserAdminRepository>();
+
+        // Admin & moderation (MVP-7)
+        services.AddScoped<IAuditLogger, Services.Audit.AuditLogger>();
+        services.AddScoped<INotificationService, Services.Notifications.NotificationService>();
+        services.AddScoped<ISystemSettingsService, Services.Settings.SystemSettingsService>();
+        services.Configure<NotificationOptions>(
+            configuration.GetSection(NotificationOptions.SectionName)
+        );
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
 
         // Password-reset / email / client-app options
         services.Configure<PasswordResetOptions>(
@@ -231,6 +259,7 @@ public static class DependencyInjection
         // Current user from HTTP context
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IUserDirectory, UserDirectory>();
 
         return services;
     }

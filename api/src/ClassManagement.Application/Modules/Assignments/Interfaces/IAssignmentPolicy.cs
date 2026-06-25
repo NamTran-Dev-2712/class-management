@@ -8,8 +8,11 @@ public interface IAssignmentPolicy
     /// <summary>Upper bound for an assignment's time limit, in minutes.</summary>
     int MaxTimeLimitMinutes { get; }
 
-    /// <summary>Upper bound on attempts allowed per assignment.</summary>
+    /// <summary>Absolute upper bound a teacher may configure (appsettings; used by the write validator).</summary>
     int MaxAttemptsCap { get; }
+
+    /// <summary>Live global ceiling on attempts per assignment (system_settings); <c>0</c> = unlimited.</summary>
+    Task<int> GetMaxAttemptsPerAssignmentAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Max expired attempts auto-submitted per lifecycle sweep.</summary>
     int LifecycleBatchSize { get; }

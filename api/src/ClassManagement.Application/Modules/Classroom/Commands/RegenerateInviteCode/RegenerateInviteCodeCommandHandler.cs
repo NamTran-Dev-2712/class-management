@@ -4,16 +4,19 @@ public class RegenerateInviteCodeCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
     private readonly IInviteCodeGenerator _inviteCodes;
+    private readonly IClassroomPolicy _policy;
 
     public RegenerateInviteCodeCommandHandler(
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
-        IInviteCodeGenerator inviteCodes
+        IInviteCodeGenerator inviteCodes,
+        IClassroomPolicy policy
     )
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
         _inviteCodes = inviteCodes;
+        _policy = policy;
     }
 
     public async Task<string> Handle(RegenerateInviteCodeCommand request, CancellationToken ct)
@@ -23,10 +26,11 @@ public class RegenerateInviteCodeCommandHandler
             _currentUser.UserId
         );
 
+        var length = await _policy.GetInviteCodeLengthAsync(ct);
         string code;
         do
         {
-            code = _inviteCodes.Generate();
+            code = _inviteCodes.Generate(length);
         } while (await _unitOfWork.Classes.InviteCodeExistsAsync(code, ct));
 
         entity.InviteCode = code;

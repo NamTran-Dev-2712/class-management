@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
-import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Ban, Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ interface ColumnOptions {
     showOwner?: boolean;
     onOpen?: (a: AssignmentListItem) => void;
     onDelete?: (a: AssignmentListItem) => void;
+    onForceClose?: (a: AssignmentListItem) => void;
 }
 
 export function getAssignmentColumns({
@@ -27,6 +28,7 @@ export function getAssignmentColumns({
     showOwner,
     onOpen,
     onDelete,
+    onForceClose,
 }: ColumnOptions): ColumnDef<AssignmentListItem>[] {
     const formatDate = (iso: string | null) =>
         iso
@@ -104,7 +106,7 @@ export function getAssignmentColumns({
         });
     }
 
-    if (onOpen || onDelete) {
+    if (onOpen || onDelete || onForceClose) {
         columns.push({
             id: "actions",
             header: () => <span className="sr-only">{t("columns.actions")}</span>,
@@ -126,6 +128,16 @@ export function getAssignmentColumns({
                                     <DropdownMenuItem onSelect={() => onOpen(a)}>
                                         <Eye className="size-4" />
                                         {t("actions.open")}
+                                    </DropdownMenuItem>
+                                ) : null}
+                                {onForceClose &&
+                                (a.status === "Open" || a.status === "Scheduled") ? (
+                                    <DropdownMenuItem
+                                        variant="destructive"
+                                        onSelect={() => onForceClose(a)}
+                                    >
+                                        <Ban className="size-4" />
+                                        {t("actions.forceClose")}
                                     </DropdownMenuItem>
                                 ) : null}
                                 {onDelete && a.status === "Draft" ? (

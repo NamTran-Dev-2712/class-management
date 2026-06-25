@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { DataTable } from "@/components/shared/data-table/data-table";
 import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
+import { ReportDialog } from "@/components/shared/report-dialog";
 import { getQuestionColumns } from "../_shared/question-columns";
 import { QuestionFilters } from "../_shared/question-filters";
 import { QuestionPreviewDialog } from "../_shared/question-preview";
@@ -33,6 +34,7 @@ export default function PublicQuestionsPage() {
 
     const [previewId, setPreviewId] = useState<string | null>(null);
     const { data: preview, isLoading: previewLoading } = usePublicQuestion(previewId ?? undefined);
+    const [reportId, setReportId] = useState<string | null>(null);
 
     const sorting: SortingState = filters.params.sortBy
         ? [{ id: filters.params.sortBy, desc: filters.params.sortOrder === "desc" }]
@@ -45,6 +47,7 @@ export default function PublicQuestionsPage() {
                 locale: i18n.language,
                 showOwner: true,
                 onPreview: (q) => setPreviewId(q.publicId),
+                onReport: (q) => setReportId(q.publicId),
                 onDuplicate: (q) =>
                     duplicate.mutate(q.publicId, {
                         onSuccess: (res) => {
@@ -116,6 +119,15 @@ export default function PublicQuestionsPage() {
                 question={preview}
                 isLoading={previewLoading}
             />
+
+            {reportId ? (
+                <ReportDialog
+                    open={reportId !== null}
+                    onOpenChange={(open) => !open && setReportId(null)}
+                    targetType="Question"
+                    targetPublicId={reportId}
+                />
+            ) : null}
         </div>
     );
 }

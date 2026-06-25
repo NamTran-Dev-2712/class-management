@@ -24,6 +24,534 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Admin.Entities.AuditLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("action");
+
+                    b.Property<long?>("ActorId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("actor_id");
+
+                    b.Property<string>("ActorRole")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("actor_role");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)")
+                        .HasColumnName("ip_address");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
+                    b.Property<long?>("TargetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("target_id");
+
+                    b.Property<Guid?>("TargetPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_public_id");
+
+                    b.Property<string>("TargetType")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("target_type");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_audit_logs");
+
+                    b.HasIndex("CreatedAt")
+                        .IsDescending()
+                        .HasDatabaseName("idx_audit_logs_created_at");
+
+                    b.HasIndex("Action", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_audit_logs_action_created");
+
+                    b.HasIndex("ActorId", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_audit_logs_actor_created");
+
+                    b.HasIndex("TargetType", "TargetId")
+                        .HasDatabaseName("idx_audit_logs_target");
+
+                    b.ToTable("audit_logs", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_audit_logs_action", "action IN ('user.login', 'user.logout', 'user.login_failed', 'user.password_changed', 'user.password_reset_requested', 'user.password_reset_completed', 'user.role_changed', 'user.locked', 'user.unlocked', 'user.deleted', 'question.created', 'question.updated', 'question.correct_answer_changed', 'question.deleted', 'question.visibility_changed', 'exam.created', 'exam.updated', 'exam.deleted', 'exam.visibility_changed', 'assignment.published', 'assignment.closed', 'assignment.archived', 'attempt.started', 'attempt.submitted', 'attempt.auto_submitted', 'grade.manual_graded', 'grade.manual_grade_updated', 'grade.published', 'report.created', 'report.reviewed', 'report.resolved', 'report.rejected', 'admin.system_settings_changed', 'admin.assignment_force_closed')");
+
+                            t.HasCheckConstraint("chk_audit_logs_actor_role", "actor_role IS NULL OR actor_role IN ('Student', 'Teacher', 'Admin', 'System')");
+
+                            t.HasCheckConstraint("chk_audit_logs_target_type", "target_type IS NULL OR target_type IN ('User', 'Class', 'Question', 'Exam', 'Assignment', 'Attempt', 'ManualGrade', 'Report', 'Subscription', 'Payment', 'SystemSetting')");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Admin.Entities.AuditLogView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("action");
+
+                    b.Property<string>("ActorEmail")
+                        .HasColumnType("text")
+                        .HasColumnName("actor_email");
+
+                    b.Property<long?>("ActorId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("actor_id");
+
+                    b.Property<string>("ActorName")
+                        .HasColumnType("text")
+                        .HasColumnName("actor_name");
+
+                    b.Property<Guid?>("ActorPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_public_id");
+
+                    b.Property<string>("ActorRole")
+                        .HasColumnType("text")
+                        .HasColumnName("actor_role");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("text")
+                        .HasColumnName("ip_address");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("text")
+                        .HasColumnName("metadata");
+
+                    b.Property<Guid?>("TargetPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_public_id");
+
+                    b.Property<string>("TargetType")
+                        .HasColumnType("text")
+                        .HasColumnName("target_type");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_audit_log_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_audit_logs", (string)null);
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Admin.Entities.Notification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Body")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("Link")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("link");
+
+                    b.Property<string>("Payload")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("read_at");
+
+                    b.Property<string>("ReferenceId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reference_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Unread")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notifications");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_notifications_public_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("idx_notifications_user_unread")
+                        .HasFilter("status = 'Unread'");
+
+                    b.HasIndex("EventType", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_notifications_event_type");
+
+                    b.HasIndex("UserId", "EventType", "ReferenceId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_notifications_idempotent")
+                        .HasFilter("reference_id IS NOT NULL");
+
+                    b.HasIndex("UserId", "Status", "CreatedAt")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("idx_notifications_user_status");
+
+                    b.ToTable("notifications", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_notifications_body_length", "body IS NULL OR length(body) <= 500");
+
+                            t.HasCheckConstraint("chk_notifications_status", "status IN ('Unread', 'Read', 'Archived')");
+
+                            t.HasCheckConstraint("chk_notifications_title_length", "length(title) >= 1 AND length(title) <= 200");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Admin.Entities.Report", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AdminAction")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("admin_action");
+
+                    b.Property<long?>("AdminId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("admin_id");
+
+                    b.Property<string>("AdminNote")
+                        .HasColumnType("text")
+                        .HasColumnName("admin_note");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("reason");
+
+                    b.Property<long>("ReporterId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("reporter_id");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Pending")
+                        .HasColumnName("status");
+
+                    b.Property<long>("TargetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("target_id");
+
+                    b.Property<Guid?>("TargetPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_public_id");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("target_type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_reports");
+
+                    b.HasIndex("AdminId")
+                        .HasDatabaseName("idx_reports_admin")
+                        .HasFilter("admin_id IS NOT NULL");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_reports_public_id");
+
+                    b.HasIndex("ReporterId")
+                        .HasDatabaseName("idx_reports_reporter");
+
+                    b.HasIndex("Status", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_reports_status");
+
+                    b.HasIndex("TargetType", "TargetId")
+                        .HasDatabaseName("idx_reports_target");
+
+                    b.HasIndex("ReporterId", "TargetType", "TargetId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_reports_idempotent")
+                        .HasFilter("status IN ('Pending', 'Reviewing')");
+
+                    b.ToTable("reports", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_reports_admin_action", "admin_action IS NULL OR admin_action IN ('Dismiss', 'WarnUser', 'HideContent', 'DeleteContent', 'BanUser')");
+
+                            t.HasCheckConstraint("chk_reports_admin_note_length", "admin_note IS NULL OR length(admin_note) <= 1000");
+
+                            t.HasCheckConstraint("chk_reports_description_length", "description IS NULL OR length(description) <= 2000");
+
+                            t.HasCheckConstraint("chk_reports_reason", "reason IN ('InappropriateContent', 'Spam', 'Copyright', 'IncorrectAnswer', 'Other')");
+
+                            t.HasCheckConstraint("chk_reports_status", "status IN ('Pending', 'Reviewing', 'Resolved', 'Rejected')");
+
+                            t.HasCheckConstraint("chk_reports_target_type", "target_type IN ('Question', 'Exam', 'Assignment', 'Class', 'User')");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Admin.Entities.ReportView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AdminAction")
+                        .HasColumnType("text")
+                        .HasColumnName("admin_action");
+
+                    b.Property<long?>("AdminId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("admin_id");
+
+                    b.Property<string>("AdminName")
+                        .HasColumnType("text")
+                        .HasColumnName("admin_name");
+
+                    b.Property<string>("AdminNote")
+                        .HasColumnType("text")
+                        .HasColumnName("admin_note");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("ReporterEmail")
+                        .HasColumnType("text")
+                        .HasColumnName("reporter_email");
+
+                    b.Property<long>("ReporterId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("reporter_id");
+
+                    b.Property<string>("ReporterName")
+                        .HasColumnType("text")
+                        .HasColumnName("reporter_name");
+
+                    b.Property<Guid?>("ReporterPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reporter_public_id");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("TargetPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_public_id");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_report_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_reports", (string)null);
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Admin.Entities.SystemSetting", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsPublic")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_public");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("key");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("value");
+
+                    b.Property<string>("ValueType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("string")
+                        .HasColumnName("value_type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_system_settings");
+
+                    b.HasIndex("Key")
+                        .IsUnique()
+                        .HasDatabaseName("uq_system_settings_key");
+
+                    b.HasIndex("UpdatedBy")
+                        .HasDatabaseName("ix_system_settings_updated_by");
+
+                    b.ToTable("system_settings", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_system_settings_value_type", "value_type IN ('string', 'integer', 'boolean', 'json')");
+                        });
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.Assignment", b =>
                 {
                     b.Property<long>("Id")
@@ -2711,6 +3239,41 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasName("pk_user_tokens");
 
                     b.ToTable("user_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Admin.Entities.Notification", b =>
+                {
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_asp_net_users_user_id");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Admin.Entities.Report", b =>
+                {
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_reports_asp_net_users_admin_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_reports_asp_net_users_reporter_id");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Admin.Entities.SystemSetting", b =>
+                {
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_system_settings_asp_net_users_updated_by");
                 });
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.Assignment", b =>

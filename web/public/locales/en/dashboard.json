@@ -13,9 +13,24 @@
         "questionBank": "Question bank",
         "exams": "Exams",
         "assignments": "Assignments",
+        "auditLogs": "Audit log",
+        "settings": "Settings",
         "myClasses": "My classes",
         "requests": "Join requests",
         "grades": "Grades"
+    },
+    "stats": {
+        "totalUsers": "Total users",
+        "newUsers": "New users (7d)",
+        "activeClasses": "Active classes",
+        "openAssignments": "Open assignments",
+        "pendingReports": "Pending reports",
+        "reviewNow": "Review now"
+    },
+    "charts": {
+        "userGrowth": "New users (last 30 days)",
+        "reportsByStatus": "Reports by status",
+        "assignmentsByStatus": "Assignments by status"
     },
     "admin": {
         "title": "Admin",

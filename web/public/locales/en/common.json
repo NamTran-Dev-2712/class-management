@@ -1,6 +1,9 @@
 {
     "appName": "Class Management",
     "tagline": "Online classrooms, exams and grading — in one place.",
+    "maintenance": {
+        "banner": "The system is under maintenance. Some actions are temporarily unavailable."
+    },
     "language": "Language",
     "nav": {
         "home": "Home",

@@ -1,6 +1,9 @@
 {
     "appName": "Quản lý lớp học",
     "tagline": "Lớp học trực tuyến, thi cử và chấm điểm — trong một nơi.",
+    "maintenance": {
+        "banner": "Hệ thống đang bảo trì. Một số thao tác tạm thời không khả dụng."
+    },
     "language": "Ngôn ngữ",
     "nav": {
         "home": "Trang chủ",

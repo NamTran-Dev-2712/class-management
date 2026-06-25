@@ -1,15 +1,22 @@
 using ClassManagement.Application.Exceptions;
+using ClassManagement.Application.Modules.Assignments.Interfaces;
 using ClassManagement.Domain.Modules.Assignments.Enums;
 
 public class StartAttemptCommandHandler : IRequestHandler<StartAttemptCommand, Guid>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAssignmentPolicy _policy;
 
-    public StartAttemptCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+    public StartAttemptCommandHandler(
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUser,
+        IAssignmentPolicy policy
+    )
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
+        _policy = policy;
     }
 
     public async Task<Guid> Handle(StartAttemptCommand request, CancellationToken ct)
@@ -48,13 +55,17 @@ public class StartAttemptCommandHandler : IRequestHandler<StartAttemptCommand, G
         if (existing is not null)
             return existing.PublicId;
 
-        // Max attempts (BR-5-05).
+        // Max attempts (BR-5-05). The effective ceiling is the lower of the assignment's own MaxAttempts
+        // and the live global cap (system_settings.max_attempts_per_assignment; 0 = unlimited).
         var usedAttempts = await _unitOfWork.Attempts.CountByStudentAsync(
             assignment.Id,
             studentId,
             ct
         );
-        if (usedAttempts >= assignment.MaxAttempts)
+        var globalCap = await _policy.GetMaxAttemptsPerAssignmentAsync(ct);
+        var effectiveMax =
+            globalCap > 0 ? Math.Min(assignment.MaxAttempts, globalCap) : assignment.MaxAttempts;
+        if (usedAttempts >= effectiveMax)
             throw new BadException("Assignment.MaxAttemptsReached");
 
         // Server-computed deadline (BR-5-07): started_at + time limit, capped at the assignment close.

@@ -2,6 +2,7 @@ import { Menu, PanelLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { NotificationBell } from "@/components/shared/notification-bell";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/shared/user-menu";
 import type { ProfileResponse } from "@/services/auth/dtos/queries/profile/profile.response";
@@ -43,6 +44,7 @@ export function Topbar({ titleKey, user }: TopbarProps) {
             ) : null}
 
             <div className="ml-auto flex items-center gap-2">
+                <NotificationBell />
                 <LanguageSwitcher />
                 <UserMenu user={user} />
             </div>

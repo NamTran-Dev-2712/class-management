@@ -39,6 +39,12 @@ public sealed class ApplicationDbContext
     public DbSet<AttemptAnswer> AttemptAnswers => Set<AttemptAnswer>();
     public DbSet<ManualGrade> ManualGrades => Set<ManualGrade>();
 
+    // Admin & moderation (MVP-7)
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<Report> Reports => Set<Report>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

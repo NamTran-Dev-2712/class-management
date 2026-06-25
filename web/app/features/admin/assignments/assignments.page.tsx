@@ -1,13 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SortingState } from "@tanstack/react-table";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { DataTable } from "@/components/shared/data-table/data-table";
 import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
 import { useTableParams } from "@/hooks/use-table-params";
+import { ApiError } from "@/lib/api-error";
 import { queryKeys } from "@/lib/query-keys";
+import { adminService } from "@/services/admin/admin.service";
 import { adminAssignmentService } from "@/services/assignment/assignment.service";
+import type { AssignmentListItem } from "@/services/assignment/dtos/queries/assignment-list";
 import { getAssignmentColumns } from "@/features/teacher/assignments/_shared/assignment-columns";
 import type { Route } from "./+types/assignments.page";
 
@@ -18,6 +23,8 @@ export function meta(_: Route.MetaArgs) {
 export default function AdminAssignmentsPage() {
     const { t, i18n } = useTranslation("assignment");
     const { params, setPage, setPageSize, setSort } = useTableParams();
+    const qc = useQueryClient();
+    const [forceClosing, setForceClosing] = useState<AssignmentListItem | null>(null);
 
     const query = {
         pageNumber: params.pageNumber,
@@ -31,12 +38,29 @@ export default function AdminAssignmentsPage() {
         placeholderData: (prev) => prev,
     });
 
+    const forceClose = useMutation({
+        mutationFn: (publicId: string) => adminService.forceCloseAssignment(publicId),
+        onSuccess: () => {
+            toast.success(t("toast.forceClosed"));
+            setForceClosing(null);
+            qc.invalidateQueries({ queryKey: queryKeys.assignments.all });
+        },
+        onError: (error: unknown) =>
+            toast.error(error instanceof ApiError ? error.message : t("toast.error")),
+    });
+
     const sorting: SortingState = params.sortBy
         ? [{ id: params.sortBy, desc: params.sortOrder === "desc" }]
         : [];
 
     const columns = useMemo(
-        () => getAssignmentColumns({ t, locale: i18n.language, showOwner: true }),
+        () =>
+            getAssignmentColumns({
+                t,
+                locale: i18n.language,
+                showOwner: true,
+                onForceClose: setForceClosing,
+            }),
         [t, i18n.language],
     );
 
@@ -74,6 +98,17 @@ export default function AdminAssignmentsPage() {
                     onPageSizeChange={setPageSize}
                 />
             ) : null}
+
+            <ConfirmDialog
+                open={forceClosing !== null}
+                onOpenChange={(open) => !open && setForceClosing(null)}
+                title={t("forceClose.title")}
+                description={t("forceClose.description", { title: forceClosing?.title ?? "" })}
+                confirmLabel={t("actions.forceClose")}
+                destructive
+                isPending={forceClose.isPending}
+                onConfirm={() => forceClosing && forceClose.mutate(forceClosing.publicId)}
+            />
         </div>
     );
 }

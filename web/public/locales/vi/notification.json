@@ -1,0 +1,48 @@
+{
+    "title": "Thông báo",
+    "markAllRead": "Đánh dấu đã đọc tất cả",
+    "loading": "Đang tải…",
+    "empty": "Bạn chưa có thông báo nào.",
+    "events": {
+        "ClassJoinApproved": {
+            "title": "Yêu cầu vào lớp được duyệt",
+            "body": "Bạn đã được duyệt vào lớp {{className}}."
+        },
+        "ClassJoinRejected": {
+            "title": "Yêu cầu vào lớp bị từ chối",
+            "body": "Yêu cầu tham gia lớp {{className}} không được duyệt."
+        },
+        "AssignmentCreated": {
+            "title": "Bài tập mới",
+            "body": "Có bài tập mới \"{{assignmentTitle}}\"."
+        },
+        "AssignmentDueSoon": {
+            "title": "Bài tập sắp đến hạn",
+            "body": "\"{{assignmentTitle}}\" sắp đến hạn. Đừng quên nộp bài."
+        },
+        "AssignmentClosed": {
+            "title": "Bài tập đã đóng",
+            "body": "\"{{assignmentTitle}}\" đã đóng."
+        },
+        "GradePublished": {
+            "title": "Điểm đã được công bố",
+            "body": "Điểm cho \"{{assignmentTitle}}\" đã có."
+        },
+        "PendingGradingReminder": {
+            "title": "Nhắc nhở chấm bài",
+            "body": "Bạn có bài nộp đang chờ chấm."
+        },
+        "ReportResolved": {
+            "title": "Báo cáo đã được xử lý",
+            "body": "Báo cáo của bạn đã được xem xét."
+        },
+        "ReportReceived": {
+            "title": "Báo cáo mới",
+            "body": "Có báo cáo mới cần xem xét."
+        },
+        "SystemAnnouncement": {
+            "title": "{{title}}",
+            "body": "{{body}}"
+        }
+    }
+}

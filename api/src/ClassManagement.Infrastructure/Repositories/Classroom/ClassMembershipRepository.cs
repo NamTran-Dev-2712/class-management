@@ -47,6 +47,15 @@ public sealed class ClassMembershipRepository : IClassMembershipRepository
             cancellationToken
         );
 
+    public Task<int> CountApprovedAsync(
+        long classId,
+        CancellationToken cancellationToken = default
+    ) =>
+        _context.ClassMemberships.CountAsync(
+            m => m.ClassId == classId && m.Status == MembershipStatus.Approved,
+            cancellationToken
+        );
+
     public async Task AddAsync(
         ClassMembership entity,
         CancellationToken cancellationToken = default

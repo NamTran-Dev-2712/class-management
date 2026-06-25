@@ -20,6 +20,9 @@ public interface IClassMembershipRepository
         CancellationToken cancellationToken = default
     );
 
+    /// <summary>Number of approved members in a class (for the max-students-per-class cap).</summary>
+    Task<int> CountApprovedAsync(long classId, CancellationToken cancellationToken = default);
+
     Task AddAsync(ClassMembership entity, CancellationToken cancellationToken = default);
 
     void Update(ClassMembership entity);

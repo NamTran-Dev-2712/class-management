@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using ClassManagement.Domain.Modules.Admin.Constants;
 using ClassManagement.Infrastructure.Security;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -10,27 +11,37 @@ public class JwtTokenService : IJwtTokenService
 {
     private readonly JwtOptions _options;
     private readonly ITokenHasher _tokenHasher;
+    private readonly ISystemSettingsService _settings;
 
-    public JwtTokenService(IOptions<JwtOptions> options, ITokenHasher tokenHasher)
+    public JwtTokenService(
+        IOptions<JwtOptions> options,
+        ITokenHasher tokenHasher,
+        ISystemSettingsService settings
+    )
     {
         _options = options.Value;
         _tokenHasher = tokenHasher;
+        _settings = settings;
     }
 
-    public Task<TokenResult> GenerateTokensAsync(UserTokenData data)
+    public async Task<TokenResult> GenerateTokensAsync(UserTokenData data)
     {
         var now = DateTime.UtcNow;
         var accessToken = BuildAccessToken(data, now);
         var rawRefreshToken = GenerateRawRefreshToken();
 
-        return Task.FromResult(
-            new TokenResult(
-                AccessToken: accessToken,
-                RefreshToken: rawRefreshToken,
-                RefreshTokenHash: _tokenHasher.Hash(rawRefreshToken),
-                AccessTokenExpiry: now.AddMinutes(_options.ExpiryMinutes),
-                RefreshTokenExpiry: now.AddDays(_options.RefreshTokenExpiryDays)
-            )
+        // Refresh-token lifetime is live-configurable (system_settings) with the appsettings fallback.
+        var refreshTtlDays = await _settings.GetIntAsync(
+            SystemSettingKeys.RefreshTokenTtlDays,
+            _options.RefreshTokenExpiryDays
+        );
+
+        return new TokenResult(
+            AccessToken: accessToken,
+            RefreshToken: rawRefreshToken,
+            RefreshTokenHash: _tokenHasher.Hash(rawRefreshToken),
+            AccessTokenExpiry: now.AddMinutes(_options.ExpiryMinutes),
+            RefreshTokenExpiry: now.AddDays(refreshTtlDays)
         );
     }
 

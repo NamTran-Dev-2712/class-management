@@ -183,14 +183,37 @@ Examples:
 > audit đầy đủ ai/khi nào để dành cho MVP-7 `audit_logs`). Không có view mới — tổng điểm nằm trên
 > bảng `attempts`, đã được `vw_attempts`/`vw_student_assignments` đọc.
 
-### MVP-7: Admin
+### MVP-7: Admin (as built)
+
+**Đã triển khai** — gộp 4 bảng vào **một** migration (giống Questions/Exams/Assignments):
 
 ```
-202602260900_create_audit_logs_table        -- + indexes + REVOKE UPDATE/DELETE
-202602260910_create_reports_table           -- + triggers
-202602260920_create_notifications_table     -- + idempotency index
-202602260930_create_system_settings_table   -- + seed data
+20260620063139_create_admin_moderation_tables
+  -- audit_logs    (append-only; KHÔNG public_id, KHÔNG updated_at; actor/target đa hình KHÔNG FK;
+  --                metadata jsonb; CHECK action/actor_role/target_type; 4 index theo doc 08)
+  -- reports       (public_id; FK reporter_id RESTRICT, admin_id SET NULL; uq_reports_idempotent
+  --                partial unique (reporter_id,target_type,target_id) WHERE status IN Pending/Reviewing)
+  -- notifications (public_id; FK user_id CASCADE; reference_id + uq_notifications_idempotent partial
+  --                unique (user_id,event_type,reference_id) WHERE reference_id IS NOT NULL)
+  -- system_settings (value jsonb; uq_system_settings_key; FK updated_by SET NULL)
+20260620064853_add_audit_logs_view    -- vw_audit_logs (audit ⨝ actor; metadata::text)
+20260621064905_add_reports_view       -- vw_reports (report ⨝ reporter ⨝ reviewing admin)
 ```
+
+> Notifications đọc trực tiếp từ bảng `notifications` (scope theo current user) qua `BaseGetQueryHandler`
+> — không cần view riêng.
+
+> Khác kế hoạch gốc / [08-schema-admin.md](./08-schema-admin.md):
+> - **Idempotency notifications** dùng cột `reference_id` (text) thay vì biểu thức `payload->>'reference_id'`
+>   trong partial index — `NOW()` không IMMUTABLE nên cửa sổ 24h của doc không thể nằm trong predicate
+>   (gotcha #4); job dedup theo thời gian, partial unique là backstop cứng cho event có reference_id.
+> - **`reason`** lưu PascalCase (`InappropriateContent`…) cho nhất quán với mọi enum-as-string khác.
+> - **`system_settings`** thêm `created_at` (từ `BaseEntity`) — vô hại, không có trong doc gốc.
+> - **REVOKE UPDATE/DELETE** trên `audit_logs` ở DB level: **chưa áp dụng** ở MVP-7 (app-layer append-only
+>   qua `IAuditLogger`; cân nhắc bật ở hardening sau vì test/seed dùng chung role). `updated_at` của
+>   `reports`/`system_settings` qua trigger `set_updated_at` (thêm trong `DatabaseSeeder.ApplyTriggersAsync`).
+> - Seed 12 `system_settings` mặc định qua `SystemSettingSeeder` (idempotent, additive).
+> - View đọc (`vw_audit_logs`, `vw_reports`, `vw_notifications`) tạo ở các migration sau theo từng phase.
 
 ### MVP-8: Payment
 
