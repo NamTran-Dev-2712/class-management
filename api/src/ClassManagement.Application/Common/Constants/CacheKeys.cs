@@ -9,6 +9,8 @@ public static class CacheKeys
     public static string SubjectList() => "catalog:subjects:active";
 
     public static string SubjectDetail(Guid publicId) => $"catalog:subjects:{publicId}";
+
+    public static string SystemSettings() => "system:settings:all";
 }
 
 /// <summary>
@@ -33,6 +35,16 @@ public static class OutputCachePolicies
     public const string AdminAssignmentsRead = "admin-assignments-read";
     public const string AttemptsRead = "attempts-read";
     public const string AssignmentReportRead = "assignment-report-read";
+
+    // Admin & moderation (MVP-7)
+    public const string AdminAuditLogsRead = "admin-audit-logs-read";
+    public const string NotificationsRead = "notifications-read";
+    public const string NotificationUnreadCount = "notifications-unread-count";
+    public const string AdminReportsRead = "admin-reports-read";
+    public const string MyReportsRead = "my-reports-read";
+    public const string SystemSettingsRead = "system-settings-read";
+    public const string AdminDashboardRead = "admin-dashboard-read";
+    public const string PublicConfigRead = "public-config-read";
 }
 
 /// <summary>
@@ -47,4 +59,11 @@ public static class OutputCacheTags
     public const string Questions = "questions";
     public const string Exams = "exams";
     public const string Assignments = "assignments";
+
+    // Admin & moderation (MVP-7)
+    public const string AuditLogs = "audit-logs";
+    public const string Notifications = "notifications";
+    public const string Reports = "reports";
+    public const string SystemSettings = "system-settings";
+    public const string AdminDashboard = "admin-dashboard";
 }

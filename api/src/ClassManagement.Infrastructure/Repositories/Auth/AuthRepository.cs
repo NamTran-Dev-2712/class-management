@@ -2,6 +2,8 @@ using System.Security.Cryptography;
 using System.Text;
 using ClassManagement.Application.Common.Constants;
 using ClassManagement.Application.Exceptions;
+using ClassManagement.Application.Interfaces.Audit;
+using ClassManagement.Domain.Modules.Admin.Constants;
 using ClassManagement.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -14,6 +16,8 @@ public class AuthRepository : IAuthRepository
     private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
     private readonly IEmailQueueService _emailQueue;
     private readonly ITokenHasher _tokenHasher;
+    private readonly IAuditLogger _auditLogger;
+    private readonly ISystemSettingsService _settings;
     private readonly PasswordResetOptions _passwordResetOptions;
     private readonly ClientAppOptions _clientAppOptions;
 
@@ -24,6 +28,8 @@ public class AuthRepository : IAuthRepository
         IPasswordResetTokenRepository passwordResetTokenRepository,
         IEmailQueueService emailQueue,
         ITokenHasher tokenHasher,
+        IAuditLogger auditLogger,
+        ISystemSettingsService settings,
         IOptions<PasswordResetOptions> passwordResetOptions,
         IOptions<ClientAppOptions> clientAppOptions
     )
@@ -34,6 +40,8 @@ public class AuthRepository : IAuthRepository
         _passwordResetTokenRepository = passwordResetTokenRepository;
         _emailQueue = emailQueue;
         _tokenHasher = tokenHasher;
+        _auditLogger = auditLogger;
+        _settings = settings;
         _passwordResetOptions = passwordResetOptions.Value;
         _clientAppOptions = clientAppOptions.Value;
     }
@@ -42,11 +50,28 @@ public class AuthRepository : IAuthRepository
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
+        {
+            // Audit the attempt against no actor (unknown email) — same generic error to the caller.
+            await AuditLoginFailedAsync(null, email, "unknown_email");
             throw new UnauthorizedException("Auth.InvalidCredentials");
+        }
+
+        // Failed-attempt lockout (BR-7-08): Identity tracks the count + 15-min window (configured in DI).
+        if (await _userManager.IsLockedOutAsync(user))
+        {
+            await AuditLoginFailedAsync(user.Id, email, "locked_out");
+            throw new UnauthorizedException("Auth.AccountTemporarilyLocked");
+        }
 
         var passwordValid = await _userManager.CheckPasswordAsync(user, password);
         if (!passwordValid)
+        {
+            // CheckPasswordAsync does not increment the failure count — do it explicitly so the lockout
+            // threshold is enforced; a crossing into locked still returns the generic invalid message.
+            await _userManager.AccessFailedAsync(user);
+            await AuditLoginFailedAsync(user.Id, email, "invalid_password");
             throw new UnauthorizedException("Auth.InvalidCredentials");
+        }
 
         // Account-state gate — checked only after password is verified
         if (user.IsDeleted)
@@ -55,6 +80,10 @@ public class AuthRepository : IAuthRepository
             throw new UnauthorizedException("Auth.AccountDisabled");
         if (user.IsLocked)
             throw new UnauthorizedException("Auth.AccountLocked");
+
+        // Successful credential check — clear the failed-attempt counter.
+        if (await _userManager.GetAccessFailedCountAsync(user) > 0)
+            await _userManager.ResetAccessFailedCountAsync(user);
 
         var roles = await _userManager.GetRolesAsync(user);
         var tokenResult = await _tokenService.GenerateTokensAsync(
@@ -76,7 +105,48 @@ public class AuthRepository : IAuthRepository
         user.LastLoginAt = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
 
+        await _auditLogger.LogAndSaveAsync(
+            new AuditEntry
+            {
+                Action = AuditActions.UserLogin,
+                ActorId = user.Id,
+                ActorRole = HighestRole(roles),
+                TargetType = AuditTargetTypes.User,
+                TargetId = user.Id,
+                TargetPublicId = user.PublicId,
+            }
+        );
+
         return BuildAuthResult(user, tokenResult, roles);
+    }
+
+    // Records user.login_failed. Reason is kept internal (audit metadata only) — the API stays generic.
+    private Task AuditLoginFailedAsync(long? userId, string email, string reason) =>
+        _auditLogger.LogAndSaveAsync(
+            new AuditEntry
+            {
+                Action = AuditActions.UserLoginFailed,
+                ActorId = userId,
+                ActorRole = userId is null ? AuditActorRoles.System : null,
+                TargetType = userId is null ? null : AuditTargetTypes.User,
+                TargetId = userId,
+                Metadata = new Dictionary<string, object?>
+                {
+                    ["email"] = email,
+                    ["reason"] = reason,
+                },
+            }
+        );
+
+    private static string? HighestRole(IList<string> roles)
+    {
+        if (roles.Contains(ApplicationRoles.Admin))
+            return ApplicationRoles.Admin;
+        if (roles.Contains(ApplicationRoles.Teacher))
+            return ApplicationRoles.Teacher;
+        if (roles.Contains(ApplicationRoles.Student))
+            return ApplicationRoles.Student;
+        return null;
     }
 
     public async Task<AuthResult> RefreshTokenAsync(
@@ -230,7 +300,13 @@ public class AuthRepository : IAuthRepository
         await _passwordResetTokenRepository.InvalidatePreviousAsync(user.Id, cancellationToken);
 
         var otp = GenerateOtp(_passwordResetOptions.OtpLength);
-        var expiresAt = DateTime.UtcNow.AddMinutes(_passwordResetOptions.ExpiryMinutes);
+        // Reset-OTP lifetime is live-configurable (system_settings) with the appsettings fallback.
+        var ttlMinutes = await _settings.GetIntAsync(
+            SystemSettingKeys.ResetPasswordTokenTtlMinutes,
+            _passwordResetOptions.ExpiryMinutes,
+            cancellationToken
+        );
+        var expiresAt = DateTime.UtcNow.AddMinutes(ttlMinutes);
 
         await _passwordResetTokenRepository.CreateAsync(
             user.Id,

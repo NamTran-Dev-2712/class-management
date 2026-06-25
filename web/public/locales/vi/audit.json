@@ -1,0 +1,18 @@
+{
+    "title": "Nhật ký kiểm toán",
+    "subtitle": "Bản ghi chỉ-thêm cho mọi hành động nhạy cảm trên toàn hệ thống.",
+    "system": "Hệ thống",
+    "columns": {
+        "time": "Thời gian",
+        "action": "Hành động",
+        "actor": "Người thực hiện",
+        "role": "Vai trò",
+        "target": "Đối tượng",
+        "details": "Chi tiết",
+        "ip": "Địa chỉ IP"
+    },
+    "filters": {
+        "search": "Tìm theo tên hoặc email người thực hiện…",
+        "allTargets": "Tất cả đối tượng"
+    }
+}

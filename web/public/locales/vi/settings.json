@@ -1,0 +1,68 @@
+{
+    "title": "Cấu hình hệ thống",
+    "subtitle": "Điều chỉnh giới hạn và cấu hình toàn hệ thống. Thay đổi có hiệu lực ngay.",
+    "save": "Lưu",
+    "unlimitedHint": "0 = không giới hạn",
+    "boolean": {
+        "true": "Bật",
+        "false": "Tắt"
+    },
+    "keys": {
+        "max_classes_per_teacher": {
+            "label": "Số lớp tối đa mỗi giáo viên",
+            "description": "Số lớp tối đa một giáo viên được sở hữu. 0 = không giới hạn."
+        },
+        "max_questions_per_teacher": {
+            "label": "Số câu hỏi tối đa mỗi giáo viên",
+            "description": "Số câu hỏi tối đa một giáo viên được sở hữu. 0 = không giới hạn."
+        },
+        "max_exams_per_teacher": {
+            "label": "Số đề thi tối đa mỗi giáo viên",
+            "description": "Số đề thi tối đa một giáo viên được sở hữu. 0 = không giới hạn."
+        },
+        "max_students_per_class": {
+            "label": "Số học sinh tối đa mỗi lớp",
+            "description": "Số học sinh được duyệt tối đa trong một lớp. 0 = không giới hạn."
+        },
+        "max_attempts_per_assignment": {
+            "label": "Số lượt làm tối đa mỗi bài tập",
+            "description": "Trần toàn cục cho số lượt làm mỗi bài tập. 0 = không giới hạn."
+        },
+        "invite_code_length": {
+            "label": "Độ dài mã mời",
+            "description": "Độ dài mã mời lớp được sinh ra (6–12)."
+        },
+        "refresh_token_ttl_days": {
+            "label": "Thời hạn token làm mới (ngày)",
+            "description": "Phiên đăng nhập còn hiệu lực bao lâu trước khi phải đăng nhập lại."
+        },
+        "reset_password_token_ttl_minutes": {
+            "label": "Thời hạn mã đặt lại (phút)",
+            "description": "Mã đặt lại mật khẩu còn hiệu lực trong bao lâu."
+        },
+        "assignment_due_soon_hours": {
+            "label": "Nhắc sắp đến hạn (giờ)",
+            "description": "Số giờ trước hạn để nhắc học sinh chưa nộp bài."
+        },
+        "notification_cleanup_days": {
+            "label": "Lưu trữ thông báo (ngày)",
+            "description": "Xóa thông báo đã lưu trữ cũ hơn số ngày này."
+        },
+        "max_reports_per_day": {
+            "label": "Số báo cáo tối đa mỗi ngày",
+            "description": "Số báo cáo tối đa một người dùng được gửi mỗi ngày."
+        },
+        "app_name": {
+            "label": "Tên ứng dụng",
+            "description": "Tên thương hiệu hiển thị trên toàn ứng dụng."
+        },
+        "maintenance_mode": {
+            "label": "Chế độ bảo trì",
+            "description": "Khi bật, người dùng không phải admin chỉ đọc, không thể thay đổi."
+        }
+    },
+    "toast": {
+        "saved": "Đã lưu cấu hình.",
+        "error": "Đã xảy ra lỗi."
+    }
+}

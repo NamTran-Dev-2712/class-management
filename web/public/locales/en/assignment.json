@@ -7,7 +7,8 @@
         "delete": "Delete",
         "publish": "Publish",
         "close": "Close early",
-        "archive": "Archive"
+        "archive": "Archive",
+        "forceClose": "Force close"
     },
     "columns": {
         "title": "Title",
@@ -41,6 +42,10 @@
         "title": "Archive assignment?",
         "description": "Archived assignments are hidden from active lists. Attempts are preserved."
     },
+    "forceClose": {
+        "title": "Force-close assignment?",
+        "description": "This immediately closes \"{{title}}\" and auto-submits any in-progress attempts. Use only in emergencies."
+    },
     "toast": {
         "created": "Assignment created.",
         "updated": "Assignment updated.",
@@ -48,6 +53,7 @@
         "closed": "Assignment closed.",
         "archived": "Assignment archived.",
         "deleted": "Assignment deleted.",
+        "forceClosed": "Assignment force-closed.",
         "submitted": "Attempt submitted.",
         "error": "Something went wrong."
     },

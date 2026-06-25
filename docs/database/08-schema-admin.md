@@ -299,7 +299,72 @@ Phụ thuộc:
 
 ## Open Questions
 
-- [ ] **Row-Level Security (RLS)**: Có muốn bật RLS trên `notifications` để enforce `user_id = current_user_id` ở DB level? Hiệu quả hơn nhưng phức tạp hơn với EF Core.
-- [ ] **Notification delivery**: MVP-7 dùng polling (client pull). Khi nâng cấp real-time: thêm `delivered_at`, `push_token_sent_at` columns mà không phá schema hiện tại.
+- [x] **Row-Level Security (RLS)**: **Không bật** ở MVP-7. Quyền đọc notification được enforce ở app layer
+  (mọi truy vấn scope theo `ICurrentUserService.UserId`); RLS để dành nếu cần defense-in-depth sau.
+- [x] **Notification delivery**: **Polling** (client pull, TanStack Query `refetchInterval`). Schema để mở
+  cho real-time sau (có thể thêm `delivered_at`… không phá schema).
 - [ ] **Audit log rotation**: pg_partman hay manual partition management? Cần quyết định trước khi volume lớn.
-- [ ] **system_settings caching**: Setting thay đổi ít nhưng đọc nhiều → cache ở app layer (Redis/memory). Cần invalidation strategy khi Admin cập nhật.
+- [x] **system_settings caching**: Cache ở app layer qua `ISystemSettingsService` (Redis `ICacheService`),
+  invalidate khi Admin cập nhật (Phase 4 MVP-7).
+
+---
+
+## Implementation notes (MVP-7, as built)
+
+Migration: `20260620063139_create_admin_moderation_tables` (gộp 4 bảng — xem
+[12-migrations-strategy.md](./12-migrations-strategy.md)). Entities: `Domain/Modules/Admin/Entities`;
+EF config: `Infrastructure/Persistence/Configurations/Admin`; repos (thin, qua `IUnitOfWork`):
+`AuditLogs`/`Reports`/`Notifications`/`SystemSettings`.
+
+Khác với thiết kế ở trên (cập nhật bảng cho khớp code):
+
+- **`audit_logs`**: append-only ở **app layer** qua `IAuditLogger` (chưa `REVOKE UPDATE/DELETE` ở DB).
+  `metadata` map qua value-converter `Dictionary<string,object?>` ↔ jsonb. `action`/`actor_role`/
+  `target_type` là hằng trong `Domain/Modules/Admin/Constants` (CHECK constraint sinh từ đó).
+- **`reports.reason`**: lưu **PascalCase** (`InappropriateContent`, `Spam`, `Copyright`,
+  `IncorrectAnswer`, `Other`) cho nhất quán enum-as-string toàn hệ thống (doc gốc ghi snake_case).
+  Không có `created_by/updated_by` (đúng doc); `updated_at` qua trigger `set_updated_at`.
+- **`notifications`**: thêm cột **`reference_id`** (text, ≤100) cho idempotency thay vì biểu thức
+  `payload->>'reference_id'`; partial unique `uq_notifications_idempotent (user_id, event_type,
+  reference_id) WHERE reference_id IS NOT NULL` (bỏ cửa sổ 24h vì `NOW()` không IMMUTABLE — job tự
+  dedup theo thời gian). `payload` vẫn là jsonb cho dữ liệu giàu.
+- **`system_settings`**: có thêm `created_at` (từ `BaseEntity`, vô hại). `value` là jsonb (raw JSON
+  text). Seed 12 key mặc định qua `SystemSettingSeeder` (idempotent, additive — không ghi đè chỉnh sửa
+  của Admin). `value_type` ∈ {string,integer,boolean,json}.
+- **Triggers** `trg_reports_updated_at`, `trg_system_settings_updated_at` thêm vào
+  `DatabaseSeeder.ApplyTriggersAsync` (idempotent mỗi lần khởi động).
+- **Read views**: `vw_audit_logs` (audit ⨝ actor) + `vw_reports` (report ⨝ reporter ⨝ admin) tạo bằng
+  raw SQL trong migration; notifications đọc trực tiếp bảng (scope theo user). Xem
+  [12-migrations-strategy.md](./12-migrations-strategy.md).
+- **`system_settings` là source-of-truth runtime cho resource limits** (MVP-7): `ISystemSettingsService`
+  (cache Redis 5 phút, invalidate khi admin sửa) cấp giá trị cho `IClassroomPolicy`/`IQuestionPolicy`/
+  `IExamPolicy`; fallback là giá trị appsettings. Default seed cho `max_classes/questions/exams_per_teacher`
+  = **0 (unlimited)** để giữ hành vi hiện tại (MVP-8 / admin sẽ đặt cap thực). Thêm key
+  `max_reports_per_day` (mặc định 10) cho chống spam report.
+- **Moderation actions** (review report): `BanUser` → khoá account + revoke refresh token (BR-7-03, dùng
+  `IUserAdminRepository.SetLockAsync`); `HideContent`/`DeleteContent` → soft-delete nội dung (Question/Exam/
+  Class/Assignment), `DeleteContent` chặn nếu Question còn trong exam (BR-7-05) → buộc dùng Hide. Không
+  thêm cột `is_hidden` (hide = soft-delete, phân biệt qua `admin_action` + audit).
+
+### MVP-7.5 — mọi system setting đều LIVE (consumer cụ thể)
+Tất cả 13 key đã được nối dây để có tác dụng thật (qua `ISystemSettingsService`, cache + fallback appsettings):
+
+| Key | Consumer |
+|---|---|
+| `max_classes_per_teacher` | `IClassroomPolicy` → `CreateClass` |
+| `max_questions_per_teacher` | `IQuestionPolicy` → `CreateQuestion`/`DuplicateQuestion` |
+| `max_exams_per_teacher` | `IExamPolicy` → `CreateExam`/`DuplicateExam` |
+| `max_students_per_class` | `IClassroomPolicy` → `ApproveMember` (chặn khi đủ chỗ) |
+| `max_attempts_per_assignment` | `IAssignmentPolicy` → `StartAttempt` (trần cứng = min với `assignment.MaxAttempts`) |
+| `invite_code_length` | `IClassroomPolicy` → `CreateClass`/`RegenerateInviteCode` (clamp 6–12) |
+| `refresh_token_ttl_days` | `JwtTokenService` (đọc lúc phát token) |
+| `reset_password_token_ttl_minutes` | `AuthRepository.ForgotPassword` |
+| `assignment_due_soon_hours` | job `assignment-due-soon` |
+| `notification_cleanup_days` | job `notification-cleanup` |
+| `max_reports_per_day` | `SubmitReport` (daily cap) |
+| `app_name` | `GET /api/public/app-config` (anonymous) → FE brand |
+| `maintenance_mode` | `GET /api/public/app-config` + **maintenance-gate middleware** (503 cho write của non-admin) |
+
+`app_name`/`maintenance_mode` là `is_public=true`; FE đọc qua `PublicConfigController` (output-cache
+`PublicConfigRead`, tag `system-settings` nên evict khi admin sửa). Default cho 3 cap per-teacher vẫn **0
+(unlimited)**; admin hạ xuống để áp dụng.

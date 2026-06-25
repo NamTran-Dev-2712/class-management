@@ -1,0 +1,68 @@
+{
+    "admin": {
+        "title": "Báo cáo vi phạm",
+        "subtitle": "Xem các báo cáo từ người dùng và thực hiện kiểm duyệt."
+    },
+    "dialog": {
+        "title": "Báo cáo nội dung",
+        "description": "Hãy cho chúng tôi biết vấn đề. Quản trị viên sẽ xem xét báo cáo của bạn."
+    },
+    "review": {
+        "title": "Xử lý báo cáo",
+        "subtitle": "{{targetType}} bị báo cáo vì: {{reason}}",
+        "status": "Quyết định",
+        "action": "Hành động",
+        "note": "Ghi chú nội bộ",
+        "notePlaceholder": "Ghi chú tùy chọn cho nhật ký kiểm toán…",
+        "submit": "Áp dụng",
+        "destructiveWarning": "Hành động này không thể hoàn tác đối với người dùng/nội dung bị ảnh hưởng."
+    },
+    "columns": {
+        "target": "Đối tượng",
+        "reason": "Lý do",
+        "reporter": "Người báo cáo",
+        "status": "Trạng thái",
+        "createdAt": "Thời điểm",
+        "actions": "Thao tác"
+    },
+    "form": {
+        "reason": "Lý do",
+        "description": "Chi tiết",
+        "descriptionPlaceholder": "Thêm bối cảnh giúp việc xem xét…",
+        "descriptionMax": "Chi tiết không được vượt quá 2000 ký tự.",
+        "cancel": "Hủy",
+        "submit": "Gửi báo cáo"
+    },
+    "filters": {
+        "search": "Tìm báo cáo…",
+        "allStatuses": "Tất cả trạng thái",
+        "allTargets": "Tất cả đối tượng"
+    },
+    "reasons": {
+        "InappropriateContent": "Nội dung không phù hợp",
+        "Spam": "Spam",
+        "Copyright": "Bản quyền",
+        "IncorrectAnswer": "Đáp án sai",
+        "Other": "Khác"
+    },
+    "status": {
+        "Pending": "Chờ xử lý",
+        "Reviewing": "Đang xem xét",
+        "Resolved": "Đã xử lý",
+        "Rejected": "Đã từ chối"
+    },
+    "actions": {
+        "review": "Xử lý",
+        "Dismiss": "Bỏ qua",
+        "WarnUser": "Cảnh báo người dùng",
+        "HideContent": "Ẩn nội dung",
+        "DeleteContent": "Xóa nội dung",
+        "BanUser": "Khóa tài khoản"
+    },
+    "toast": {
+        "submitted": "Đã gửi báo cáo. Cảm ơn bạn.",
+        "reviewed": "Đã cập nhật báo cáo.",
+        "error": "Đã xảy ra lỗi."
+    },
+    "trigger": "Báo cáo"
+}

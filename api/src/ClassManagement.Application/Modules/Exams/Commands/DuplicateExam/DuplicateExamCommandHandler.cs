@@ -32,10 +32,11 @@ public class DuplicateExamCommandHandler : IRequestHandler<DuplicateExamCommand,
             teacherId
         );
 
-        if (_policy.MaxExamsPerTeacher > 0)
+        var maxExams = await _policy.GetMaxExamsPerTeacherAsync(ct);
+        if (maxExams > 0)
         {
             var count = await _unitOfWork.Exams.CountByTeacherAsync(teacherId, ct);
-            if (count >= _policy.MaxExamsPerTeacher)
+            if (count >= maxExams)
                 throw new BadException("Exam.MaxExamsReached");
         }
 

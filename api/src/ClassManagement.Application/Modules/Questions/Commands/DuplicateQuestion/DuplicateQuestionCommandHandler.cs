@@ -27,10 +27,11 @@ public class DuplicateQuestionCommandHandler : IRequestHandler<DuplicateQuestion
             teacherId
         );
 
-        if (_policy.MaxQuestionsPerTeacher > 0)
+        var maxQuestions = await _policy.GetMaxQuestionsPerTeacherAsync(ct);
+        if (maxQuestions > 0)
         {
             var count = await _unitOfWork.Questions.CountByTeacherAsync(teacherId, ct);
-            if (count >= _policy.MaxQuestionsPerTeacher)
+            if (count >= maxQuestions)
                 throw new BadException("Question.MaxQuestionsReached");
         }
 

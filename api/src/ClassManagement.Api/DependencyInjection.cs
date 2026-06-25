@@ -5,6 +5,8 @@ using ClassManagement.Api.Contracts.Common;
 using ClassManagement.Api.Contracts.Exceptions;
 using ClassManagement.Application.Common.Constants;
 using ClassManagement.Application.Interfaces.Localization;
+using ClassManagement.Application.Interfaces.Settings;
+using ClassManagement.Domain.Modules.Admin.Constants;
 using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Security;
 using Microsoft.AspNetCore.Localization;
@@ -46,6 +48,14 @@ public static class DependencyInjection
 
         // Built-in OpenAPI document (Scalar reads this)
         services.AddOpenApi();
+
+        // SignalR realtime (MVP-7.5) — single-server. For multi-instance scale-out add a backplane
+        // (e.g. .AddStackExchangeRedis(...)); the IRealtimeNotifier abstraction stays unchanged.
+        services.AddSignalR();
+        services.AddScoped<
+            ClassManagement.Application.Interfaces.Notifications.IRealtimeNotifier,
+            Hubs.SignalRNotifier
+        >();
 
         // Global exception handler — returns ApiResponse<T> on all errors
         services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -161,6 +171,12 @@ public static class DependencyInjection
             AddUserFixedWindow(RateLimitOptions.Policies.AttemptSubmit, rl.AttemptSubmit);
             AddIpFixedWindow(RateLimitOptions.Policies.GradeWrite, rl.GradeWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.Export, rl.Export);
+            // Admin & moderation (MVP-7): report submit + notification writes are per-user (shared NAT),
+            // admin actions + settings writes are per-IP.
+            AddUserFixedWindow(RateLimitOptions.Policies.ReportWrite, rl.ReportWrite);
+            AddUserFixedWindow(RateLimitOptions.Policies.NotificationWrite, rl.NotificationWrite);
+            AddIpFixedWindow(RateLimitOptions.Policies.AdminAction, rl.AdminAction);
+            AddIpFixedWindow(RateLimitOptions.Policies.SystemSettingWrite, rl.SystemSettingWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.Read, rl.Read);
         });
 
@@ -272,6 +288,44 @@ public static class DependencyInjection
                 OutputCachePolicies.AssignmentReportRead,
                 b => PerUser(b, OutputCacheTags.Assignments)
             );
+
+            // Admin & moderation (MVP-7). Audit log / admin reports / dashboard are the same for every
+            // admin (Shared); a user's own notifications, unread count, and own reports are personalized
+            // (PerUser). System settings are admin-wide (Shared). Each tagged by its resource domain.
+            options.AddPolicy(
+                OutputCachePolicies.AdminAuditLogsRead,
+                b => Shared(b, OutputCacheTags.AuditLogs)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.NotificationsRead,
+                b => PerUser(b, OutputCacheTags.Notifications)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.NotificationUnreadCount,
+                b => PerUser(b, OutputCacheTags.Notifications)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminReportsRead,
+                b => Shared(b, OutputCacheTags.Reports)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.MyReportsRead,
+                b => PerUser(b, OutputCacheTags.Reports)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.SystemSettingsRead,
+                b => Shared(b, OutputCacheTags.SystemSettings)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminDashboardRead,
+                b => Shared(b, OutputCacheTags.AdminDashboard)
+            );
+            // Public app config (brand + maintenance) — same for everyone, tagged system-settings so an
+            // admin settings change evicts it.
+            options.AddPolicy(
+                OutputCachePolicies.PublicConfigRead,
+                b => Shared(b, OutputCacheTags.SystemSettings)
+            );
         });
 
         return services;
@@ -307,13 +361,79 @@ public static class DependencyInjection
             }
         );
 
+        // Security headers on every response (production hardening, MVP-7). The strict API-only CSP is
+        // applied outside Development so it doesn't break the Scalar UI (which loads scripts) in dev.
+        var isDevelopment = app.Environment.IsDevelopment();
+        app.Use(
+            async (context, next) =>
+            {
+                var headers = context.Response.Headers;
+                headers["X-Content-Type-Options"] = "nosniff";
+                headers["X-Frame-Options"] = "DENY";
+                headers["Referrer-Policy"] = "no-referrer";
+                headers["X-XSS-Protection"] = "0";
+                if (!isDevelopment)
+                    headers["Content-Security-Policy"] =
+                        "default-src 'none'; frame-ancestors 'none'";
+                await next();
+            }
+        );
+
         app.UseExceptionHandler();
         app.UseCors();
         app.UseRateLimiter();
-        if (!app.Environment.IsDevelopment())
+        if (!isDevelopment)
+        {
+            app.UseHsts();
             app.UseHttpsRedirection();
+        }
         app.UseAuthentication();
         app.UseAuthorization();
+
+        // Maintenance gate (MVP-7.5): while maintenance_mode is on, reject non-admin write requests with
+        // 503 (reads + admins + auth endpoints stay open). Live — the settings cache is invalidated on the
+        // admin toggle. Only read the (cached) flag for write methods to avoid per-GET overhead.
+        app.Use(
+            async (context, next) =>
+            {
+                var method = context.Request.Method;
+                var isWrite =
+                    HttpMethods.IsPost(method)
+                    || HttpMethods.IsPut(method)
+                    || HttpMethods.IsPatch(method)
+                    || HttpMethods.IsDelete(method);
+
+                if (isWrite && !context.Request.Path.StartsWithSegments("/api/auth"))
+                {
+                    var settings =
+                        context.RequestServices.GetRequiredService<ISystemSettingsService>();
+                    var maintenance = await settings.GetBoolAsync(
+                        SystemSettingKeys.MaintenanceMode,
+                        false,
+                        context.RequestAborted
+                    );
+                    if (maintenance && !context.User.IsInRole(ApplicationRoles.Admin))
+                    {
+                        var localizer =
+                            context.RequestServices.GetRequiredService<ILocalizationService>();
+                        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsJsonAsync(
+                            ApiResponse<object?>.Fail(
+                                StatusCodes.Status503ServiceUnavailable,
+                                localizer["Error.Maintenance"],
+                                null,
+                                context.TraceIdentifier
+                            ),
+                            context.RequestAborted
+                        );
+                        return;
+                    }
+                }
+
+                await next();
+            }
+        );
 
         // Output cache runs AFTER authentication/authorization so a cache hit can never bypass authz
         // (the authorization middleware has already vetted the request). Gated by config so it can be

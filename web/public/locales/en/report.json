@@ -1,0 +1,68 @@
+{
+    "admin": {
+        "title": "Reports",
+        "subtitle": "Review user-submitted reports and take moderation action."
+    },
+    "dialog": {
+        "title": "Report content",
+        "description": "Tell us what's wrong. An administrator will review your report."
+    },
+    "review": {
+        "title": "Review report",
+        "subtitle": "{{targetType}} reported for: {{reason}}",
+        "status": "Decision",
+        "action": "Action",
+        "note": "Internal note",
+        "notePlaceholder": "Optional note for the audit trail…",
+        "submit": "Apply",
+        "destructiveWarning": "This action is irreversible for the affected user/content."
+    },
+    "columns": {
+        "target": "Target",
+        "reason": "Reason",
+        "reporter": "Reporter",
+        "status": "Status",
+        "createdAt": "Reported",
+        "actions": "Actions"
+    },
+    "form": {
+        "reason": "Reason",
+        "description": "Details",
+        "descriptionPlaceholder": "Add any context that will help the review…",
+        "descriptionMax": "The details must not exceed 2000 characters.",
+        "cancel": "Cancel",
+        "submit": "Submit report"
+    },
+    "filters": {
+        "search": "Search reports…",
+        "allStatuses": "All statuses",
+        "allTargets": "All targets"
+    },
+    "reasons": {
+        "InappropriateContent": "Inappropriate content",
+        "Spam": "Spam",
+        "Copyright": "Copyright",
+        "IncorrectAnswer": "Incorrect answer",
+        "Other": "Other"
+    },
+    "status": {
+        "Pending": "Pending",
+        "Reviewing": "Reviewing",
+        "Resolved": "Resolved",
+        "Rejected": "Rejected"
+    },
+    "actions": {
+        "review": "Review",
+        "Dismiss": "Dismiss",
+        "WarnUser": "Warn user",
+        "HideContent": "Hide content",
+        "DeleteContent": "Delete content",
+        "BanUser": "Ban user"
+    },
+    "toast": {
+        "submitted": "Report submitted. Thank you.",
+        "reviewed": "Report updated.",
+        "error": "Something went wrong."
+    },
+    "trigger": "Report"
+}

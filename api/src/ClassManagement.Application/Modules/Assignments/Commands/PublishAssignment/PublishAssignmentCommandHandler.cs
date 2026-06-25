@@ -1,16 +1,28 @@
 using ClassManagement.Application.Exceptions;
+using ClassManagement.Domain.Modules.Admin.Constants;
+using ClassManagement.Domain.Modules.Admin.Enums;
 using ClassManagement.Domain.Modules.Assignments.Enums;
+using ClassManagement.Domain.Modules.Classroom.Enums;
 using ClassManagement.Domain.Modules.Questions.Enums;
 
 public class PublishAssignmentCommandHandler : IRequestHandler<PublishAssignmentCommand>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAuditLogger _auditLogger;
+    private readonly INotificationService _notifications;
 
-    public PublishAssignmentCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+    public PublishAssignmentCommandHandler(
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUser,
+        IAuditLogger auditLogger,
+        INotificationService notifications
+    )
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
+        _auditLogger = auditLogger;
+        _notifications = notifications;
     }
 
     public async Task Handle(PublishAssignmentCommand request, CancellationToken ct)
@@ -122,6 +134,54 @@ public class PublishAssignmentCommandHandler : IRequestHandler<PublishAssignment
                 : AssignmentStatus.Open;
 
         _unitOfWork.Assignments.Update(assignment);
+
+        await _auditLogger.LogAsync(
+            new AuditEntry
+            {
+                Action = AuditActions.AssignmentPublished,
+                TargetType = AuditTargetTypes.Assignment,
+                TargetId = assignment.Id,
+                TargetPublicId = assignment.PublicId,
+                Metadata = new Dictionary<string, object?>
+                {
+                    ["status"] = assignment.Status.ToString(),
+                    ["total_questions"] = snapshot.TotalQuestions,
+                },
+            },
+            ct
+        );
+
+        // Fan out "new assignment" to every approved student of the class (BR risk: batch insert, does
+        // not block the teacher). Skipped for a Scheduled assignment that opens later? No — students are
+        // told it exists; due-soon reminders come from the lifecycle job.
+        var memberRepo = _unitOfWork.Repository<ClassMembership>();
+        var studentIds = await memberRepo.ToListAsync(
+            memberRepo
+                .Query()
+                .Where(m =>
+                    m.ClassId == assignment.ClassId && m.Status == MembershipStatus.Approved
+                )
+                .Select(m => m.StudentId),
+            ct
+        );
+
+        await _notifications.NotifyManyAsync(
+            studentIds,
+            new NotificationContent
+            {
+                EventType = NotificationEventType.AssignmentCreated,
+                Title = "New assignment",
+                Body = $"A new assignment \"{assignment.Title}\" is available.",
+                Link = $"/student/assignments/{assignment.PublicId}",
+                ReferenceId = assignment.PublicId.ToString(),
+                Payload = new Dictionary<string, object?>
+                {
+                    ["assignmentTitle"] = assignment.Title,
+                    ["assignmentPublicId"] = assignment.PublicId.ToString(),
+                },
+            },
+            ct
+        );
 
         // One atomic SaveChanges — snapshot + questions + options + the status flip commit together.
         await _unitOfWork.SaveChangesAsync(ct);

@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
-import { Copy, Eye, Globe, Lock, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Copy, Eye, Flag, Globe, Lock, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ export interface QuestionColumnActions {
     onDuplicate?: (q: QuestionListItem) => void;
     onToggleVisibility?: (q: QuestionListItem) => void;
     onDelete?: (q: QuestionListItem) => void;
+    onReport?: (q: QuestionListItem) => void;
 }
 
 const difficultyVariant: Record<QuestionDifficulty, "secondary" | "outline" | "destructive"> = {
@@ -46,6 +47,7 @@ export function getQuestionColumns({
     onDuplicate,
     onToggleVisibility,
     onDelete,
+    onReport,
 }: ColumnOptions): ColumnDef<QuestionListItem>[] {
     const formatDate = (iso: string) =>
         new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(iso));
@@ -205,6 +207,12 @@ export function getQuestionColumns({
                                             {t("actions.makePublic")}
                                         </>
                                     )}
+                                </DropdownMenuItem>
+                            ) : null}
+                            {onReport ? (
+                                <DropdownMenuItem onSelect={() => onReport(q)}>
+                                    <Flag className="size-4" />
+                                    {t("actions.report")}
                                 </DropdownMenuItem>
                             ) : null}
                             {onDelete ? (

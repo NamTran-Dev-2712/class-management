@@ -1,0 +1,1706 @@
+{
+    "info": {
+        "name": "Class Management API — MVP-7 (Admin & Moderation)",
+        "_postman_id": "b1a7e2c0-0007-4000-9000-classmgmt0007",
+        "description": "End-to-end MVP-7 flows: in-app notifications (class approve → student notified), reports & moderation (submit → idempotent → admin ban), live system-settings limits, admin dashboard / audit log / announcements, and production hardening (login lockout + health). Cookie-based auth via Postman's cookie jar; folders re-login to switch actor. Run folders 0→5 top-to-bottom against a freshly-seeded local API. Reuse the 'Class Management — Local' environment.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "classId",
+            "value": ""
+        },
+        {
+            "key": "inviteCode",
+            "value": ""
+        },
+        {
+            "key": "memberId",
+            "value": ""
+        },
+        {
+            "key": "notificationId",
+            "value": ""
+        },
+        {
+            "key": "reportId",
+            "value": ""
+        },
+        {
+            "key": "targetPublicId",
+            "value": ""
+        },
+        {
+            "key": "assignmentId",
+            "value": ""
+        }
+    ],
+    "item": [
+        {
+            "name": "0. Setup",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "1. Notifications",
+            "item": [
+                {
+                    "name": "Register Teacher",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"displayName\": \"MVP7 Teacher\",\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\",\n  \"role\": \"Teacher\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.environment.set('teacherEmail', 'mvp7_teacher_' + Date.now() + '@example.com');"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login Teacher",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Create class",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"MVP7 Class {{$timestamp}}\",\n  \"subjectName\": \"General\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var d = pm.response.json().data;",
+                                    "if (d) pm.environment.set('classId', d.publicId);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get class (capture invite code)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var d = pm.response.json().data;",
+                                    "if (d) pm.environment.set('inviteCode', d.inviteCode);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Register Student",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"displayName\": \"MVP7 Student\",\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\",\n  \"role\": \"Student\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.environment.set('studentEmail', 'mvp7_student_' + Date.now() + '@example.com');"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login Student",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Join class",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/student/classes/join",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "student",
+                                "classes",
+                                "join"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"inviteCode\": \"{{inviteCode}}\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Login Teacher (approve)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "List pending members (capture id)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members?status=Pending&pageSize=50",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "members"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "Pending"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "50"
+                                }
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var d = pm.response.json().data;",
+                                    "if (d) pm.environment.set('memberId', d.items[0].publicId);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Approve member (fires ClassJoinApproved)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{memberId}}/approve",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes",
+                                "{{classId}}",
+                                "members",
+                                "{{memberId}}",
+                                "approve"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Login Student (read notifications)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "List notifications",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/notifications",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "notifications"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var items = pm.response.json().data.items;",
+                                    "pm.test('has ClassJoinApproved', () => items.some(n => n.eventType === 'ClassJoinApproved'));",
+                                    "if (items[0]) pm.environment.set('notificationId', items[0].publicId);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Unread count",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/notifications/unread-count",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "unread-count"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Mark one read",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "{{notificationId}}",
+                                "read"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Mark all read",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/notifications/read-all",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "read-all"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Archive one",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/notifications/{{notificationId}}/archive",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "{{notificationId}}",
+                                "archive"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Reports & Moderation",
+            "item": [
+                {
+                    "name": "Register Reporter",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"displayName\": \"Reporter\",\n  \"email\": \"{{reporterEmail}}\",\n  \"password\": \"{{studentPassword}}\",\n  \"role\": \"Student\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.environment.set('reporterEmail', 'mvp7_reporter_' + Date.now() + '@example.com');"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Register Target user",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"displayName\": \"Target\",\n  \"email\": \"{{targetEmail}}\",\n  \"password\": \"{{studentPassword}}\",\n  \"role\": \"Student\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.environment.set('targetEmail', 'mvp7_target_' + Date.now() + '@example.com');"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login Target (capture publicId)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{targetEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var d = pm.response.json().data;",
+                                    "if (d) pm.environment.set('targetPublicId', d.publicId);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login Reporter",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{reporterEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Submit report (User target)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/reports",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reports"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"targetType\": \"User\",\n  \"targetPublicId\": \"{{targetPublicId}}\",\n  \"reason\": \"Spam\",\n  \"description\": \"Spamming the platform.\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var d = pm.response.json().data;",
+                                    "if (d) pm.environment.set('reportId', d.publicId);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Submit again (idempotent — same id)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/reports",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reports"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"targetType\": \"User\",\n  \"targetPublicId\": \"{{targetPublicId}}\",\n  \"reason\": \"Spam\",\n  \"description\": \"dupe\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var d = pm.response.json().data;",
+                                    "pm.test('idempotent', () => d.publicId === pm.environment.get('reportId'));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "My reports",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/reports/mine",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reports",
+                                "mine"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Login Admin (moderate)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin list reports (Pending)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reports?status=Pending&pageSize=50",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "Pending"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "50"
+                                }
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Review report — BanUser",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reports/{{reportId}}/review",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reports",
+                                "{{reportId}}",
+                                "review"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"Resolved\",\n  \"adminAction\": \"BanUser\",\n  \"adminNote\": \"Confirmed spam.\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Banned user login fails (401)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{targetEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('401', () => pm.response.code === 401);"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "3. System Settings (live limit)",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "List settings",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/settings",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "settings"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Set max_classes_per_teacher = 1",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/settings/max_classes_per_teacher",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "settings",
+                                "max_classes_per_teacher"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"value\": \"1\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Register limited Teacher",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"displayName\": \"Limited Teacher\",\n  \"email\": \"{{limitTeacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\",\n  \"role\": \"Teacher\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.environment.set('limitTeacherEmail', 'mvp7_limit_' + Date.now() + '@example.com');"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login limited Teacher",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{limitTeacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Create class #1 (ok)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Cap A {{$timestamp}}\",\n  \"subjectName\": \"General\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('201', () => pm.response.code === 201);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Create class #2 (rejected — limit)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/teacher/classes",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teacher",
+                                "classes"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Cap B {{$timestamp}}\",\n  \"subjectName\": \"General\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('400', () => pm.response.code === 400);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login Admin (reset)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Reset max_classes_per_teacher = 0",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/settings/max_classes_per_teacher",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "settings",
+                                "max_classes_per_teacher"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"value\": \"0\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Dashboard / Audit / Announcement",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Dashboard overview",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/dashboard",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "dashboard"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Audit log (action=user.login)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/audit-logs?action=user.login&pageSize=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "audit-logs"
+                            ],
+                            "query": [
+                                {
+                                    "key": "action",
+                                    "value": "user.login"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Send announcement (Students)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/announcements",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "announcements"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Maintenance tonight\",\n  \"body\": \"We will be down 1-2am.\",\n  \"role\": \"Student\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Production hardening",
+            "item": [
+                {
+                    "name": "Register lockout user",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"displayName\": \"Lock Me\",\n  \"email\": \"{{lockEmail}}\",\n  \"password\": \"{{studentPassword}}\",\n  \"role\": \"Student\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.environment.set('lockEmail', 'mvp7_lock_' + Date.now() + '@example.com');"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Wrong login #1",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{lockEmail}}\",\n  \"password\": \"WrongPass!1\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('401', () => pm.response.code === 401);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Wrong login #2",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{lockEmail}}\",\n  \"password\": \"WrongPass!1\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('401', () => pm.response.code === 401);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Wrong login #3",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{lockEmail}}\",\n  \"password\": \"WrongPass!1\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('401', () => pm.response.code === 401);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Wrong login #4",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{lockEmail}}\",\n  \"password\": \"WrongPass!1\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('401', () => pm.response.code === 401);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Wrong login #5",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{lockEmail}}\",\n  \"password\": \"WrongPass!1\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('401', () => pm.response.code === 401);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login (now temporarily locked)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{lockEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('401 locked', () => pm.response.code === 401);",
+                                    "pm.test('locked message', () => /too many|locked/i.test(pm.response.json().message || ''));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Health check (no /api prefix)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/../health",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "..",
+                                "health"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('200', () => pm.response.code === 200);"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

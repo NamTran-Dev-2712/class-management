@@ -1,15 +1,22 @@
 using ClassManagement.Application.Exceptions;
+using ClassManagement.Domain.Modules.Admin.Enums;
 using ClassManagement.Domain.Modules.Classroom.Enums;
 
 public class RejectMemberCommandHandler : IRequestHandler<RejectMemberCommand>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
+    private readonly INotificationService _notifications;
 
-    public RejectMemberCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+    public RejectMemberCommandHandler(
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUser,
+        INotificationService notifications
+    )
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
+        _notifications = notifications;
     }
 
     public async Task Handle(RejectMemberCommand request, CancellationToken ct)
@@ -33,6 +40,25 @@ public class RejectMemberCommandHandler : IRequestHandler<RejectMemberCommand>
         membership.RejectionReason = request.RejectionReason?.Trim();
 
         _unitOfWork.ClassMemberships.Update(membership);
+
+        await _notifications.NotifyAsync(
+            membership.StudentId,
+            new NotificationContent
+            {
+                EventType = NotificationEventType.ClassJoinRejected,
+                Title = "Class join request rejected",
+                Body = $"Your request to join {cls.Name} was not approved.",
+                Link = "/student/classes",
+                ReferenceId = membership.PublicId.ToString(),
+                Payload = new Dictionary<string, object?>
+                {
+                    ["className"] = cls.Name,
+                    ["classPublicId"] = cls.PublicId.ToString(),
+                },
+            },
+            ct
+        );
+
         await _unitOfWork.SaveChangesAsync(ct);
     }
 }

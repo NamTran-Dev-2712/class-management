@@ -1,12 +1,12 @@
-import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
 import { brandIcon as BrandIcon } from "@/config/nav";
+import { useAppName } from "@/hooks/use-app-name";
 import { cn } from "@/lib/utils";
 
 /** Logo + app name shown at the top of the sidebar (and mobile sheet). */
 export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
-    const { t } = useTranslation("common");
+    const appName = useAppName();
 
     return (
         <Link
@@ -17,7 +17,7 @@ export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
             )}
         >
             <BrandIcon className="text-primary size-6 shrink-0" />
-            {!collapsed && <span className="truncate font-semibold">{t("appName")}</span>}
+            {!collapsed && <span className="truncate font-semibold">{appName}</span>}
         </Link>
     );
 }

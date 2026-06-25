@@ -26,11 +26,12 @@ public class CreateClassCommandHandler : IRequestHandler<CreateClassCommand, Gui
         var ownerId = _currentUser.UserId ?? throw new UnauthorizedException("Auth.Unauthorized");
         var name = request.Name.Trim();
 
-        // BR-2-09: optional cap on classes per teacher (0 = unlimited).
-        if (_policy.MaxClassesPerTeacher > 0)
+        // BR-2-09: optional cap on classes per teacher (0 = unlimited). Read live from system_settings.
+        var maxClasses = await _policy.GetMaxClassesPerTeacherAsync(ct);
+        if (maxClasses > 0)
         {
             var count = await _unitOfWork.Classes.CountByOwnerAsync(ownerId, ct);
-            if (count >= _policy.MaxClassesPerTeacher)
+            if (count >= maxClasses)
                 throw new BadException("Class.MaxClassesReached");
         }
 
@@ -67,10 +68,11 @@ public class CreateClassCommandHandler : IRequestHandler<CreateClassCommand, Gui
 
     private async Task<string> AllocateInviteCodeAsync(CancellationToken ct)
     {
+        var length = await _policy.GetInviteCodeLengthAsync(ct);
         string code;
         do
         {
-            code = _inviteCodes.Generate();
+            code = _inviteCodes.Generate(length);
         } while (await _unitOfWork.Classes.InviteCodeExistsAsync(code, ct));
         return code;
     }

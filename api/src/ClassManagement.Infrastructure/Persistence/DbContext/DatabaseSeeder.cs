@@ -95,6 +95,7 @@ public static class DatabaseSeeder
         await AdminSeeder.SeedAsync(userManager, configuration, logger);
 
         await SubjectSeeder.SeedAsync(context, logger);
+        await SystemSettingSeeder.SeedAsync(context, logger);
     }
 
     // set_updated_at() function + per-table triggers — idempotent (DROP IF EXISTS + CREATE)
@@ -122,6 +123,16 @@ public static class DatabaseSeeder
             DROP TRIGGER IF EXISTS trg_classes_updated_at ON classes;
             CREATE TRIGGER trg_classes_updated_at
               BEFORE UPDATE ON classes
+              FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+            DROP TRIGGER IF EXISTS trg_reports_updated_at ON reports;
+            CREATE TRIGGER trg_reports_updated_at
+              BEFORE UPDATE ON reports
+              FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+            DROP TRIGGER IF EXISTS trg_system_settings_updated_at ON system_settings;
+            CREATE TRIGGER trg_system_settings_updated_at
+              BEFORE UPDATE ON system_settings
               FOR EACH ROW EXECUTE FUNCTION set_updated_at();
             """
         );

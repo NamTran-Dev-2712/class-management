@@ -21,11 +21,12 @@ public class CreateQuestionCommandHandler : IRequestHandler<CreateQuestionComman
     {
         var teacherId = _currentUser.UserId ?? throw new UnauthorizedException("Auth.Unauthorized");
 
-        // BR-3-11: optional cap on questions per teacher (0 = unlimited).
-        if (_policy.MaxQuestionsPerTeacher > 0)
+        // BR-3-11: optional cap on questions per teacher (0 = unlimited). Read live from system_settings.
+        var maxQuestions = await _policy.GetMaxQuestionsPerTeacherAsync(ct);
+        if (maxQuestions > 0)
         {
             var count = await _unitOfWork.Questions.CountByTeacherAsync(teacherId, ct);
-            if (count >= _policy.MaxQuestionsPerTeacher)
+            if (count >= maxQuestions)
                 throw new BadException("Question.MaxQuestionsReached");
         }
 

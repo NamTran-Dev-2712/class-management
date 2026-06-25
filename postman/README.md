@@ -8,6 +8,13 @@ integration tests (`api/tests/ClassManagement.IntegrationTests`).
 - `ClassManagement-MVP5.postman_collection.json` — end-to-end Assignment & online-testing flow.
 - `ClassManagement-MVP6.postman_collection.json` — end-to-end Manual Grading & Reports flow
   (grade a writing answer → report/CSV export → publish grades → student sees score + feedback).
+- `ClassManagement-MVP7.postman_collection.json` — Admin & Moderation flows: in-app notifications,
+  reports + moderation (ban), live system-settings limits, dashboard / audit log / announcement, and
+  production hardening (login lockout + health).
+- `ClassManagement-MVP7.5.postman_collection.json` — Polish flows: live `app_name` via the public config
+  endpoint, live limits (invite-code length, max-students-per-class cap), maintenance mode (503 for
+  non-admin writes), and the richer dashboard (counters + 30-day trend + status breakdowns). Realtime
+  notifications use SignalR (`/hubs/notifications`) — verify manually in the browser, not Postman.
 - `ClassManagement.postman_environment.json` — `baseUrl` + admin/teacher/student credentials.
 
 ## Feature flows (MVP-5 / MVP-6)
@@ -21,6 +28,13 @@ folders deliberately re-log-in when they switch actor (teacher ↔ student ↔ a
 `7. Admin — Report`. The assignment uses the **Manual** grade-publish policy, so the student's score
 stays hidden until step 5 publishes it; the writing answer (4/5) + the auto-graded objective (4/4)
 make a released total of 8.
+
+**MVP-7 order**: `0. Setup` → `1. Notifications` (approve a member → student is notified, then
+read/archive) → `2. Reports & Moderation` (submit → idempotent re-submit → admin bans the target →
+banned login 401) → `3. System Settings (live limit)` (lower `max_classes_per_teacher` to 1 → 2nd
+class create is rejected → reset to 0) → `4. Dashboard / Audit / Announcement` → `5. Production
+hardening` (5 wrong logins → account temporarily locked; `/health` 200). Health lives at the API root
+(`http://localhost:5007/health`), not under `/api`.
 
 ## Import
 1. Postman → **Import** → select both JSON files.

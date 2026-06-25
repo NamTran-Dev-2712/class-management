@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
 import { brandIcon as BrandIcon } from "@/config/nav";
+import { useAppName } from "@/hooks/use-app-name";
 
 const socials = [
     { icon: Github, href: "#", key: "github" },
@@ -22,6 +23,7 @@ const companyLinks = [
 
 export function PublicFooter() {
     const { t } = useTranslation(["public", "common"]);
+    const appName = useAppName();
 
     return (
         <footer className="bg-muted/30 border-t">
@@ -29,7 +31,7 @@ export function PublicFooter() {
                 <div className="md:col-span-2">
                     <Link to="/" className="flex items-center gap-2 font-semibold">
                         <BrandIcon className="text-primary size-6" />
-                        <span>{t("appName", { ns: "common" })}</span>
+                        <span>{appName}</span>
                     </Link>
                     <p className="text-muted-foreground mt-3 max-w-sm text-sm">
                         {t("tagline", { ns: "common" })}
@@ -83,8 +85,7 @@ export function PublicFooter() {
 
             <div className="border-t">
                 <div className="text-muted-foreground mx-auto max-w-6xl px-4 py-4 text-center text-sm md:px-6">
-                    © {new Date().getFullYear()} {t("appName", { ns: "common" })}.{" "}
-                    {t("footer.rights")}
+                    © {new Date().getFullYear()} {appName}. {t("footer.rights")}
                 </div>
             </div>
         </footer>

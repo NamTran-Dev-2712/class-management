@@ -1,0 +1,68 @@
+{
+    "title": "System settings",
+    "subtitle": "Tune platform-wide limits and configuration. Changes take effect immediately.",
+    "save": "Save",
+    "unlimitedHint": "0 = unlimited",
+    "boolean": {
+        "true": "Enabled",
+        "false": "Disabled"
+    },
+    "keys": {
+        "max_classes_per_teacher": {
+            "label": "Max classes per teacher",
+            "description": "Maximum classes a teacher may own. 0 = unlimited."
+        },
+        "max_questions_per_teacher": {
+            "label": "Max questions per teacher",
+            "description": "Maximum questions a teacher may own. 0 = unlimited."
+        },
+        "max_exams_per_teacher": {
+            "label": "Max exams per teacher",
+            "description": "Maximum exams a teacher may own. 0 = unlimited."
+        },
+        "max_students_per_class": {
+            "label": "Max students per class",
+            "description": "Maximum approved students per class. 0 = unlimited."
+        },
+        "max_attempts_per_assignment": {
+            "label": "Max attempts per assignment",
+            "description": "Global ceiling on attempts per assignment. 0 = unlimited."
+        },
+        "invite_code_length": {
+            "label": "Invite code length",
+            "description": "Length of generated class invite codes (6–12)."
+        },
+        "refresh_token_ttl_days": {
+            "label": "Refresh token lifetime (days)",
+            "description": "How long a sign-in session stays valid before re-login."
+        },
+        "reset_password_token_ttl_minutes": {
+            "label": "Reset code lifetime (minutes)",
+            "description": "How long a password-reset code remains valid."
+        },
+        "assignment_due_soon_hours": {
+            "label": "Due-soon reminder (hours)",
+            "description": "Hours before the deadline to remind students who haven't submitted."
+        },
+        "notification_cleanup_days": {
+            "label": "Notification retention (days)",
+            "description": "Delete archived notifications older than this many days."
+        },
+        "max_reports_per_day": {
+            "label": "Max reports per day",
+            "description": "Maximum reports a single user may submit per day."
+        },
+        "app_name": {
+            "label": "Application name",
+            "description": "The brand name shown across the app."
+        },
+        "maintenance_mode": {
+            "label": "Maintenance mode",
+            "description": "When on, non-admins can read but cannot make changes."
+        }
+    },
+    "toast": {
+        "saved": "Setting saved.",
+        "error": "Something went wrong."
+    }
+}

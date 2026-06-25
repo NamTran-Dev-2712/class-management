@@ -15,6 +15,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { brandIcon as BrandIcon, marketingNav } from "@/config/nav";
+import { useAppName } from "@/hooks/use-app-name";
 import { roleHome } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import type { ProfileResponse } from "@/services/auth/dtos/queries/profile/profile.response";
@@ -28,6 +29,7 @@ function navLinkClass({ isActive }: { isActive: boolean }) {
 
 export function PublicHeader({ user }: { user: ProfileResponse | null }) {
     const { t } = useTranslation(["public", "common"]);
+    const appName = useAppName();
     const [open, setOpen] = useState(false);
 
     return (
@@ -35,7 +37,7 @@ export function PublicHeader({ user }: { user: ProfileResponse | null }) {
             <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 md:px-6">
                 <Link to="/" className="flex items-center gap-2 font-semibold">
                     <BrandIcon className="text-primary size-6" />
-                    <span className="truncate">{t("appName", { ns: "common" })}</span>
+                    <span className="truncate">{appName}</span>
                 </Link>
 
                 {/* Desktop nav */}
@@ -96,11 +98,9 @@ export function PublicHeader({ user }: { user: ProfileResponse | null }) {
                             <SheetHeader>
                                 <SheetTitle className="flex items-center gap-2">
                                     <BrandIcon className="text-primary size-5" />
-                                    {t("appName", { ns: "common" })}
+                                    {appName}
                                 </SheetTitle>
-                                <SheetDescription className="sr-only">
-                                    {t("appName", { ns: "common" })}
-                                </SheetDescription>
+                                <SheetDescription className="sr-only">{appName}</SheetDescription>
                             </SheetHeader>
                             <nav className="grid gap-1 px-4">
                                 {marketingNav.map((item) => (

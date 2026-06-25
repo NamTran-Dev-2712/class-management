@@ -7,7 +7,8 @@
         "delete": "Xóa",
         "publish": "Phát hành",
         "close": "Đóng sớm",
-        "archive": "Lưu trữ"
+        "archive": "Lưu trữ",
+        "forceClose": "Buộc đóng"
     },
     "columns": {
         "title": "Tiêu đề",
@@ -41,6 +42,10 @@
         "title": "Lưu trữ bài giao?",
         "description": "Bài giao lưu trữ sẽ ẩn khỏi danh sách đang hoạt động. Các lượt làm bài vẫn được giữ lại."
     },
+    "forceClose": {
+        "title": "Buộc đóng bài giao?",
+        "description": "Thao tác này đóng ngay \"{{title}}\" và tự động nộp mọi lượt đang làm. Chỉ dùng trong trường hợp khẩn cấp."
+    },
     "toast": {
         "created": "Đã tạo bài giao.",
         "updated": "Đã cập nhật bài giao.",
@@ -48,6 +53,7 @@
         "closed": "Đã đóng bài giao.",
         "archived": "Đã lưu trữ bài giao.",
         "deleted": "Đã xóa bài giao.",
+        "forceClosed": "Đã buộc đóng bài giao.",
         "submitted": "Đã nộp bài.",
         "error": "Đã xảy ra lỗi."
     },

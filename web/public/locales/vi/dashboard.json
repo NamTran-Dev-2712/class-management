@@ -13,9 +13,24 @@
         "questionBank": "Ngân hàng câu hỏi",
         "exams": "Đề thi",
         "assignments": "Bài tập",
+        "auditLogs": "Nhật ký kiểm toán",
+        "settings": "Cấu hình",
         "myClasses": "Lớp của tôi",
         "requests": "Yêu cầu tham gia",
         "grades": "Điểm số"
+    },
+    "stats": {
+        "totalUsers": "Tổng người dùng",
+        "newUsers": "Người dùng mới (7 ngày)",
+        "activeClasses": "Lớp đang hoạt động",
+        "openAssignments": "Bài tập đang mở",
+        "pendingReports": "Báo cáo chờ xử lý",
+        "reviewNow": "Xem xét ngay"
+    },
+    "charts": {
+        "userGrowth": "Người dùng mới (30 ngày qua)",
+        "reportsByStatus": "Báo cáo theo trạng thái",
+        "assignmentsByStatus": "Bài tập theo trạng thái"
     },
     "admin": {
         "title": "Quản trị",

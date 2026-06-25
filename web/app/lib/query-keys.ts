@@ -81,4 +81,24 @@ export const queryKeys = {
             [...queryKeys.assignments.all, "grading", attemptId] as const,
         report: (publicId: string) => [...queryKeys.assignments.all, "report", publicId] as const,
     },
+    auditLogs: {
+        all: ["audit-logs"] as const,
+        list: (params: unknown) => [...queryKeys.auditLogs.all, "list", params] as const,
+    },
+    notifications: {
+        all: ["notifications"] as const,
+        list: (params: unknown) => [...queryKeys.notifications.all, "list", params] as const,
+        unreadCount: () => [...queryKeys.notifications.all, "unread-count"] as const,
+    },
+    reports: {
+        all: ["reports"] as const,
+        mine: (params: unknown) => [...queryKeys.reports.all, "mine", params] as const,
+        adminList: (params: unknown) =>
+            [...queryKeys.reports.all, "admin", "list", params] as const,
+    },
+    admin: {
+        all: ["admin"] as const,
+        dashboard: () => [...queryKeys.admin.all, "dashboard"] as const,
+        settings: () => [...queryKeys.admin.all, "settings"] as const,
+    },
 } as const;

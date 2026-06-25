@@ -10,6 +10,7 @@
         "duplicate": "Duplicate",
         "makePublic": "Make public",
         "makePrivate": "Make private",
+        "report": "Report",
         "delete": "Delete"
     },
     "columns": {

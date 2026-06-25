@@ -11,6 +11,12 @@ public interface IUnitOfWork
     IAttemptRepository Attempts { get; }
     IManualGradeRepository ManualGrades { get; }
 
+    // Admin & moderation (MVP-7)
+    IAuditLogRepository AuditLogs { get; }
+    IReportRepository Reports { get; }
+    INotificationRepository Notifications { get; }
+    ISystemSettingRepository SystemSettings { get; }
+
     // Generic fallback for entities without a dedicated repository.
     IGenericRepository<T> Repository<T>()
         where T : class;

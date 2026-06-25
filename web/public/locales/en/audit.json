@@ -1,0 +1,18 @@
+{
+    "title": "Audit log",
+    "subtitle": "An append-only record of every sensitive action across the platform.",
+    "system": "System",
+    "columns": {
+        "time": "Time",
+        "action": "Action",
+        "actor": "Actor",
+        "role": "Role",
+        "target": "Target",
+        "details": "Details",
+        "ip": "IP address"
+    },
+    "filters": {
+        "search": "Search by actor name or email…",
+        "allTargets": "All targets"
+    }
+}

@@ -1,4 +1,5 @@
 using ClassManagement.Application.Exceptions;
+using ClassManagement.Domain.Modules.Admin.Constants;
 using ClassManagement.Domain.Modules.Assignments.Enums;
 using ClassManagement.Domain.Modules.Questions.Enums;
 
@@ -6,11 +7,17 @@ public class GradeAttemptCommandHandler : IRequestHandler<GradeAttemptCommand>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAuditLogger _auditLogger;
 
-    public GradeAttemptCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+    public GradeAttemptCommandHandler(
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUser,
+        IAuditLogger auditLogger
+    )
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
+        _auditLogger = auditLogger;
     }
 
     public async Task Handle(GradeAttemptCommand request, CancellationToken ct)
@@ -82,14 +89,31 @@ public class GradeAttemptCommandHandler : IRequestHandler<GradeAttemptCommand>
                 throw new BadException("Grade.ScoreOutOfRange");
         }
 
-        // Upsert one manual_grade per (attempt, snapshot question).
-        var now = DateTime.UtcNow;
+        // Upsert one manual_grade per (attempt, snapshot question). Capture old → new per question for
+        // the audit trail (BR-7 grade.manual_grade_updated old/new requirement).
         var existing = (await _unitOfWork.ManualGrades.GetByAttemptAsync(attempt.Id, ct)).ToList();
         var existingByQuestion = existing.ToDictionary(g => g.SnapshotQuestionId);
+        var changes = new List<Dictionary<string, object?>>();
+        var anyPriorGrade = false;
 
         foreach (var item in request.Grades)
         {
             var snapshotQuestionId = byPublicId[item.QuestionPublicId].Id;
+            decimal? oldScore = existingByQuestion.TryGetValue(snapshotQuestionId, out var prior)
+                ? prior.Score
+                : null;
+            if (oldScore is not null)
+                anyPriorGrade = true;
+
+            changes.Add(
+                new Dictionary<string, object?>
+                {
+                    ["question_public_id"] = item.QuestionPublicId.ToString(),
+                    ["old_score"] = oldScore,
+                    ["new_score"] = item.Score,
+                }
+            );
+
             if (existingByQuestion.TryGetValue(snapshotQuestionId, out var grade))
             {
                 grade.Score = item.Score;
@@ -113,6 +137,21 @@ public class GradeAttemptCommandHandler : IRequestHandler<GradeAttemptCommand>
 
         var writingQuestionIds = writingQuestions.Select(q => q.Id).ToList();
         ManualGradeFinalizer.Recompute(_unitOfWork, attempt, writingQuestionIds, existing);
+
+        // Stage the audit row so it commits in the same transaction as the grades (BR-6-03 edits).
+        await _auditLogger.LogAsync(
+            new AuditEntry
+            {
+                Action = anyPriorGrade
+                    ? AuditActions.GradeManualGradeUpdated
+                    : AuditActions.GradeManualGraded,
+                TargetType = AuditTargetTypes.Attempt,
+                TargetId = attempt.Id,
+                TargetPublicId = attempt.PublicId,
+                Metadata = new Dictionary<string, object?> { ["changes"] = changes },
+            },
+            ct
+        );
 
         await _unitOfWork.SaveChangesAsync(ct);
     }

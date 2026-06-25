@@ -15,7 +15,11 @@ public class UnitOfWork : IUnitOfWork
         IExamRepository exams,
         IAssignmentRepository assignments,
         IAttemptRepository attempts,
-        IManualGradeRepository manualGrades
+        IManualGradeRepository manualGrades,
+        IAuditLogRepository auditLogs,
+        IReportRepository reports,
+        INotificationRepository notifications,
+        ISystemSettingRepository systemSettings
     )
     {
         _context = context;
@@ -27,6 +31,10 @@ public class UnitOfWork : IUnitOfWork
         Assignments = assignments;
         Attempts = attempts;
         ManualGrades = manualGrades;
+        AuditLogs = auditLogs;
+        Reports = reports;
+        Notifications = notifications;
+        SystemSettings = systemSettings;
     }
 
     public ISubjectRepository Subjects { get; }
@@ -37,6 +45,10 @@ public class UnitOfWork : IUnitOfWork
     public IAssignmentRepository Assignments { get; }
     public IAttemptRepository Attempts { get; }
     public IManualGradeRepository ManualGrades { get; }
+    public IAuditLogRepository AuditLogs { get; }
+    public IReportRepository Reports { get; }
+    public INotificationRepository Notifications { get; }
+    public ISystemSettingRepository SystemSettings { get; }
 
     public IGenericRepository<T> Repository<T>()
         where T : class

@@ -1,0 +1,48 @@
+{
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "loading": "Loading…",
+    "empty": "You have no notifications.",
+    "events": {
+        "ClassJoinApproved": {
+            "title": "Class join request approved",
+            "body": "You have been approved to join {{className}}."
+        },
+        "ClassJoinRejected": {
+            "title": "Class join request rejected",
+            "body": "Your request to join {{className}} was not approved."
+        },
+        "AssignmentCreated": {
+            "title": "New assignment",
+            "body": "A new assignment \"{{assignmentTitle}}\" is available."
+        },
+        "AssignmentDueSoon": {
+            "title": "Assignment due soon",
+            "body": "\"{{assignmentTitle}}\" is due soon. Don't forget to submit."
+        },
+        "AssignmentClosed": {
+            "title": "Assignment closed",
+            "body": "\"{{assignmentTitle}}\" has closed."
+        },
+        "GradePublished": {
+            "title": "Grades published",
+            "body": "Grades for \"{{assignmentTitle}}\" are now available."
+        },
+        "PendingGradingReminder": {
+            "title": "Grading reminder",
+            "body": "You have submissions waiting to be graded."
+        },
+        "ReportResolved": {
+            "title": "Report resolved",
+            "body": "Your report has been reviewed."
+        },
+        "ReportReceived": {
+            "title": "New report",
+            "body": "A new report needs review."
+        },
+        "SystemAnnouncement": {
+            "title": "{{title}}",
+            "body": "{{body}}"
+        }
+    }
+}
