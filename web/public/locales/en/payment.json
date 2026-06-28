@@ -1,0 +1,156 @@
+{
+    "nav": {
+        "subscription": "Subscription",
+        "payments": "Payments"
+    },
+    "subscription": {
+        "title": "Subscription & Billing",
+        "subtitle": "Manage your plan, usage, and invoices.",
+        "currentPlan": "Current plan",
+        "free": "Free",
+        "pro": "Pro",
+        "status": "Status",
+        "renewsOn": "Renews on",
+        "expiresOn": "Expires on",
+        "cancelledNote": "Your plan stays active until {{date}}, then reverts to Free.",
+        "graceNote": "Payment overdue — Pro stays active until {{date}}.",
+        "statusValue": {
+            "Active": "Active",
+            "PastDue": "Past due",
+            "Cancelled": "Cancelled",
+            "Expired": "Expired",
+            "Free": "Free"
+        },
+        "actions": {
+            "upgrade": "Upgrade to Pro",
+            "cancel": "Cancel subscription",
+            "reactivate": "Resume subscription",
+            "renew": "Renew now"
+        },
+        "cancelConfirm": {
+            "title": "Cancel subscription?",
+            "description": "You will keep Pro until the end of the current period, then move to the Free plan.",
+            "confirm": "Cancel subscription"
+        },
+        "toast": {
+            "cancelled": "Subscription cancelled.",
+            "reactivated": "Subscription resumed.",
+            "checkoutFailed": "Could not start checkout."
+        }
+    },
+    "usage": {
+        "title": "Resource usage",
+        "classes": "Classes",
+        "questions": "Questions",
+        "exams": "Exams",
+        "unlimited": "Unlimited",
+        "ofLimit": "{{used}} / {{limit}}",
+        "limitReached": "Limit reached — upgrade to Pro for more."
+    },
+    "plans": {
+        "title": "Choose a plan",
+        "perMonth": "/ month",
+        "perYear": "/ year",
+        "free": "Free",
+        "billing": {
+            "Monthly": "Monthly",
+            "Annual": "Annual"
+        },
+        "limits": {
+            "classes": "{{count}} classes",
+            "questions": "{{count}} questions",
+            "exams": "{{count}} exams",
+            "unlimitedClasses": "Unlimited classes",
+            "unlimitedQuestions": "Unlimited questions",
+            "unlimitedExams": "Unlimited exams"
+        },
+        "select": "Choose",
+        "current": "Current plan"
+    },
+    "checkout": {
+        "title": "Checkout",
+        "provider": "Payment method",
+        "momo": "Momo",
+        "vnpay": "VNPay",
+        "pay": "Pay {{amount}}",
+        "redirecting": "Redirecting to the payment gateway…",
+        "return": {
+            "title": "Payment status",
+            "pending": "Waiting for payment confirmation…",
+            "completed": "Payment successful! Your Pro subscription is now active.",
+            "failed": "Payment failed. Please try again.",
+            "expired": "This payment order has expired.",
+            "back": "Back to subscription"
+        }
+    },
+    "invoices": {
+        "title": "Invoices",
+        "empty": "No invoices yet.",
+        "number": "Invoice",
+        "amount": "Amount",
+        "plan": "Plan",
+        "date": "Date",
+        "download": "Download PDF"
+    },
+    "admin": {
+        "title": "Payments & Subscriptions",
+        "subtitle": "Subscriptions, payment history, and revenue.",
+        "tabs": {
+            "subscriptions": "Subscriptions",
+            "payments": "Payments",
+            "revenue": "Revenue"
+        },
+        "subscriptions": {
+            "teacher": "Teacher",
+            "plan": "Plan",
+            "status": "Status",
+            "type": "Type",
+            "started": "Started",
+            "expires": "Expires",
+            "note": "Note",
+            "search": "Search by teacher…",
+            "allStatuses": "All statuses",
+            "manualSet": "Grant Pro",
+            "paymentType": {
+                "Auto": "Auto",
+                "Manual": "Manual"
+            }
+        },
+        "payments": {
+            "teacher": "Teacher",
+            "plan": "Plan",
+            "provider": "Provider",
+            "amount": "Amount",
+            "status": "Status",
+            "txn": "Transaction",
+            "created": "Created",
+            "completed": "Completed",
+            "search": "Search by teacher / txn…",
+            "allStatuses": "All statuses",
+            "allProviders": "All providers"
+        },
+        "revenue": {
+            "total": "Total revenue",
+            "completed": "Completed payments",
+            "byMonth": "Revenue by month",
+            "byPlan": "Revenue by plan",
+            "months": "Last {{count}} months"
+        },
+        "manualDialog": {
+            "title": "Grant Pro manually",
+            "description": "Create or override a teacher's Pro subscription (e.g. partnership / demo).",
+            "teacherId": "Teacher public ID",
+            "plan": "Plan",
+            "note": "Admin note",
+            "notePlaceholder": "Reason (optional)",
+            "submit": "Grant Pro",
+            "success": "Pro subscription granted."
+        }
+    },
+    "status": {
+        "Pending": "Pending",
+        "Completed": "Completed",
+        "Failed": "Failed",
+        "Expired": "Expired"
+    }
+}

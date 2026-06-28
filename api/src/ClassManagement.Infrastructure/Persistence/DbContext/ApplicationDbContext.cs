@@ -39,6 +39,12 @@ public sealed class ApplicationDbContext
     public DbSet<AttemptAnswer> AttemptAnswers => Set<AttemptAnswer>();
     public DbSet<ManualGrade> ManualGrades => Set<ManualGrade>();
 
+    // Premium & payment (MVP-8)
+    public DbSet<Plan> Plans => Set<Plan>();
+    public DbSet<Subscription> Subscriptions => Set<Subscription>();
+    public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<Invoice> Invoices => Set<Invoice>();
+
     // Admin & moderation (MVP-7)
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Report> Reports => Set<Report>();

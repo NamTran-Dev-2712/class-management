@@ -177,6 +177,8 @@ public static class DependencyInjection
             AddUserFixedWindow(RateLimitOptions.Policies.NotificationWrite, rl.NotificationWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.AdminAction, rl.AdminAction);
             AddIpFixedWindow(RateLimitOptions.Policies.SystemSettingWrite, rl.SystemSettingWrite);
+            AddUserFixedWindow(RateLimitOptions.Policies.PaymentCheckout, rl.PaymentCheckout);
+            AddIpFixedWindow(RateLimitOptions.Policies.PaymentWebhook, rl.PaymentWebhook);
             AddIpFixedWindow(RateLimitOptions.Policies.Read, rl.Read);
         });
 
@@ -325,6 +327,33 @@ public static class DependencyInjection
             options.AddPolicy(
                 OutputCachePolicies.PublicConfigRead,
                 b => Shared(b, OutputCacheTags.SystemSettings)
+            );
+
+            // Premium & payment (MVP-8)
+            options.AddPolicy(OutputCachePolicies.PlansRead, b => Shared(b, OutputCacheTags.Plans));
+            options.AddPolicy(
+                OutputCachePolicies.TeacherSubscriptionRead,
+                b => PerUser(b, OutputCacheTags.Subscriptions)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.SubscriptionUsageRead,
+                b => PerUser(b, OutputCacheTags.Subscriptions)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.InvoicesRead,
+                b => PerUser(b, OutputCacheTags.Invoices)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminSubscriptionsRead,
+                b => Shared(b, OutputCacheTags.Subscriptions)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminPaymentsRead,
+                b => Shared(b, OutputCacheTags.Payments)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminRevenueRead,
+                b => Shared(b, OutputCacheTags.Payments)
             );
         });
 

@@ -215,15 +215,36 @@ Examples:
 > - Seed 12 `system_settings` mặc định qua `SystemSettingSeeder` (idempotent, additive).
 > - View đọc (`vw_audit_logs`, `vw_reports`, `vw_notifications`) tạo ở các migration sau theo từng phase.
 
-### MVP-8: Payment
+### MVP-8: Payment (as built)
+
+**Đã triển khai** — gộp 4 bảng vào **một** migration (giống Questions/Exams/Assignments), + một
+migration view riêng cho admin:
 
 ```
-202603050900_create_plans_table             -- + seed Free/Pro plans
-202603050910_create_subscriptions_table
-202603050920_create_payments_table
-202603050930_create_invoices_table
-202603050940_seed_free_subscriptions        -- Data migration: existing teachers
+20260626153009_create_payment_tables
+  -- plans, subscriptions, payments, invoices (check constraints + indexes theo doc 09)
+  -- partial unique uq_subscriptions_teacher_active (teacher_id) WHERE status='Active' (BR-8-01)
+  -- uq_payments_idempotency_key (dedup webhook), idx_payments_pending_expires (sweep)
+  -- uq_invoices_payment (1-1), uq_invoices_number; sequence payment_invoice_number_seq (raw SQL)
+  -- mở rộng chk_audit_logs_action thêm các action subscription.*/payment.*/invoice.issued
+20260628144059_add_payment_admin_views
+  -- vw_subscriptions (subscription ⨝ teacher ⨝ plan) + vw_payments (payment ⨝ teacher ⨝ plan) — raw SQL
 ```
+
+> Khác kế hoạch gốc:
+> - **Enum lưu PascalCase** (`Monthly`/`Annual`, `Momo`/`VnPay`, `Auto`/`Manual`, `Active`/`PastDue`/…)
+>   cho nhất quán với mọi enum-as-string khác — CHECK constraints dùng đúng các giá trị này.
+> - **Không seed Free subscription cho mỗi teacher** (open question đã chốt: lazy — không có Active
+>   subscription ⇒ coi như Free). Free limits đọc từ `system_settings` qua `IResourceLimitService`.
+> - **Không có bảng riêng cho invoice number**: dùng Postgres sequence `payment_invoice_number_seq`
+>   (race-free) format `INV-YYYYMM-######`.
+> - **Plans là nguồn sự thật cho resource limit theo plan**: teacher có Active/PastDue (grace) sub →
+>   limit của plan đó (null = unlimited); ngược lại → Free caps live từ `system_settings`.
+> - Provider trừu tượng qua `IPaymentProvider` (+ `IPaymentProviderResolver`): `FakePaymentProvider`
+>   (dev/test, `Payment:UseFakeProvider=true`) + `MomoPaymentProvider`/`VnPayPaymentProvider` thật.
+> - Lifecycle (Active→PastDue/Cancelled, PastDue→Expired, hết hạn Pending order) chạy bằng Hangfire
+>   recurring `subscription-lifecycle` → `RunSubscriptionLifecycleCommand` (app-layer, idempotent).
+
 
 ---
 

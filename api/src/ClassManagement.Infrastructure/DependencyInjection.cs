@@ -206,6 +206,26 @@ public static class DependencyInjection
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
 
+        // Premium & payment (MVP-8)
+        services.AddScoped<IPlanRepository, PlanRepository>();
+        services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+        services.AddScoped<IResourceLimitService, Services.Payment.ResourceLimitService>();
+        services.Configure<PaymentOptions>(configuration.GetSection(PaymentOptions.SectionName));
+        services.Configure<SubscriptionOptions>(
+            configuration.GetSection(SubscriptionOptions.SectionName)
+        );
+        services.AddScoped<ISubscriptionPolicy, Services.Payment.SubscriptionPolicy>();
+        services.AddScoped<Services.Payment.FakePaymentProvider>();
+        services.AddScoped<Services.Payment.VnPayPaymentProvider>();
+        services.AddHttpClient<Services.Payment.MomoPaymentProvider>();
+        services.AddScoped<IPaymentProviderResolver, Services.Payment.PaymentProviderResolver>();
+        services.AddSingleton<
+            Application.Modules.Payment.Interfaces.IInvoicePdfService,
+            Services.Payment.QuestPdfInvoiceService
+        >();
+
         // Password-reset / email / client-app options
         services.Configure<PasswordResetOptions>(
             configuration.GetSection(PasswordResetOptions.SectionName)

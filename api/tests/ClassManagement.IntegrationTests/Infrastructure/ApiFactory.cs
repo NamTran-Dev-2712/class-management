@@ -44,6 +44,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             "AdminAction",
             "NotificationWrite",
             "SystemSettingWrite",
+            "PaymentCheckout",
+            "PaymentWebhook",
             "Read",
         ];
         foreach (var policy in policies)

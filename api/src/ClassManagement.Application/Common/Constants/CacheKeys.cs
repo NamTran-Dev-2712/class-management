@@ -45,6 +45,15 @@ public static class OutputCachePolicies
     public const string SystemSettingsRead = "system-settings-read";
     public const string AdminDashboardRead = "admin-dashboard-read";
     public const string PublicConfigRead = "public-config-read";
+
+    // Premium & payment (MVP-8)
+    public const string PlansRead = "plans-read";
+    public const string TeacherSubscriptionRead = "teacher-subscription-read";
+    public const string SubscriptionUsageRead = "subscription-usage-read";
+    public const string InvoicesRead = "invoices-read";
+    public const string AdminSubscriptionsRead = "admin-subscriptions-read";
+    public const string AdminPaymentsRead = "admin-payments-read";
+    public const string AdminRevenueRead = "admin-revenue-read";
 }
 
 /// <summary>
@@ -66,4 +75,10 @@ public static class OutputCacheTags
     public const string Reports = "reports";
     public const string SystemSettings = "system-settings";
     public const string AdminDashboard = "admin-dashboard";
+
+    // Premium & payment (MVP-8)
+    public const string Plans = "plans";
+    public const string Subscriptions = "subscriptions";
+    public const string Payments = "payments";
+    public const string Invoices = "invoices";
 }

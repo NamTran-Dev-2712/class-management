@@ -4,25 +4,26 @@ public class CreateQuestionCommandHandler : IRequestHandler<CreateQuestionComman
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
-    private readonly IQuestionPolicy _policy;
+    private readonly IResourceLimitService _resourceLimits;
 
     public CreateQuestionCommandHandler(
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
-        IQuestionPolicy policy
+        IResourceLimitService resourceLimits
     )
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
-        _policy = policy;
+        _resourceLimits = resourceLimits;
     }
 
     public async Task<Guid> Handle(CreateQuestionCommand request, CancellationToken ct)
     {
         var teacherId = _currentUser.UserId ?? throw new UnauthorizedException("Auth.Unauthorized");
 
-        // BR-3-11: optional cap on questions per teacher (0 = unlimited). Read live from system_settings.
-        var maxQuestions = await _policy.GetMaxQuestionsPerTeacherAsync(ct);
+        // BR-3-11 + MVP-8: effective cap = the teacher's plan limit (Pro = unlimited) or the live Free
+        // system_settings cap (0 = unlimited).
+        var maxQuestions = await _resourceLimits.GetMaxQuestionsAsync(teacherId, ct);
         if (maxQuestions > 0)
         {
             var count = await _unitOfWork.Questions.CountByTeacherAsync(teacherId, ct);

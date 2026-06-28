@@ -19,6 +19,11 @@ public static class SystemSettingKeys
     public const string MaxReportsPerDay = "max_reports_per_day";
     public const string AppName = "app_name";
     public const string MaintenanceMode = "maintenance_mode";
+
+    // Premium & payment (MVP-8)
+    public const string SubscriptionGracePeriodDays = "subscription_grace_period_days";
+    public const string SubscriptionExpiringNoticeDays = "subscription_expiring_notice_days";
+    public const string PaymentOrderTimeoutMinutes = "payment_order_timeout_minutes";
 }
 
 /// <summary>Allowed <c>system_settings.value_type</c> values.</summary>

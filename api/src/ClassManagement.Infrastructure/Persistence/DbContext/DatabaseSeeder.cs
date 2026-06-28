@@ -96,6 +96,7 @@ public static class DatabaseSeeder
 
         await SubjectSeeder.SeedAsync(context, logger);
         await SystemSettingSeeder.SeedAsync(context, logger);
+        await PlanSeeder.SeedAsync(context, logger);
     }
 
     // set_updated_at() function + per-table triggers — idempotent (DROP IF EXISTS + CREATE)
@@ -133,6 +134,16 @@ public static class DatabaseSeeder
             DROP TRIGGER IF EXISTS trg_system_settings_updated_at ON system_settings;
             CREATE TRIGGER trg_system_settings_updated_at
               BEFORE UPDATE ON system_settings
+              FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+            DROP TRIGGER IF EXISTS trg_plans_updated_at ON plans;
+            CREATE TRIGGER trg_plans_updated_at
+              BEFORE UPDATE ON plans
+              FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+            DROP TRIGGER IF EXISTS trg_subscriptions_updated_at ON subscriptions;
+            CREATE TRIGGER trg_subscriptions_updated_at
+              BEFORE UPDATE ON subscriptions
               FOR EACH ROW EXECUTE FUNCTION set_updated_at();
             """
         );

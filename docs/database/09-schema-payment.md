@@ -265,6 +265,22 @@ Khi Admin set Pro manual:
 
 ---
 
+## Read-model Views (as built, MVP-8)
+
+Admin lists join to `users` (Identity) + `plans`, so they read through DB views (giống `vw_reports`),
+queried via `BaseGetQueryHandler` (search/filter/sort/paging). Created raw-SQL trong migration
+`20260628144059_add_payment_admin_views`.
+
+| View | Nguồn | Dùng cho |
+|---|---|---|
+| `vw_subscriptions` | `subscriptions ⨝ users ⨝ plans` | Admin subscription list (A8-01) — teacher name/email + plan name/price + status/type/expiry |
+| `vw_payments` | `payments ⨝ users ⨝ plans` | Admin payment history (A8-03) — teacher name/email + plan name + provider/amount/status/txn |
+
+Revenue summary (A8-04) **không có view riêng**: `GetRevenueSummaryQuery` group-by SQL trên `vw_payments`
+(status `Completed`) theo tháng + theo plan.
+
+---
+
 ## Relationships Diagram
 
 ```
@@ -297,9 +313,17 @@ Phụ thuộc:
 
 ---
 
-## Open Questions
+## Open Questions (resolved as built, MVP-8)
 
-- [ ] **Free subscription creation**: Khi user được set role Teacher, tự động INSERT Free subscription hay lazy-load khi cần? Đề xuất: lazy-load (query finds no active subscription → treat as Free)
-- [ ] **Invoice PDF**: Generate ở app layer với iTextSharp/QuestPDF, store ở S3/Cloudflare R2, update `pdf_url`. Cần async job.
-- [ ] **Proration**: Khi Teacher nâng từ Monthly→Annual giữa kỳ, tính tiền dư như thế nào? MVP-8 để đơn giản: bắt đầu kỳ mới. Future: credit account.
-- [ ] **Webhook security**: Verify signature từ Momo/VNPay trước khi process. Store signing secret trong env var, không trong DB.
+- [x] **Free subscription creation**: **Lazy** — không seed Free sub per-teacher; không có Active/PastDue
+  subscription ⇒ coi như Free (limits từ `system_settings` qua `IResourceLimitService`).
+- [x] **Invoice PDF**: Generate **on-the-fly** bằng **QuestPDF** (`IInvoicePdfService`/`QuestPdfInvoiceService`),
+  stream blob qua `GET /api/teacher/subscription/invoices/{id}/pdf` (giống CSV export). Không lưu file/S3,
+  không async job; `pdf_url` để dành cho tương lai. Labels resolve theo culture ở controller (renderer i18n-free).
+- [x] **Proration**: MVP-8 đơn giản — gia hạn cộng dồn từ `max(expires_at, now)` theo billing cycle
+  (`ActivateSubscriptionAsync`); không tính prorata. Future: credit account.
+- [x] **Webhook security**: `IPaymentProvider.VerifyAndParseWebhook` verify chữ ký trong adapter (Momo/VnPay),
+  secret đọc từ config/env (`Payment:Momo:*`/`Payment:VnPay:*`), **không** lưu DB. `FakePaymentProvider`
+  (dev/test) bỏ qua chữ ký. Idempotency qua `payments.idempotency_key` unique (`{provider}_{orderRef}`).
+- [x] **Resource limit source of truth**: **plans table** (limit của Active/grace plan; null = unlimited),
+  fallback Free = `system_settings`. `0 = unlimited` xuyên suốt.

@@ -7,18 +7,21 @@ public class CreateClassCommandHandler : IRequestHandler<CreateClassCommand, Gui
     private readonly ICurrentUserService _currentUser;
     private readonly IInviteCodeGenerator _inviteCodes;
     private readonly IClassroomPolicy _policy;
+    private readonly IResourceLimitService _resourceLimits;
 
     public CreateClassCommandHandler(
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
         IInviteCodeGenerator inviteCodes,
-        IClassroomPolicy policy
+        IClassroomPolicy policy,
+        IResourceLimitService resourceLimits
     )
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
         _inviteCodes = inviteCodes;
         _policy = policy;
+        _resourceLimits = resourceLimits;
     }
 
     public async Task<Guid> Handle(CreateClassCommand request, CancellationToken ct)
@@ -26,8 +29,9 @@ public class CreateClassCommandHandler : IRequestHandler<CreateClassCommand, Gui
         var ownerId = _currentUser.UserId ?? throw new UnauthorizedException("Auth.Unauthorized");
         var name = request.Name.Trim();
 
-        // BR-2-09: optional cap on classes per teacher (0 = unlimited). Read live from system_settings.
-        var maxClasses = await _policy.GetMaxClassesPerTeacherAsync(ct);
+        // BR-2-09 + MVP-8: effective cap = the teacher's plan limit (Pro = unlimited) or the live Free
+        // system_settings cap (0 = unlimited).
+        var maxClasses = await _resourceLimits.GetMaxClassesAsync(ownerId, ct);
         if (maxClasses > 0)
         {
             var count = await _unitOfWork.Classes.CountByOwnerAsync(ownerId, ct);

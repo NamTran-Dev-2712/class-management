@@ -13,6 +13,8 @@ global using ClassManagement.Domain.Modules.Auth.Entities;
 global using ClassManagement.Domain.Modules.Catalog.Entities;
 global using ClassManagement.Domain.Modules.Classroom.Entities;
 global using ClassManagement.Domain.Modules.Exams.Entities;
+global using ClassManagement.Domain.Modules.Payment.Entities;
+global using ClassManagement.Domain.Modules.Payment.Enums;
 global using ClassManagement.Domain.Modules.Questions.Entities;
 global using ClassManagement.Domain.Modules.Users.Entities;
 global using ClassManagement.Domain.Primitives;

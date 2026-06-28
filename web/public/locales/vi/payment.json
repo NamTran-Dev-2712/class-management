@@ -1,0 +1,156 @@
+{
+    "nav": {
+        "subscription": "Gói dịch vụ",
+        "payments": "Thanh toán"
+    },
+    "subscription": {
+        "title": "Gói dịch vụ & Thanh toán",
+        "subtitle": "Quản lý gói, mức sử dụng và hoá đơn của bạn.",
+        "currentPlan": "Gói hiện tại",
+        "free": "Miễn phí",
+        "pro": "Pro",
+        "status": "Trạng thái",
+        "renewsOn": "Gia hạn vào",
+        "expiresOn": "Hết hạn vào",
+        "cancelledNote": "Gói vẫn hoạt động đến {{date}}, sau đó chuyển về Miễn phí.",
+        "graceNote": "Thanh toán quá hạn — Pro vẫn hoạt động đến {{date}}.",
+        "statusValue": {
+            "Active": "Đang hoạt động",
+            "PastDue": "Quá hạn",
+            "Cancelled": "Đã huỷ",
+            "Expired": "Đã hết hạn",
+            "Free": "Miễn phí"
+        },
+        "actions": {
+            "upgrade": "Nâng cấp Pro",
+            "cancel": "Huỷ gói",
+            "reactivate": "Tiếp tục gói",
+            "renew": "Gia hạn ngay"
+        },
+        "cancelConfirm": {
+            "title": "Huỷ gói đăng ký?",
+            "description": "Bạn vẫn dùng Pro đến hết kỳ hiện tại, sau đó chuyển về gói Miễn phí.",
+            "confirm": "Huỷ gói"
+        },
+        "toast": {
+            "cancelled": "Đã huỷ gói đăng ký.",
+            "reactivated": "Đã tiếp tục gói đăng ký.",
+            "checkoutFailed": "Không thể bắt đầu thanh toán."
+        }
+    },
+    "usage": {
+        "title": "Mức sử dụng tài nguyên",
+        "classes": "Lớp học",
+        "questions": "Câu hỏi",
+        "exams": "Đề thi",
+        "unlimited": "Không giới hạn",
+        "ofLimit": "{{used}} / {{limit}}",
+        "limitReached": "Đã đạt giới hạn — nâng cấp Pro để dùng thêm."
+    },
+    "plans": {
+        "title": "Chọn gói",
+        "perMonth": "/ tháng",
+        "perYear": "/ năm",
+        "free": "Miễn phí",
+        "billing": {
+            "Monthly": "Hàng tháng",
+            "Annual": "Hàng năm"
+        },
+        "limits": {
+            "classes": "{{count}} lớp học",
+            "questions": "{{count}} câu hỏi",
+            "exams": "{{count}} đề thi",
+            "unlimitedClasses": "Không giới hạn lớp học",
+            "unlimitedQuestions": "Không giới hạn câu hỏi",
+            "unlimitedExams": "Không giới hạn đề thi"
+        },
+        "select": "Chọn",
+        "current": "Gói hiện tại"
+    },
+    "checkout": {
+        "title": "Thanh toán",
+        "provider": "Phương thức thanh toán",
+        "momo": "Momo",
+        "vnpay": "VNPay",
+        "pay": "Thanh toán {{amount}}",
+        "redirecting": "Đang chuyển đến cổng thanh toán…",
+        "return": {
+            "title": "Trạng thái thanh toán",
+            "pending": "Đang chờ xác nhận thanh toán…",
+            "completed": "Thanh toán thành công! Gói Pro của bạn đã được kích hoạt.",
+            "failed": "Thanh toán thất bại. Vui lòng thử lại.",
+            "expired": "Đơn thanh toán này đã hết hạn.",
+            "back": "Về trang gói dịch vụ"
+        }
+    },
+    "invoices": {
+        "title": "Hoá đơn",
+        "empty": "Chưa có hoá đơn nào.",
+        "number": "Hoá đơn",
+        "amount": "Số tiền",
+        "plan": "Gói",
+        "date": "Ngày",
+        "download": "Tải PDF"
+    },
+    "admin": {
+        "title": "Thanh toán & Gói đăng ký",
+        "subtitle": "Gói đăng ký, lịch sử thanh toán và doanh thu.",
+        "tabs": {
+            "subscriptions": "Gói đăng ký",
+            "payments": "Thanh toán",
+            "revenue": "Doanh thu"
+        },
+        "subscriptions": {
+            "teacher": "Giáo viên",
+            "plan": "Gói",
+            "status": "Trạng thái",
+            "type": "Loại",
+            "started": "Bắt đầu",
+            "expires": "Hết hạn",
+            "note": "Ghi chú",
+            "search": "Tìm theo giáo viên…",
+            "allStatuses": "Tất cả trạng thái",
+            "manualSet": "Cấp Pro",
+            "paymentType": {
+                "Auto": "Tự động",
+                "Manual": "Thủ công"
+            }
+        },
+        "payments": {
+            "teacher": "Giáo viên",
+            "plan": "Gói",
+            "provider": "Cổng",
+            "amount": "Số tiền",
+            "status": "Trạng thái",
+            "txn": "Giao dịch",
+            "created": "Tạo lúc",
+            "completed": "Hoàn tất",
+            "search": "Tìm theo giáo viên / mã GD…",
+            "allStatuses": "Tất cả trạng thái",
+            "allProviders": "Tất cả cổng"
+        },
+        "revenue": {
+            "total": "Tổng doanh thu",
+            "completed": "Giao dịch hoàn tất",
+            "byMonth": "Doanh thu theo tháng",
+            "byPlan": "Doanh thu theo gói",
+            "months": "{{count}} tháng gần nhất"
+        },
+        "manualDialog": {
+            "title": "Cấp Pro thủ công",
+            "description": "Tạo hoặc ghi đè gói Pro của giáo viên (vd: đối tác / demo).",
+            "teacherId": "Public ID giáo viên",
+            "plan": "Gói",
+            "note": "Ghi chú quản trị",
+            "notePlaceholder": "Lý do (tuỳ chọn)",
+            "submit": "Cấp Pro",
+            "success": "Đã cấp gói Pro."
+        }
+    },
+    "status": {
+        "Pending": "Đang chờ",
+        "Completed": "Hoàn tất",
+        "Failed": "Thất bại",
+        "Expired": "Hết hạn"
+    }
+}
