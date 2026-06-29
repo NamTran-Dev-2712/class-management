@@ -1,7 +1,10 @@
+using ClassManagement.Application.Modules.Assignments.Interfaces;
 using ClassManagement.Infrastructure.Persistence.Seeds;
+using ClassManagement.Infrastructure.Persistence.Seeds.Demo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace ClassManagement.Infrastructure.Persistence.DbContext;
@@ -97,6 +100,15 @@ public static class DatabaseSeeder
         await SubjectSeeder.SeedAsync(context, logger);
         await SystemSettingSeeder.SeedAsync(context, logger);
         await PlanSeeder.SeedAsync(context, logger);
+
+        // Step 5: Dev-only demo data — gated by environment (hard production backstop) AND the
+        // Seed:DemoData flag (default false; on in appsettings.Development.json; forced off in tests).
+        var environment = sp.GetRequiredService<IHostEnvironment>();
+        if (environment.IsDevelopment() && configuration.GetValue<bool>("Seed:DemoData"))
+        {
+            var autoGrader = sp.GetRequiredService<IAutoGradingService>();
+            await DemoDataSeeder.SeedAsync(context, userManager, autoGrader, logger);
+        }
     }
 
     // set_updated_at() function + per-table triggers — idempotent (DROP IF EXISTS + CREATE)
