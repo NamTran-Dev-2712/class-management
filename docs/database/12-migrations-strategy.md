@@ -444,6 +444,27 @@ public static async Task SeedAsync(ApplicationDbContext context)
 }
 ```
 
+### Demo data seeder (dev-only, end-to-end)
+
+Ngoài reference data (roles/admin/subjects/system-settings/plans seed mỗi lần khởi động, idempotent),
+dự án có một **demo dataset đầy đủ** phục vụ test/QA thủ công — `DemoDataSeeder`
+(`Infrastructure/Persistence/Seeds/Demo/`). Đặc điểm:
+
+- **Gate:** chỉ chạy khi `IHostEnvironment.IsDevelopment()` **AND** cờ `Seed:DemoData=true`
+  (mặc định `false` trong `appsettings.json`; bật trong `appsettings.Development.json`; **ép `false`**
+  trong test host qua `ApiFactory`). Production không bao giờ seed (env check là backstop cứng).
+- **Idempotent:** bỏ qua toàn bộ nếu user mốc `teacher1@demo.local` đã tồn tại.
+- **Không thêm schema/migration** — chỉ insert dữ liệu hàng loạt qua `ApplicationDbContext`
+  (`UserManager` cho user) theo đúng thứ tự FK: users → classes + memberships → questions → exams →
+  assignments + snapshot (publish) → attempts + auto/manual grading → subscription + payment + invoice
+  → notifications/reports/audit logs.
+- **Tôn trọng invariant:** dựng snapshot giống `PublishAssignmentCommandHandler`, chấm tự động qua
+  `IAutoGradingService` (mô phỏng `AttemptGrading`), tính lại manual grade như `ManualGradeFinalizer`,
+  lấy invoice number từ sequence `payment_invoice_number_seq`. **Không** gửi MediatR command (handler
+  phụ thuộc `ICurrentUserService` gắn HTTP, null khi seed lúc khởi động).
+- **Test:** `Seeding/DemoSeedGatingTests` (gate tắt trong test host) + `Seeding/DemoDataSeederTests`
+  (chạy seeder trực tiếp trên container cô lập, kiểm tra graph đầy đủ + idempotent).
+
 ### Seed Data Files
 
 Seed data quan trọng nên có migration file riêng (không trộn với schema migration):

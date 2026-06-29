@@ -200,6 +200,13 @@ dotnet run --project src/ClassManagement.Api
 > the admin user, and default subjects. No manual `database update` is required.
 > API docs are available at **`/scalar/v1`** in Development.
 
+> **Demo data (dev only).** To start with a fully-populated system (teachers, students, classes, questions,
+> exams, published assignments, attempts + grading, a Pro subscription + invoice, sample
+> notifications/reports), set `"Seed": { "DemoData": true }` in
+> `api/src/ClassManagement.Api/appsettings.Development.json`. The demo seed runs **only** in Development
+> with that flag (never in Production or tests) and is idempotent. Demo logins use password `Demo@123456`
+> (`teacher1@demo.local`, `student1@demo.local`); the admin is `onboarding@resend.dev` / `Admin@123456`.
+
 ### 5. Run the frontend (`web/`)
 
 ```bash
@@ -263,7 +270,7 @@ fullstack_class_management/
 │   ├── mvp/                               # product roadmap & per-MVP specs
 │   └── database/                          # schema, conventions, migration strategy
 │
-├── postman/                              # Postman collections per MVP
+├── postman/                              # Postman collections (per-MVP + a Full all-controller one)
 ├── .claude/rules/                        # engineering conventions (AI-tuned reference)
 ├── docker-compose.yml                    # local PostgreSQL + Redis
 └── CLAUDE.md                             # repo guardrails & module status

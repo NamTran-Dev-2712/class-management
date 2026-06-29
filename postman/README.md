@@ -4,6 +4,11 @@ Importable collection + environment for manually exercising the API alongside th
 integration tests (`api/tests/ClassManagement.IntegrationTests`).
 
 ## Files
+- `ClassManagement-Full.postman_collection.json` — **broad coverage of every controller**, organised by
+  actor (Anonymous / Admin / Teacher / Student). Designed to run against a dev API seeded with the
+  end-to-end **demo dataset** (see below): each actor folder logs in with a demo account, then exercises
+  that actor's read endpoints (+ a couple of write smokes), chaining ids from list responses into the
+  following detail GETs. Run folders top to bottom.
 - `ClassManagement.postman_collection.json` — all endpoints (Auth, Admin Subjects, Admin Users).
 - `ClassManagement-MVP5.postman_collection.json` — end-to-end Assignment & online-testing flow.
 - `ClassManagement-MVP6.postman_collection.json` — end-to-end Manual Grading & Reports flow
@@ -15,7 +20,16 @@ integration tests (`api/tests/ClassManagement.IntegrationTests`).
   endpoint, live limits (invite-code length, max-students-per-class cap), maintenance mode (503 for
   non-admin writes), and the richer dashboard (counters + 30-day trend + status breakdowns). Realtime
   notifications use SignalR (`/hubs/notifications`) — verify manually in the browser, not Postman.
-- `ClassManagement.postman_environment.json` — `baseUrl` + admin/teacher/student credentials.
+- `ClassManagement.postman_environment.json` — `baseUrl` + admin/teacher/student credentials, plus the
+  demo accounts (`demoTeacherEmail`, `demoStudentEmail`, `demoPassword`) used by the Full collection.
+
+## Demo data (dev only)
+The Full collection assumes the **demo dataset** is present. It is seeded only when the API runs in the
+**Development** environment with `Seed:DemoData=true` (set in `appsettings.Development.json`; off by
+default and forced off in tests). On a fresh dev DB the seeder (idempotent) creates teachers/students,
+classes + members, questions, exams, published assignments + attempts + grading, a Pro subscription +
+invoice, and sample notifications/reports/audit logs. Demo logins (password `Demo@123456`):
+`teacher1@demo.local`, `student1@demo.local`; admin is the seeded `onboarding@resend.dev` / `Admin@123456`.
 
 ## Feature flows (MVP-5 / MVP-6)
 The MVP collections are **self-contained**: each registers its own teacher/student, builds the exam →
