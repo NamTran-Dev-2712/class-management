@@ -32,6 +32,7 @@ public class AdminClassesController : BaseApiController
     }
 
     [HttpGet("{publicId:guid}")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
     [OutputCache(PolicyName = OutputCachePolicies.AdminClassesRead)]
     public async Task<IActionResult> GetClass(Guid publicId, CancellationToken cancellationToken)
     {

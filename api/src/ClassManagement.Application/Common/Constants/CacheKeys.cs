@@ -36,6 +36,10 @@ public static class OutputCachePolicies
     public const string AttemptsRead = "attempts-read";
     public const string AssignmentReportRead = "assignment-report-read";
 
+    // Admin views any assignment's report (shared across admins) — distinct from the owner-scoped
+    // teacher report (AssignmentReportRead, PerUser).
+    public const string AdminAssignmentReportRead = "admin-assignment-report-read";
+
     // Admin & moderation (MVP-7)
     public const string AdminAuditLogsRead = "admin-audit-logs-read";
     public const string NotificationsRead = "notifications-read";

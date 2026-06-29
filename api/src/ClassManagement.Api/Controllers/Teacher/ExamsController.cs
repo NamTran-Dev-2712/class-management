@@ -47,6 +47,7 @@ public class TeacherExamsController : BaseApiController
 
     [HttpGet("public/{publicId:guid}")]
     [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.PublicExamsRead)]
     public async Task<IActionResult> GetPublicExam(
         Guid publicId,
         CancellationToken cancellationToken
@@ -61,6 +62,7 @@ public class TeacherExamsController : BaseApiController
 
     [HttpGet("{publicId:guid}", Name = "GetTeacherExam")]
     [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.TeacherExamsRead)]
     public async Task<IActionResult> GetExam(Guid publicId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetExamDetailQuery(publicId), cancellationToken);

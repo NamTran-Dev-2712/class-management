@@ -33,6 +33,7 @@ public class AdminQuestionsController : BaseApiController
 
     [HttpGet("{publicId:guid}")]
     [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.AdminQuestionsRead)]
     public async Task<IActionResult> GetQuestion(Guid publicId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(

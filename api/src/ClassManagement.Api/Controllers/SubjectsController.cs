@@ -29,6 +29,7 @@ public class SubjectsController : BaseApiController
     }
 
     [HttpGet("{publicId:guid}", Name = "GetSubjectById")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
     [OutputCache(PolicyName = OutputCachePolicies.SubjectsRead)]
     public async Task<IActionResult> GetSubject(Guid publicId, CancellationToken cancellationToken)
     {

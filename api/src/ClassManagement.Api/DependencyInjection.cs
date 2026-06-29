@@ -290,6 +290,12 @@ public static class DependencyInjection
                 OutputCachePolicies.AssignmentReportRead,
                 b => PerUser(b, OutputCacheTags.Assignments)
             );
+            // Admin assignment report — shared across admins (admin is a read-only viewer of any
+            // assignment), tagged "assignments" so grade/release writes evict it.
+            options.AddPolicy(
+                OutputCachePolicies.AdminAssignmentReportRead,
+                b => Shared(b, OutputCacheTags.Assignments)
+            );
 
             // Admin & moderation (MVP-7). Audit log / admin reports / dashboard are the same for every
             // admin (Shared); a user's own notifications, unread count, and own reports are personalized
