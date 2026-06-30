@@ -35,6 +35,7 @@ public class TeacherClassesController : BaseApiController
     }
 
     [HttpGet("{publicId:guid}", Name = "GetTeacherClass")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
     [OutputCache(PolicyName = OutputCachePolicies.TeacherClassesRead)]
     public async Task<IActionResult> GetClass(Guid publicId, CancellationToken cancellationToken)
     {

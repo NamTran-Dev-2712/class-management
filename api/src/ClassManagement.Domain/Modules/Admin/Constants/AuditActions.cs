@@ -58,6 +58,17 @@ public static class AuditActions
     public const string AdminSystemSettingsChanged = "admin.system_settings_changed";
     public const string AdminAssignmentForceClosed = "admin.assignment_force_closed";
 
+    // Payment & subscription (MVP-8)
+    public const string SubscriptionCreated = "subscription.created";
+    public const string SubscriptionCancelled = "subscription.cancelled";
+    public const string SubscriptionReactivated = "subscription.reactivated";
+    public const string SubscriptionManualSet = "subscription.manual_set";
+    public const string SubscriptionExpired = "subscription.expired";
+    public const string PaymentCreated = "payment.created";
+    public const string PaymentCompleted = "payment.completed";
+    public const string PaymentFailed = "payment.failed";
+    public const string InvoiceIssued = "invoice.issued";
+
     /// <summary>All valid action values — drives the CHECK constraint + validation.</summary>
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -95,5 +106,14 @@ public static class AuditActions
         ReportRejected,
         AdminSystemSettingsChanged,
         AdminAssignmentForceClosed,
+        SubscriptionCreated,
+        SubscriptionCancelled,
+        SubscriptionReactivated,
+        SubscriptionManualSet,
+        SubscriptionExpired,
+        PaymentCreated,
+        PaymentCompleted,
+        PaymentFailed,
+        InvoiceIssued,
     };
 }

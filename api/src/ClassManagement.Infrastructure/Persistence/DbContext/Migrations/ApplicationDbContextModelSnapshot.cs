@@ -101,7 +101,7 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
 
                     b.ToTable("audit_logs", null, t =>
                         {
-                            t.HasCheckConstraint("chk_audit_logs_action", "action IN ('user.login', 'user.logout', 'user.login_failed', 'user.password_changed', 'user.password_reset_requested', 'user.password_reset_completed', 'user.role_changed', 'user.locked', 'user.unlocked', 'user.deleted', 'question.created', 'question.updated', 'question.correct_answer_changed', 'question.deleted', 'question.visibility_changed', 'exam.created', 'exam.updated', 'exam.deleted', 'exam.visibility_changed', 'assignment.published', 'assignment.closed', 'assignment.archived', 'attempt.started', 'attempt.submitted', 'attempt.auto_submitted', 'grade.manual_graded', 'grade.manual_grade_updated', 'grade.published', 'report.created', 'report.reviewed', 'report.resolved', 'report.rejected', 'admin.system_settings_changed', 'admin.assignment_force_closed')");
+                            t.HasCheckConstraint("chk_audit_logs_action", "action IN ('user.login', 'user.logout', 'user.login_failed', 'user.password_changed', 'user.password_reset_requested', 'user.password_reset_completed', 'user.role_changed', 'user.locked', 'user.unlocked', 'user.deleted', 'question.created', 'question.updated', 'question.correct_answer_changed', 'question.deleted', 'question.visibility_changed', 'exam.created', 'exam.updated', 'exam.deleted', 'exam.visibility_changed', 'assignment.published', 'assignment.closed', 'assignment.archived', 'attempt.started', 'attempt.submitted', 'attempt.auto_submitted', 'grade.manual_graded', 'grade.manual_grade_updated', 'grade.published', 'report.created', 'report.reviewed', 'report.resolved', 'report.rejected', 'admin.system_settings_changed', 'admin.assignment_force_closed', 'subscription.created', 'subscription.cancelled', 'subscription.reactivated', 'subscription.manual_set', 'subscription.expired', 'payment.created', 'payment.completed', 'payment.failed', 'invoice.issued')");
 
                             t.HasCheckConstraint("chk_audit_logs_actor_role", "actor_role IS NULL OR actor_role IN ('Student', 'Teacher', 'Admin', 'System')");
 
@@ -2492,6 +2492,595 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.ToView("vw_exams", (string)null);
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.Invoice", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AmountVnd")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount_vnd");
+
+                    b.Property<string>("BillingCycle")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("billing_cycle");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("issued_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("invoice_number");
+
+                    b.Property<long>("PaymentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("payment_id");
+
+                    b.Property<string>("PdfUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("pdf_url");
+
+                    b.Property<string>("PlanName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("plan_name");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<long?>("SubscriptionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("subscription_id");
+
+                    b.Property<long>("TeacherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("teacher_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_invoices");
+
+                    b.HasIndex("InvoiceNumber")
+                        .IsUnique()
+                        .HasDatabaseName("uq_invoices_number");
+
+                    b.HasIndex("PaymentId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_invoices_payment");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_invoices_public_id");
+
+                    b.HasIndex("SubscriptionId")
+                        .HasDatabaseName("ix_invoices_subscription_id");
+
+                    b.HasIndex("TeacherId", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_invoices_teacher");
+
+                    b.ToTable("invoices", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_invoices_amount", "amount_vnd > 0");
+
+                            t.HasCheckConstraint("chk_invoices_billing_cycle", "billing_cycle IN ('Monthly', 'Annual')");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.Payment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AmountVnd")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount_vnd");
+
+                    b.Property<string>("BillingCycle")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("billing_cycle");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<long>("PlanId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("plan_id");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("ProviderMetadata")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("provider_metadata");
+
+                    b.Property<string>("ProviderOrderId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("provider_order_id");
+
+                    b.Property<string>("ProviderTransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("provider_transaction_id");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Pending")
+                        .HasColumnName("status");
+
+                    b.Property<long?>("SubscriptionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("subscription_id");
+
+                    b.Property<long>("TeacherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("teacher_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_payments");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("idx_payments_pending_expires")
+                        .HasFilter("status = 'Pending'");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("uq_payments_idempotency_key");
+
+                    b.HasIndex("PlanId")
+                        .HasDatabaseName("ix_payments_plan_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_payments_public_id");
+
+                    b.HasIndex("SubscriptionId")
+                        .HasDatabaseName("ix_payments_subscription_id");
+
+                    b.HasIndex("Provider", "ProviderOrderId")
+                        .HasDatabaseName("idx_payments_provider_order");
+
+                    b.HasIndex("Status", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_payments_status");
+
+                    b.HasIndex("TeacherId", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_payments_teacher");
+
+                    b.ToTable("payments", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_payments_amount", "amount_vnd > 0");
+
+                            t.HasCheckConstraint("chk_payments_billing_cycle", "billing_cycle IN ('Monthly', 'Annual')");
+
+                            t.HasCheckConstraint("chk_payments_provider", "provider IN ('Momo', 'VnPay')");
+
+                            t.HasCheckConstraint("chk_payments_status", "status IN ('Pending', 'Completed', 'Failed', 'Expired')");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.PaymentView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("AmountVnd")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount_vnd");
+
+                    b.Property<string>("BillingCycle")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("billing_cycle");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("PlanName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("plan_name");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("ProviderTransactionId")
+                        .HasColumnType("text")
+                        .HasColumnName("provider_transaction_id");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TeacherEmail")
+                        .HasColumnType("text")
+                        .HasColumnName("teacher_email");
+
+                    b.Property<long>("TeacherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("teacher_id");
+
+                    b.Property<string>("TeacherName")
+                        .HasColumnType("text")
+                        .HasColumnName("teacher_name");
+
+                    b.Property<Guid?>("TeacherPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("teacher_public_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_payment_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_payments", (string)null);
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.Plan", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BillingCycle")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("billing_cycle");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("display_order");
+
+                    b.Property<string>("Features")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("features");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<int?>("MaxClasses")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_classes");
+
+                    b.Property<int?>("MaxExams")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_exams");
+
+                    b.Property<int?>("MaxQuestions")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_questions");
+
+                    b.Property<int?>("MaxStudentsPerClass")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_students_per_class");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<long>("PriceVnd")
+                        .HasColumnType("bigint")
+                        .HasColumnName("price_vnd");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_plans");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_plans_public_id");
+
+                    b.HasIndex("IsActive", "DisplayOrder")
+                        .HasDatabaseName("idx_plans_active_order");
+
+                    b.HasIndex("Name", "BillingCycle")
+                        .IsUnique()
+                        .HasDatabaseName("uq_plans_name_cycle");
+
+                    b.ToTable("plans", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_plans_billing_cycle", "billing_cycle IS NULL OR billing_cycle IN ('Monthly', 'Annual')");
+
+                            t.HasCheckConstraint("chk_plans_max_classes", "max_classes IS NULL OR max_classes > 0");
+
+                            t.HasCheckConstraint("chk_plans_max_exams", "max_exams IS NULL OR max_exams > 0");
+
+                            t.HasCheckConstraint("chk_plans_max_questions", "max_questions IS NULL OR max_questions > 0");
+
+                            t.HasCheckConstraint("chk_plans_max_students", "max_students_per_class IS NULL OR max_students_per_class > 0");
+
+                            t.HasCheckConstraint("chk_plans_name_length", "length(name) >= 2 AND length(name) <= 50");
+
+                            t.HasCheckConstraint("chk_plans_price", "price_vnd >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.Subscription", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AdminNote")
+                        .HasColumnType("text")
+                        .HasColumnName("admin_note");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelled_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime?>("GracePeriodEndsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("grace_period_ends_at");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("Auto")
+                        .HasColumnName("payment_type");
+
+                    b.Property<long>("PlanId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("plan_id");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("StartedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Active")
+                        .HasColumnName("status");
+
+                    b.Property<long>("TeacherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("teacher_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_subscriptions");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("idx_subscriptions_expires")
+                        .HasFilter("status = 'Active'");
+
+                    b.HasIndex("GracePeriodEndsAt")
+                        .HasDatabaseName("idx_subscriptions_past_due")
+                        .HasFilter("status = 'PastDue'");
+
+                    b.HasIndex("PlanId")
+                        .HasDatabaseName("ix_subscriptions_plan_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_subscriptions_public_id");
+
+                    b.HasIndex("TeacherId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_subscriptions_teacher_active")
+                        .HasFilter("status = 'Active'");
+
+                    b.HasIndex("TeacherId", "Status")
+                        .HasDatabaseName("idx_subscriptions_teacher");
+
+                    b.ToTable("subscriptions", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_subscriptions_admin_note_length", "admin_note IS NULL OR length(admin_note) <= 500");
+
+                            t.HasCheckConstraint("chk_subscriptions_payment_type", "payment_type IN ('Auto', 'Manual')");
+
+                            t.HasCheckConstraint("chk_subscriptions_status", "status IN ('Active', 'PastDue', 'Cancelled', 'Expired')");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.SubscriptionView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AdminNote")
+                        .HasColumnType("text")
+                        .HasColumnName("admin_note");
+
+                    b.Property<string>("BillingCycle")
+                        .HasColumnType("text")
+                        .HasColumnName("billing_cycle");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelled_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime?>("GracePeriodEndsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("grace_period_ends_at");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payment_type");
+
+                    b.Property<string>("PlanName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("plan_name");
+
+                    b.Property<long>("PlanPriceVnd")
+                        .HasColumnType("bigint")
+                        .HasColumnName("plan_price_vnd");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TeacherEmail")
+                        .HasColumnType("text")
+                        .HasColumnName("teacher_email");
+
+                    b.Property<long>("TeacherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("teacher_id");
+
+                    b.Property<string>("TeacherName")
+                        .HasColumnType("text")
+                        .HasColumnName("teacher_name");
+
+                    b.Property<Guid?>("TeacherPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("teacher_public_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_subscription_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_subscriptions", (string)null);
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.Question", b =>
                 {
                     b.Property<long>("Id")
@@ -3586,6 +4175,69 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_exam_tags_exams_exam_id");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.Invoice", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Payment.Entities.Payment", null)
+                        .WithMany()
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_invoices_payments_payment_id");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Payment.Entities.Subscription", null)
+                        .WithMany()
+                        .HasForeignKey("SubscriptionId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_invoices_subscriptions_subscription_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_invoices_users_teacher_id");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.Payment", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Payment.Entities.Plan", null)
+                        .WithMany()
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_payments_plans_plan_id");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Payment.Entities.Subscription", null)
+                        .WithMany()
+                        .HasForeignKey("SubscriptionId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_payments_subscriptions_subscription_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_payments_users_teacher_id");
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.Subscription", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Payment.Entities.Plan", null)
+                        .WithMany()
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_subscriptions_plans_plan_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_subscriptions_users_teacher_id");
                 });
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.Question", b =>

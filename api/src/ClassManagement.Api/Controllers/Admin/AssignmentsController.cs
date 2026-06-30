@@ -33,6 +33,7 @@ public class AdminAssignmentsController : BaseApiController
 
     [HttpGet("{publicId:guid}")]
     [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.AdminAssignmentsRead)]
     public async Task<IActionResult> GetAssignment(
         Guid publicId,
         CancellationToken cancellationToken
@@ -49,7 +50,7 @@ public class AdminAssignmentsController : BaseApiController
     // guard (role-gated by [Authorize(Admin)] above).
     [HttpGet("{publicId:guid}/report")]
     [EnableRateLimiting(RateLimitOptions.Policies.Read)]
-    [OutputCache(PolicyName = OutputCachePolicies.AssignmentReportRead)]
+    [OutputCache(PolicyName = OutputCachePolicies.AdminAssignmentReportRead)]
     public async Task<IActionResult> GetReport(Guid publicId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(

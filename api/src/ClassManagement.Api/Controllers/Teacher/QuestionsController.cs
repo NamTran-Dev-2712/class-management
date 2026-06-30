@@ -47,6 +47,7 @@ public class TeacherQuestionsController : BaseApiController
 
     [HttpGet("public/{publicId:guid}")]
     [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.PublicQuestionsRead)]
     public async Task<IActionResult> GetPublicQuestion(
         Guid publicId,
         CancellationToken cancellationToken
@@ -61,6 +62,7 @@ public class TeacherQuestionsController : BaseApiController
 
     [HttpGet("{publicId:guid}", Name = "GetTeacherQuestion")]
     [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.TeacherQuestionsRead)]
     public async Task<IActionResult> GetQuestion(Guid publicId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetQuestionDetailQuery(publicId), cancellationToken);

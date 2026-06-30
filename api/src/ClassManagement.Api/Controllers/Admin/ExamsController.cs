@@ -33,6 +33,7 @@ public class AdminExamsController : BaseApiController
 
     [HttpGet("{publicId:guid}")]
     [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    [OutputCache(PolicyName = OutputCachePolicies.AdminExamsRead)]
     public async Task<IActionResult> GetExam(Guid publicId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetAdminExamDetailQuery(publicId), cancellationToken);

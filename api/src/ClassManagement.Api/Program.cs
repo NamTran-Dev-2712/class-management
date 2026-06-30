@@ -7,6 +7,7 @@ using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Persistence.DbContext;
 using ClassManagement.Infrastructure.Services.Assignments.Jobs;
 using ClassManagement.Infrastructure.Services.Notifications.Jobs;
+using ClassManagement.Infrastructure.Services.Payment.Jobs;
 using Hangfire;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -63,6 +64,17 @@ if (hangfireOptions.Enabled)
             "notification-cleanup",
             job => job.ExecuteAsync(),
             notificationOptions.CleanupCron
+        );
+
+        // Subscription lifecycle sweep (MVP-8): expiry → PastDue/Cancelled, grace → Expired, stale
+        // payment timeout, and expiring-soon reminders. Config-driven cron; handler is idempotent.
+        var subscriptionOptions =
+            app.Configuration.GetSection(SubscriptionOptions.SectionName).Get<SubscriptionOptions>()
+            ?? new SubscriptionOptions();
+        recurringJobs.AddOrUpdate<SubscriptionLifecycleJob>(
+            "subscription-lifecycle",
+            job => job.ExecuteAsync(),
+            subscriptionOptions.LifecycleSweepCron
         );
     }
 }

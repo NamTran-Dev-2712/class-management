@@ -1,0 +1,289 @@
+{
+    "info": {
+        "name": "Class Management API — Full (all controllers)",
+        "_postman_id": "b1a7e2c0-00ff-4000-9000-classmgmt00ff",
+        "description": "Broad coverage of every controller, designed to run against a dev API seeded with the end-to-end DEMO dataset (set Seed:DemoData=true in appsettings.Development.json — see postman/README.md). Cookie auth via the jar (one session per host), so the collection is organised by actor: each actor folder logs in first, then exercises that actor's reads (+ a couple of write smokes). List requests capture the first publicId into collection variables to drive the following detail GETs.\n\nDemo credentials: admin onboarding@resend.dev / Admin@123456; teacher teacher1@demo.local / Demo@123456; student student1@demo.local / Demo@123456.\n\nRun folders top to bottom. Automated equivalents live in api/tests/ClassManagement.IntegrationTests (run `dotnet test`).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        { "key": "userId", "value": "" },
+        { "key": "classId", "value": "" },
+        { "key": "questionId", "value": "" },
+        { "key": "examId", "value": "" },
+        { "key": "assignmentId", "value": "" },
+        { "key": "attemptId", "value": "" },
+        { "key": "studentAssignmentId", "value": "" }
+    ],
+    "item": [
+        {
+            "name": "0. Anonymous",
+            "item": [
+                {
+                    "name": "Get plans",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/plans", "host": ["{{baseUrl}}"], "path": ["plans"] } }
+                },
+                {
+                    "name": "Public app-config",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/public/app-config", "host": ["{{baseUrl}}"], "path": ["public", "app-config"] } }
+                },
+                {
+                    "name": "List subjects",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/subjects?pageSize=10", "host": ["{{baseUrl}}"], "path": ["subjects"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                }
+            ]
+        },
+        {
+            "name": "1. Admin",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }, "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" } }
+                },
+                {
+                    "name": "List users (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('userId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/users?pageSize=10", "host": ["{{baseUrl}}"], "path": ["admin", "users"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Get user by id",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["admin", "users", "{{userId}}"] } }
+                },
+                {
+                    "name": "List classes (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('classId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/classes?pageSize=10", "host": ["{{baseUrl}}"], "path": ["admin", "classes"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Get class by id",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["admin", "classes", "{{classId}}"] } }
+                },
+                {
+                    "name": "List questions (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('questionId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/questions?pageSize=10", "host": ["{{baseUrl}}"], "path": ["admin", "questions"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Get question by id",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/questions/{{questionId}}", "host": ["{{baseUrl}}"], "path": ["admin", "questions", "{{questionId}}"] } }
+                },
+                {
+                    "name": "List exams (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('examId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/exams?pageSize=10", "host": ["{{baseUrl}}"], "path": ["admin", "exams"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Get exam by id",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/exams/{{examId}}", "host": ["{{baseUrl}}"], "path": ["admin", "exams", "{{examId}}"] } }
+                },
+                {
+                    "name": "List assignments (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('assignmentId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/assignments?pageSize=10", "host": ["{{baseUrl}}"], "path": ["admin", "assignments"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Get assignment by id",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/assignments/{{assignmentId}}", "host": ["{{baseUrl}}"], "path": ["admin", "assignments", "{{assignmentId}}"] } }
+                },
+                {
+                    "name": "Assignment report",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/assignments/{{assignmentId}}/report", "host": ["{{baseUrl}}"], "path": ["admin", "assignments", "{{assignmentId}}", "report"] } }
+                },
+                {
+                    "name": "Audit logs",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/audit-logs?pageSize=10", "host": ["{{baseUrl}}"], "path": ["admin", "audit-logs"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Reports queue",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/reports?pageSize=10", "host": ["{{baseUrl}}"], "path": ["admin", "reports"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "System settings",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/settings", "host": ["{{baseUrl}}"], "path": ["admin", "settings"] } }
+                },
+                {
+                    "name": "Dashboard",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "pm.test('30-day trend', () => pm.response.json().data.newUsersDaily.length === 30);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/dashboard", "host": ["{{baseUrl}}"], "path": ["admin", "dashboard"] } }
+                },
+                {
+                    "name": "Subscriptions",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/subscriptions?pageSize=10", "host": ["{{baseUrl}}"], "path": ["admin", "subscriptions"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Payments",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/payments?pageSize=10", "host": ["{{baseUrl}}"], "path": ["admin", "payments"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Revenue",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/payments/revenue", "host": ["{{baseUrl}}"], "path": ["admin", "payments", "revenue"] } }
+                },
+                {
+                    "name": "Send announcement (write)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/admin/announcements", "host": ["{{baseUrl}}"], "path": ["admin", "announcements"] }, "body": { "mode": "raw", "raw": "{\n  \"title\": \"Postman smoke announcement\",\n  \"body\": \"Hello from Postman\",\n  \"role\": \"Student\"\n}" } }
+                }
+            ]
+        },
+        {
+            "name": "2. Teacher (demo)",
+            "item": [
+                {
+                    "name": "Login demo teacher",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }, "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{demoTeacherEmail}}\",\n  \"password\": \"{{demoPassword}}\"\n}" } }
+                },
+                {
+                    "name": "My classes (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('classId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/classes?pageSize=10", "host": ["{{baseUrl}}"], "path": ["teacher", "classes"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Class detail",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}"] } }
+                },
+                {
+                    "name": "Class members",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members?pageSize=20", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members"], "query": [{ "key": "pageSize", "value": "20" }] } }
+                },
+                {
+                    "name": "My questions (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('questionId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/questions?pageSize=10", "host": ["{{baseUrl}}"], "path": ["teacher", "questions"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Question detail",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/questions/{{questionId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "questions", "{{questionId}}"] } }
+                },
+                {
+                    "name": "Public questions",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/questions/public?pageSize=10", "host": ["{{baseUrl}}"], "path": ["teacher", "questions", "public"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "My exams (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('examId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/exams?pageSize=10", "host": ["{{baseUrl}}"], "path": ["teacher", "exams"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Exam detail",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/exams/{{examId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{examId}}"] } }
+                },
+                {
+                    "name": "Exam preview",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/exams/{{examId}}/preview", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{examId}}", "preview"] } }
+                },
+                {
+                    "name": "My assignments (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('assignmentId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/assignments?pageSize=10", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Assignment detail",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}"] } }
+                },
+                {
+                    "name": "Assignment attempts (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('attemptId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}/attempts?pageSize=10", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}", "attempts"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Assignment report",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}/report", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}", "report"] } }
+                },
+                {
+                    "name": "Subscription status",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription"] } }
+                },
+                {
+                    "name": "Subscription usage",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription/usage", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "usage"] } }
+                },
+                {
+                    "name": "Invoices",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription/invoices", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "invoices"] } }
+                }
+            ]
+        },
+        {
+            "name": "3. Student (demo)",
+            "item": [
+                {
+                    "name": "Login demo student",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }, "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{demoStudentEmail}}\",\n  \"password\": \"{{demoPassword}}\"\n}" } }
+                },
+                {
+                    "name": "Me",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] } }
+                },
+                {
+                    "name": "My classes",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/student/classes?pageSize=10", "host": ["{{baseUrl}}"], "path": ["student", "classes"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "My join requests",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/student/classes/requests?pageSize=10", "host": ["{{baseUrl}}"], "path": ["student", "classes", "requests"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "My assignments (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);", "const items = pm.response.json().data.items; if (items && items.length) pm.collectionVariables.set('studentAssignmentId', items[0].publicId);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/student/assignments?pageSize=10", "host": ["{{baseUrl}}"], "path": ["student", "assignments"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Assignment detail",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('ok', () => [200,404].includes(pm.response.code));"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/student/assignments/{{studentAssignmentId}}", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "{{studentAssignmentId}}"] } }
+                },
+                {
+                    "name": "My attempts",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/student/assignments/attempts?pageSize=10", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Notifications",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/notifications?pageSize=10", "host": ["{{baseUrl}}"], "path": ["notifications"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                },
+                {
+                    "name": "Unread count",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/notifications/unread-count", "host": ["{{baseUrl}}"], "path": ["notifications", "unread-count"] } }
+                },
+                {
+                    "name": "My reports",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/reports/mine?pageSize=10", "host": ["{{baseUrl}}"], "path": ["reports", "mine"], "query": [{ "key": "pageSize", "value": "10" }] } }
+                }
+            ]
+        }
+    ]
+}

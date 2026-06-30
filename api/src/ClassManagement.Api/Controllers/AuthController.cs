@@ -72,6 +72,7 @@ public class AuthController : BaseApiController
 
     [Authorize]
     [HttpGet("me")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
     public async Task<IActionResult> GetProfile(CancellationToken cancellationToken)
     {
         var profile = await _mediator.Send(new GetProfileQuery(), cancellationToken);

@@ -88,6 +88,16 @@ public sealed class RateLimitOptions
     public RateLimitPolicyOptions SystemSettingWrite { get; init; } =
         new() { PermitLimit = 20, WindowSeconds = 60 };
 
+    // Creating a payment order / cancel / reactivate (MVP-8) — per-user; tight (each call hits a
+    // provider API and creates a DB order).
+    public RateLimitPolicyOptions PaymentCheckout { get; init; } =
+        new() { PermitLimit = 10, WindowSeconds = 60 };
+
+    // Provider → server payment webhook (MVP-8) — per-IP; generous (providers may retry), signature
+    // verification + idempotency guard the endpoint, this only caps abusive floods.
+    public RateLimitPolicyOptions PaymentWebhook { get; init; } =
+        new() { PermitLimit = 120, WindowSeconds = 60 };
+
     // Generous per-IP cap for GET list endpoints — output cache absorbs repeated identical reads, but
     // this throttles param-varying spam that would otherwise bypass the cache and hit the database.
     public RateLimitPolicyOptions Read { get; init; } =
@@ -119,6 +129,8 @@ public sealed class RateLimitOptions
         public const string AdminAction = "adminAction";
         public const string NotificationWrite = "notificationWrite";
         public const string SystemSettingWrite = "systemSettingWrite";
+        public const string PaymentCheckout = "paymentCheckout";
+        public const string PaymentWebhook = "paymentWebhook";
         public const string Read = "read";
     }
 }

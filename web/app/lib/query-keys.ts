@@ -101,4 +101,24 @@ export const queryKeys = {
         dashboard: () => [...queryKeys.admin.all, "dashboard"] as const,
         settings: () => [...queryKeys.admin.all, "settings"] as const,
     },
+    plans: {
+        all: ["plans"] as const,
+        list: () => [...queryKeys.plans.all, "list"] as const,
+    },
+    subscriptions: {
+        all: ["subscriptions"] as const,
+        mine: () => [...queryKeys.subscriptions.all, "mine"] as const,
+        usage: () => [...queryKeys.subscriptions.all, "usage"] as const,
+        invoices: () => [...queryKeys.subscriptions.all, "invoices"] as const,
+        paymentStatus: (paymentId: string) =>
+            [...queryKeys.subscriptions.all, "payment-status", paymentId] as const,
+        adminList: (params: unknown) =>
+            [...queryKeys.subscriptions.all, "admin", "list", params] as const,
+    },
+    payments: {
+        all: ["payments"] as const,
+        adminList: (params: unknown) =>
+            [...queryKeys.payments.all, "admin", "list", params] as const,
+        revenue: (months: number) => [...queryKeys.payments.all, "revenue", months] as const,
+    },
 } as const;

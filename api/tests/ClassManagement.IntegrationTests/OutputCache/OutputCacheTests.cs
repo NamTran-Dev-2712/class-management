@@ -99,4 +99,52 @@ public class OutputCacheTests(ApiFactory factory) : IClassFixture<ApiFactory>
         );
         after.GetProperty("totalCount").GetInt32().Should().Be(beforeCount + 1);
     }
+
+    [Fact]
+    public async Task SubjectDetail_SecondGet_IsCached_AndEvictedOnUpdate()
+    {
+        var admin = await AuthHelper.CreateAdminClientAsync(_factory);
+
+        // Create a subject and read its id (the detail GET is anonymous + output-cached).
+        var subjectId = await AuthHelper.ReadDataAsync(
+            await admin.PostAsJsonAsync(
+                "/api/subjects",
+                new
+                {
+                    name = $"Detail_{Guid.NewGuid():N}",
+                    description = "v1",
+                    isActive = true,
+                    displayOrder = 0,
+                }
+            )
+        );
+        var id = subjectId.GetProperty("publicId").GetString();
+
+        // Anonymous client so the OutputCache default policy (which skips authenticated requests)
+        // actually caches the response — the second identical GET replays the cached body (same traceId).
+        var anon = _factory.CreateClient();
+
+        static async Task<string> TraceIdAsync(HttpResponseMessage r) =>
+            (await r.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("traceId").GetString()!;
+
+        var first = await TraceIdAsync(await anon.GetAsync($"/api/subjects/{id}"));
+        var second = await TraceIdAsync(await anon.GetAsync($"/api/subjects/{id}"));
+        second.Should().Be(first);
+
+        // A write evicts the "subjects" tag, so the next GET re-executes (fresh traceId).
+        var update = await admin.PutAsJsonAsync(
+            $"/api/subjects/{id}",
+            new
+            {
+                name = $"Detail_{Guid.NewGuid():N}",
+                description = "v2",
+                isActive = true,
+                displayOrder = 0,
+            }
+        );
+        update.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var third = await TraceIdAsync(await anon.GetAsync($"/api/subjects/{id}"));
+        third.Should().NotBe(second);
+    }
 }

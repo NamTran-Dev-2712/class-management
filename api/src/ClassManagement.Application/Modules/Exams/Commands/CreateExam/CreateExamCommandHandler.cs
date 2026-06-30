@@ -5,25 +5,26 @@ public class CreateExamCommandHandler : IRequestHandler<CreateExamCommand, Guid>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
-    private readonly IExamPolicy _policy;
+    private readonly IResourceLimitService _resourceLimits;
 
     public CreateExamCommandHandler(
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
-        IExamPolicy policy
+        IResourceLimitService resourceLimits
     )
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
-        _policy = policy;
+        _resourceLimits = resourceLimits;
     }
 
     public async Task<Guid> Handle(CreateExamCommand request, CancellationToken ct)
     {
         var teacherId = _currentUser.UserId ?? throw new UnauthorizedException("Auth.Unauthorized");
 
-        // BR-4-09: optional cap on exams per teacher (0 = unlimited). Read live from system_settings.
-        var maxExams = await _policy.GetMaxExamsPerTeacherAsync(ct);
+        // BR-4-09 + MVP-8: effective cap = the teacher's plan limit (Pro = unlimited) or the live Free
+        // system_settings cap (0 = unlimited).
+        var maxExams = await _resourceLimits.GetMaxExamsAsync(teacherId, ct);
         if (maxExams > 0)
         {
             var count = await _unitOfWork.Exams.CountByTeacherAsync(teacherId, ct);

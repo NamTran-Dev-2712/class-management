@@ -1,0 +1,219 @@
+{
+    "info": {
+        "name": "Class Management API — MVP-8 (Premium & Payment)",
+        "_postman_id": "b1a7e2c0-0080-4000-9000-classmgmt0080",
+        "description": "MVP-8 payment flows end-to-end against a freshly-seeded local API with Payment:UseFakeProvider = true (default). Cookie auth via the jar; folders register/login the actor. Run folders 0→5 in order. The Fake provider returns a local redirect carrying orderRef; the webhook step drives activation without a real gateway. Reuse the 'Class Management — Local' environment.\n\nIntegration tests (xUnit) cover the same flows in api/tests/ClassManagement.IntegrationTests/Payment/ — run `dotnet test --filter Payment` (needs Docker).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        { "key": "proPlanId", "value": "" },
+        { "key": "paymentId", "value": "" },
+        { "key": "orderRef", "value": "" },
+        { "key": "invoiceId", "value": "" },
+        { "key": "teacherPublicId", "value": "" }
+    ],
+    "item": [
+        {
+            "name": "0. Setup (teacher)",
+            "item": [
+                {
+                    "name": "Register Teacher",
+                    "event": [
+                        { "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["pm.environment.set('teacherEmail', 'teacher_' + Date.now() + '@example.com');"] } },
+                        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('created', () => [200,201].includes(pm.response.code));"] } }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"displayName\": \"MVP8 Teacher\",\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\",\n  \"role\": \"Teacher\"\n}" }
+                    }
+                },
+                {
+                    "name": "Login Teacher",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}" }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "1. Plans & usage",
+            "item": [
+                {
+                    "name": "Get plans (public)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "const plans = pm.response.json().data;",
+                        "const pro = plans.find(p => p.name === 'Pro' && p.billingCycle === 'Monthly');",
+                        "pm.test('pro monthly plan exists', () => !!pro);",
+                        "if (pro) pm.collectionVariables.set('proPlanId', pro.publicId);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/plans", "host": ["{{baseUrl}}"], "path": ["plans"] } }
+                },
+                {
+                    "name": "My subscription (Free)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('on Free', () => pm.response.json().data.isPro === false);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription"] } }
+                },
+                {
+                    "name": "Usage",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription/usage", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "usage"] } }
+                }
+            ]
+        },
+        {
+            "name": "2. Checkout & webhook",
+            "item": [
+                {
+                    "name": "Checkout (Momo)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "const d = pm.response.json().data;",
+                        "pm.collectionVariables.set('paymentId', d.paymentPublicId);",
+                        "const m = (d.redirectUrl || '').match(/orderRef=([^&]+)/);",
+                        "if (m) pm.collectionVariables.set('orderRef', m[1]);"
+                    ] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/subscription/checkout", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "checkout"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"planPublicId\": \"{{proPlanId}}\",\n  \"provider\": \"Momo\"\n}" }
+                    }
+                },
+                {
+                    "name": "Payment status (Pending)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('Pending', () => pm.response.json().data.status === 'Pending');"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription/payments/{{paymentId}}/status", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "payments", "{{paymentId}}", "status"] } }
+                },
+                {
+                    "name": "Webhook success",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/payments/webhook/momo", "host": ["{{baseUrl}}"], "path": ["payments", "webhook", "momo"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"orderRef\": \"{{orderRef}}\",\n  \"outcome\": \"Succeeded\"\n}" }
+                    }
+                },
+                {
+                    "name": "Payment status (Completed)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('Completed', () => pm.response.json().data.status === 'Completed');"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription/payments/{{paymentId}}/status", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "payments", "{{paymentId}}", "status"] } }
+                },
+                {
+                    "name": "Usage (now Pro)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('Pro', () => pm.response.json().data.isPro === true);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription/usage", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "usage"] } }
+                }
+            ]
+        },
+        {
+            "name": "3. Invoices",
+            "item": [
+                {
+                    "name": "List invoices",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "const data = pm.response.json().data;",
+                        "pm.test('one invoice', () => data.length >= 1);",
+                        "if (data.length) pm.collectionVariables.set('invoiceId', data[0].publicId);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription/invoices", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "invoices"] } }
+                },
+                {
+                    "name": "Download invoice PDF",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('is pdf', () => (pm.response.headers.get('Content-Type') || '').includes('application/pdf'));"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/subscription/invoices/{{invoiceId}}/pdf", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "invoices", "{{invoiceId}}", "pdf"] } }
+                }
+            ]
+        },
+        {
+            "name": "4. Cancel & reactivate",
+            "item": [
+                {
+                    "name": "Cancel subscription",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/teacher/subscription/cancel", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "cancel"] } }
+                },
+                {
+                    "name": "Reactivate subscription",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/teacher/subscription/reactivate", "host": ["{{baseUrl}}"], "path": ["teacher", "subscription", "reactivate"] } }
+                }
+            ]
+        },
+        {
+            "name": "5. Admin",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "List subscriptions",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/subscriptions?searchTerm={{teacherEmail}}", "host": ["{{baseUrl}}"], "path": ["admin", "subscriptions"], "query": [{ "key": "searchTerm", "value": "{{teacherEmail}}" }] } }
+                },
+                {
+                    "name": "Payment history (Completed)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/payments?status=Completed", "host": ["{{baseUrl}}"], "path": ["admin", "payments"], "query": [{ "key": "status", "value": "Completed" }] } }
+                },
+                {
+                    "name": "Revenue summary",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('has revenue', () => pm.response.json().data.totalRevenueVnd >= 0);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/payments/revenue?months=12", "host": ["{{baseUrl}}"], "path": ["admin", "payments", "revenue"], "query": [{ "key": "months", "value": "12" }] } }
+                },
+                {
+                    "name": "Find teacher (capture publicId)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "const items = pm.response.json().data.items;",
+                        "if (items && items.length) pm.collectionVariables.set('teacherPublicId', items[0].publicId);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/users?searchTerm={{teacherEmail}}", "host": ["{{baseUrl}}"], "path": ["admin", "users"], "query": [{ "key": "searchTerm", "value": "{{teacherEmail}}" }] } }
+                },
+                {
+                    "name": "Manual-set Pro",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/admin/subscriptions/manual-set", "host": ["{{baseUrl}}"], "path": ["admin", "subscriptions", "manual-set"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"teacherPublicId\": \"{{teacherPublicId}}\",\n  \"planPublicId\": \"{{proPlanId}}\",\n  \"adminNote\": \"Partnership\"\n}" }
+                    }
+                }
+            ]
+        }
+    ]
+}

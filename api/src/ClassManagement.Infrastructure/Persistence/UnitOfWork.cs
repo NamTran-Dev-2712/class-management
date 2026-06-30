@@ -19,7 +19,11 @@ public class UnitOfWork : IUnitOfWork
         IAuditLogRepository auditLogs,
         IReportRepository reports,
         INotificationRepository notifications,
-        ISystemSettingRepository systemSettings
+        ISystemSettingRepository systemSettings,
+        IPlanRepository plans,
+        ISubscriptionRepository subscriptions,
+        IPaymentRepository payments,
+        IInvoiceRepository invoices
     )
     {
         _context = context;
@@ -35,6 +39,10 @@ public class UnitOfWork : IUnitOfWork
         Reports = reports;
         Notifications = notifications;
         SystemSettings = systemSettings;
+        Plans = plans;
+        Subscriptions = subscriptions;
+        Payments = payments;
+        Invoices = invoices;
     }
 
     public ISubjectRepository Subjects { get; }
@@ -49,6 +57,10 @@ public class UnitOfWork : IUnitOfWork
     public IReportRepository Reports { get; }
     public INotificationRepository Notifications { get; }
     public ISystemSettingRepository SystemSettings { get; }
+    public IPlanRepository Plans { get; }
+    public ISubscriptionRepository Subscriptions { get; }
+    public IPaymentRepository Payments { get; }
+    public IInvoiceRepository Invoices { get; }
 
     public IGenericRepository<T> Repository<T>()
         where T : class
@@ -59,6 +71,30 @@ public class UnitOfWork : IUnitOfWork
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task ExecuteInTransactionAsync(
+        Func<CancellationToken, Task> operation,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var strategy = _context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(
+                cancellationToken
+            );
+            try
+            {
+                await operation(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
     }
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)

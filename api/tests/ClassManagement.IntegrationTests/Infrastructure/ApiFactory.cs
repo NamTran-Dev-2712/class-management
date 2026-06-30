@@ -44,6 +44,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             "AdminAction",
             "NotificationWrite",
             "SystemSettingWrite",
+            "PaymentCheckout",
+            "PaymentWebhook",
             "Read",
         ];
         foreach (var policy in policies)
@@ -85,6 +87,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
                         ["Seed:AdminEmail"] = "admin@test.local",
                         ["Seed:AdminPassword"] = "Admin@123456",
                         ["Seed:AdminDisplayName"] = "Test Admin",
+                        // Demo data must never run in the test host (in-memory wins over
+                        // appsettings.Development.json, which the test host also loads).
+                        ["Seed:DemoData"] = "false",
 
                         // Hangfire off in tests — email delivery is faked (see EmailQueue)
                         ["Hangfire:Enabled"] = "false",

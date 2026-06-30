@@ -94,6 +94,27 @@ public static class SystemSettingSeeder
             true,
             "When true, the app is in maintenance mode."
         ),
+        (
+            SystemSettingKeys.SubscriptionGracePeriodDays,
+            "3",
+            Int,
+            false,
+            "Days a PastDue subscription keeps Pro before expiring (BR-8-05)."
+        ),
+        (
+            SystemSettingKeys.SubscriptionExpiringNoticeDays,
+            "3",
+            Int,
+            false,
+            "Days before expiry to send the 'subscription expiring soon' notification."
+        ),
+        (
+            SystemSettingKeys.PaymentOrderTimeoutMinutes,
+            "30",
+            Int,
+            false,
+            "Minutes a Pending payment order stays valid before it expires."
+        ),
     ];
 
     public static async Task SeedAsync(ApplicationDbContext context, ILogger logger)

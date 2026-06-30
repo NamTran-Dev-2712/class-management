@@ -1,7 +1,10 @@
+using ClassManagement.Application.Modules.Assignments.Interfaces;
 using ClassManagement.Infrastructure.Persistence.Seeds;
+using ClassManagement.Infrastructure.Persistence.Seeds.Demo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace ClassManagement.Infrastructure.Persistence.DbContext;
@@ -96,6 +99,16 @@ public static class DatabaseSeeder
 
         await SubjectSeeder.SeedAsync(context, logger);
         await SystemSettingSeeder.SeedAsync(context, logger);
+        await PlanSeeder.SeedAsync(context, logger);
+
+        // Step 5: Dev-only demo data — gated by environment (hard production backstop) AND the
+        // Seed:DemoData flag (default false; on in appsettings.Development.json; forced off in tests).
+        var environment = sp.GetRequiredService<IHostEnvironment>();
+        if (environment.IsDevelopment() && configuration.GetValue<bool>("Seed:DemoData"))
+        {
+            var autoGrader = sp.GetRequiredService<IAutoGradingService>();
+            await DemoDataSeeder.SeedAsync(context, userManager, autoGrader, logger);
+        }
     }
 
     // set_updated_at() function + per-table triggers — idempotent (DROP IF EXISTS + CREATE)
@@ -133,6 +146,16 @@ public static class DatabaseSeeder
             DROP TRIGGER IF EXISTS trg_system_settings_updated_at ON system_settings;
             CREATE TRIGGER trg_system_settings_updated_at
               BEFORE UPDATE ON system_settings
+              FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+            DROP TRIGGER IF EXISTS trg_plans_updated_at ON plans;
+            CREATE TRIGGER trg_plans_updated_at
+              BEFORE UPDATE ON plans
+              FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+            DROP TRIGGER IF EXISTS trg_subscriptions_updated_at ON subscriptions;
+            CREATE TRIGGER trg_subscriptions_updated_at
+              BEFORE UPDATE ON subscriptions
               FOR EACH ROW EXECUTE FUNCTION set_updated_at();
             """
         );

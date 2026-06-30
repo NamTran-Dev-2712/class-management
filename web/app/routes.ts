@@ -33,6 +33,7 @@ export default [
             route("audit-logs", "features/admin/audit-logs/audit-logs.page.tsx"),
             route("reports", "features/admin/reports/reports.page.tsx"),
             route("settings", "features/admin/settings/settings.page.tsx"),
+            route("payments", "features/admin/payments/payments.page.tsx"),
         ]),
     ]),
     layout("layouts/teacher.layout.tsx", [
@@ -81,6 +82,11 @@ export default [
             route(
                 "assignments/:publicId/attempts/:attemptId/grade",
                 "features/teacher/assignments/grade/grade-attempt.page.tsx",
+            ),
+            route("subscription", "features/teacher/subscription/subscription.page.tsx"),
+            route(
+                "subscription/return",
+                "features/teacher/subscription/subscription-return.page.tsx",
             ),
         ]),
     ]),

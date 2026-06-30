@@ -30,6 +30,7 @@ public class UsersController : BaseApiController
     }
 
     [HttpGet("{publicId:guid}", Name = "GetUserById")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
     [OutputCache(PolicyName = OutputCachePolicies.UsersRead)]
     public async Task<IActionResult> GetUser(Guid publicId, CancellationToken cancellationToken)
     {

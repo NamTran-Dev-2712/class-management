@@ -3,6 +3,13 @@
 > File này tổng hợp các tính năng **sau MVP-8** — tức là sau khi hệ thống đã có người dùng thực, stable, và có monetization. Đây không phải cam kết triển khai ngay; đây là **vision** để thiết kế kiến trúc hiện tại không bị tắc nghẽn.
 >
 > Mỗi mục được đánh giá sơ bộ theo: **impact** (giá trị với user), **effort** (độ phức tạp kỹ thuật), và **dependency** (cần gì trước đó).
+>
+> **Đã được nâng thành MVP (không còn ở "future"):**
+> - **Media upload (ảnh/audio/video) cho câu hỏi** → [MVP-9](./MVP-9.md) (mục này trước đây chưa có trong file).
+> - **Advanced Question Types** (6.1 Fill-in-Blank, 6.2 Ordering, 6.3 Matching) → [MVP-11](./MVP-11.md).
+> - **Tab Switch Detection** (11.1) + browser lockdown chống gian lận → [MVP-10](./MVP-10.md).
+>
+> Các mục đã promote vẫn giữ lại bên dưới (đánh dấu ✅) để truy vết lịch sử quyết định.
 
 ---
 
@@ -159,7 +166,9 @@
 
 ## Nhóm 6 — Advanced Question Types
 
-### 6.1 Fill-in-the-Blank (Điền khuyết)
+> ✅ **Đã promote sang [MVP-11](./MVP-11.md)** — 6.1/6.2/6.3 được triển khai (chấm tự động). Giữ lại bên dưới để truy vết.
+
+### 6.1 Fill-in-the-Blank (Điền khuyết) — ✅ MVP-11
 
 **Impact:** Trung bình.
 
@@ -169,7 +178,7 @@
 
 ---
 
-### 6.2 Drag-and-Drop / Ordering
+### 6.2 Drag-and-Drop / Ordering — ✅ MVP-11
 
 **Impact:** Thấp.
 
@@ -179,7 +188,7 @@
 
 ---
 
-### 6.3 Matching (Nối đôi)
+### 6.3 Matching (Nối đôi) — ✅ MVP-11
 
 **Impact:** Thấp-Trung bình.
 
@@ -309,7 +318,10 @@
 
 ## Nhóm 11 — Advanced Proctoring
 
-### 11.1 Tab Switch Detection
+> ✅ **11.1 đã promote sang [MVP-10](./MVP-10.md)** — browser lockdown đầy đủ (fullscreen, tab-switch
+> detection, chặn copy/paste, log vi phạm, auto-submit theo ngưỡng). 11.2 (camera) vẫn ở future.
+
+### 11.1 Tab Switch Detection — ✅ MVP-10 (mở rộng thành full browser lockdown)
 
 **Impact:** Trung bình.
 
@@ -325,7 +337,7 @@
 
 **Effort:** Rất cao — WebRTC, AI face detection, privacy concerns, legal compliance.
 
-**Dependency:** MVP-5, MVP-7 (audit log mạnh)
+**Dependency:** MVP-5, MVP-7 (audit log mạnh), MVP-9 (storage cho ảnh/video proctoring), MVP-10 (lockdown nền tảng)
 
 **Ghi chú:** Cần cân nhắc kỹ về quyền riêng tư và legal (GDPR, data locality VN).
 
