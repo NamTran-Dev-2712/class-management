@@ -72,8 +72,11 @@
 | `TrueFalse` | Có | Đúng / Sai |
 | `ShortWriting` | Không | Tự luận ngắn — Teacher chấm thủ công |
 | `LongWriting` | Không | Tự luận dài — Teacher chấm thủ công |
+| `FillInBlank` | Có | Điền khuyết — content chứa chỗ trống `{{n}}`; mỗi blank có nhiều đáp án chấp nhận; chấm case-insensitive + trim. (MVP-11) |
+| `Matching` | Có | Nối đôi — ghép phần tử vế trái ↔ vế phải; mặc định đúng-tất-cả mới tính điểm. (MVP-11) |
+| `Ordering` | Có | Sắp xếp thứ tự các phần tử; mặc định đúng-toàn-bộ-thứ-tự mới tính điểm. (MVP-11) |
 
-> **Lưu ý:** `FillInTheBlank` (điền khuyết) dời sang Phase sau MVP-3.
+> **Lưu ý:** `FillInBlank` / `Matching` / `Ordering` được triển khai ở MVP-11 (chấm tự động), không nhầm với `ShortWriting`/`LongWriting` (chấm tay).
 
 ---
 
@@ -102,6 +105,12 @@
 | **Rate limit** | Giới hạn số lượng request/giây để bảo vệ API. |
 | **JWT** | JSON Web Token — access token ngắn hạn + refresh token dài hạn cho auth. |
 | **Auto-save** | Hệ thống tự động lưu đáp án đang làm của Student theo interval, tránh mất bài. |
+| **MediaAsset** | Một file media (ảnh/audio/video) đã upload, expose qua `public_id`/URL, không lộ `storage_key`. (MVP-9) |
+| **Storage provider** | Lớp trừu tượng lưu trữ file (`IStorageProvider`); production = Cloudflare R2 (S3-compatible), dev = Local. Đổi provider không sửa Application. (MVP-9) |
+| **Presigned URL** | URL có chữ ký, TTL ngắn, cho client upload file thẳng lên storage không qua API. (MVP-9) |
+| **Proctoring** | Giám sát hành vi làm bài bằng trình duyệt (lockdown) — best-effort, không tuyệt đối. (MVP-10) |
+| **Browser lockdown** | Tập biện pháp phía trình duyệt: bắt buộc fullscreen, chặn copy/paste/right-click, phát hiện chuyển tab/mất focus. (MVP-10) |
+| **ProctorEvent / Violation** | Một sự kiện liêm chính ghi server (`attempt_events`): TabSwitch/FullscreenExit/CopyAttempt… Server đếm `violation_count`; vượt ngưỡng → auto-submit/khoá. (MVP-10) |
 
 ---
 
