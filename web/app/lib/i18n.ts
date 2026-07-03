@@ -10,6 +10,7 @@ export const I18N_NAMESPACES = [
     "classroom",
     "dashboard",
     "exam",
+    "media",
     "mentor",
     "notification",
     "payment",

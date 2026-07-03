@@ -23,4 +23,7 @@ public sealed class Question : AuditableEntity, IHasPublicId, ISoftDeletable
 
     public ICollection<QuestionOption> Options { get; set; } = [];
     public ICollection<QuestionTag> Tags { get; set; } = [];
+
+    // First-class media attachments at the question level (MVP-9), replaced wholesale on update.
+    public ICollection<QuestionMedia> Media { get; set; } = [];
 }

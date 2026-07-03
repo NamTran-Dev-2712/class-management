@@ -34,6 +34,7 @@
 | `max_questions` | `INT` | YES | NULL | CHECK (max_questions > 0 OR max_questions IS NULL) | NULL = unlimited |
 | `max_exams` | `INT` | YES | NULL | CHECK (max_exams > 0 OR max_exams IS NULL) | NULL = unlimited |
 | `max_students_per_class` | `INT` | YES | NULL | — | NULL = follow system_settings |
+| `max_storage_bytes` | `BIGINT` | YES | NULL | CHECK (max_storage_bytes > 0 OR max_storage_bytes IS NULL) | (MVP-9) Tổng quota media theo plan. NULL = unlimited |
 | `is_active` | `BOOLEAN` | NO | `true` | — | Inactive = không bán nữa (existing subscriptions unaffected) |
 | `display_order` | `INT` | NO | `0` | — | Thứ tự hiển thị trên pricing page |
 | `features` | `JSONB` | YES | NULL | — | List feature names cho display |
@@ -45,15 +46,15 @@
 ```
 -- Free plan (mặc định cho tất cả Teacher)
 id=1, name='Free', billing_cycle=NULL, price_vnd=0,
-max_classes=10, max_questions=500, max_exams=50, is_active=true
+max_classes=10, max_questions=500, max_exams=50, max_storage_bytes=524288000 (500MB), is_active=true
 
 -- Pro Monthly
 id=2, name='Pro', billing_cycle='monthly', price_vnd=99000,
-max_classes=NULL, max_questions=NULL, max_exams=NULL, is_active=true
+max_classes=NULL, max_questions=NULL, max_exams=NULL, max_storage_bytes=NULL, is_active=true
 
 -- Pro Annual
 id=3, name='Pro', billing_cycle='annual', price_vnd=990000,
-max_classes=NULL, max_questions=NULL, max_exams=NULL, is_active=true
+max_classes=NULL, max_questions=NULL, max_exams=NULL, max_storage_bytes=NULL, is_active=true
 ```
 
 ### Notes

@@ -18,7 +18,9 @@
         "settings": "Settings",
         "myClasses": "My classes",
         "requests": "Join requests",
-        "grades": "Grades"
+        "grades": "Grades",
+        "media": "Media",
+        "storage": "Storage"
     },
     "stats": {
         "totalUsers": "Total users",

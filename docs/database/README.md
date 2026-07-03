@@ -33,6 +33,7 @@ Bộ tài liệu này là **nền tảng kỹ thuật** để triển khai thự
 | [12-migrations-strategy.md](./12-migrations-strategy.md) | Migration order, rollback, zero-downtime | Cross-cutting |
 | [13-extensibility.md](./13-extensibility.md) | Database extension points cho ROADMAP-FUTURE | Future |
 | [14-background-jobs.md](./14-background-jobs.md) | Hangfire schema, email queue, dashboard | Cross-cutting |
+| [15-schema-media.md](./15-schema-media.md) | media_assets, question_media, snapshot_media, vw_media | MVP-9 |
 
 ---
 
@@ -48,6 +49,7 @@ Bộ tài liệu này là **nền tảng kỹ thuật** để triển khai thự
 | MVP-6 | manual_grades, assignment_grade_releases | 21 |
 | MVP-7 | audit_logs, reports, notifications, system_settings | 25 |
 | MVP-8 | plans, subscriptions, payments, invoices | 29 |
+| MVP-9 | media_assets, question_media, snapshot_media | 32 |
 
 ---
 

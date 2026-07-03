@@ -8,6 +8,7 @@ public abstract class QuestionWriteValidator<T> : AbstractValidator<T>
 {
     private const int MinChoiceOptions = 2;
     private const int MaxOptionLength = 2000;
+    private const int MaxAttachments = 10;
 
     protected QuestionWriteValidator()
     {
@@ -40,6 +41,12 @@ public abstract class QuestionWriteValidator<T> : AbstractValidator<T>
             .Must(tags => tags.Count <= QuestionTagNormalizer.MaxTagsPerQuestion)
             .WithMessage("Validation.Question.TooManyTags")
             .When(x => x.Tags is not null);
+
+        // Question-level media attachments (MVP-9) — bounded count.
+        RuleFor(x => x.Attachments!)
+            .Must(a => a.Count <= MaxAttachments)
+            .WithMessage("Validation.Question.TooManyAttachments")
+            .When(x => x.Attachments is not null);
 
         // Per-type option rules, pushed with contextual message keys.
         RuleFor(x => x).Custom(ValidateOptions);

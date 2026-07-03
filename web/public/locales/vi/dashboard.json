@@ -18,7 +18,9 @@
         "settings": "Cấu hình",
         "myClasses": "Lớp của tôi",
         "requests": "Yêu cầu tham gia",
-        "grades": "Điểm số"
+        "grades": "Điểm số",
+        "media": "Media",
+        "storage": "Lưu trữ"
     },
     "stats": {
         "totalUsers": "Tổng người dùng",

@@ -24,6 +24,12 @@ public static class SystemSettingKeys
     public const string SubscriptionGracePeriodDays = "subscription_grace_period_days";
     public const string SubscriptionExpiringNoticeDays = "subscription_expiring_notice_days";
     public const string PaymentOrderTimeoutMinutes = "payment_order_timeout_minutes";
+
+    // Media & rich content (MVP-9) — per-file size caps (bytes) + Free-tier total storage quota (bytes).
+    public const string MaxImageBytes = "max_image_bytes";
+    public const string MaxAudioBytes = "max_audio_bytes";
+    public const string MaxVideoBytes = "max_video_bytes";
+    public const string MaxStorageBytesPerTeacher = "max_storage_bytes_per_teacher";
 }
 
 /// <summary>Allowed <c>system_settings.value_type</c> values.</summary>

@@ -13,6 +13,7 @@
 | `questions` | Câu hỏi đơn lẻ trong ngân hàng của Teacher |
 | `question_options` | Các lựa chọn đáp án cho câu hỏi loại choice |
 | `question_tags` | Tags gán cho câu hỏi (free-form, nhiều-nhiều) |
+| `question_media` | (MVP-9) Media đính kèm cấp Question (bảng nối → `media_assets`). Xem [15-schema-media.md](./15-schema-media.md) |
 
 ---
 
@@ -86,6 +87,7 @@ idx_questions_teacher_type          (teacher_id, type, difficulty) WHERE deleted
 | `content` | `TEXT` | NO | — | CHECK (length >= 1 AND length <= 2000) | Nội dung lựa chọn |
 | `is_correct` | `BOOLEAN` | NO | `false` | — | Đây có phải đáp án đúng không |
 | `display_order` | `INT` | NO | — | CHECK (display_order >= 0) | Thứ tự hiển thị |
+| `media_id` | `BIGINT` | YES | NULL | FK → media_assets(id) SET NULL | (MVP-9, T9-04) Ảnh tùy chọn cho option. Media bị xóa → SET NULL |
 | `created_at` | `TIMESTAMPTZ` | NO | `NOW()` | — | |
 
 ### Unique Constraints
@@ -105,6 +107,7 @@ CREATE UNIQUE INDEX uq_question_options_order
 pk_question_options             PRIMARY KEY (id)
 idx_question_options_question   (question_id, display_order)   -- Load options cho câu hỏi, đúng thứ tự
 uq_question_options_order       UNIQUE (question_id, display_order)
+idx_question_options_media      (media_id)                     -- (MVP-9) option có ảnh
 ```
 
 ### Business Rules (validate ở app layer)
@@ -161,6 +164,36 @@ idx_question_tags_question      (question_id)                   -- Tags của 1 
 - `tag` max 50 chars
 - Không có `updated_at` — tag management là DELETE + INSERT
 - Để lấy tất cả tags của teacher: JOIN với questions.teacher_id
+
+---
+
+## Table: `question_media` (MVP-9)
+
+**Purpose:** Danh sách media (ảnh/audio/video) đính kèm ở **cấp Question** (first-class attachment), bổ trợ cho media chèn inline trong Markdown. Bảng nối `questions` ↔ `media_assets`. Append-only child — replaced wholesale khi update question (giống `question_options`/`question_tags`).
+
+### Columns
+
+| Column | Type | Nullable | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `id` | `BIGINT` | NO | identity | PK | |
+| `question_id` | `BIGINT` | NO | — | FK → questions(id) CASCADE | |
+| `media_id` | `BIGINT` | NO | — | FK → media_assets(id) RESTRICT | Asset đã Confirmed thuộc owner |
+| `role` | `TEXT` | NO | — | CHECK (role IN ('Inline', 'Attachment')) | Inline = nhúng trong content; Attachment = liệt kê cấp question |
+| `display_order` | `INT` | NO | — | CHECK (display_order >= 0) | Thứ tự hiển thị |
+| `created_at` | `TIMESTAMPTZ` | NO | `NOW()` | — | |
+
+### Foreign Keys
+| Column | References | On Delete | Lý do |
+|---|---|---|---|
+| `question_id` | `questions(id)` | CASCADE | Xóa question → gỡ các link media |
+| `media_id` | `media_assets(id)` | RESTRICT | Không hard-delete media còn được tham chiếu (soft-delete + cleanup job xử lý) |
+
+### Indexes
+```
+pk_question_media               PRIMARY KEY (id)
+uq_question_media_order         UNIQUE (question_id, display_order)
+idx_question_media_media        (media_id)
+```
 
 ---
 
@@ -231,16 +264,21 @@ SELECT q.id, q.public_id, q.type, q.content, q.difficulty, q.suggested_point, q.
        q.subject_id, sub.public_id AS subject_public_id, sub.name AS subject_name,
        q.teacher_id, t.public_id AS teacher_public_id, t.display_name AS teacher_name,
        COALESCE(oc.option_count, 0) AS option_count,
+       COALESCE(mc.media_count, 0) AS media_count,   -- (MVP-9) số attachment cấp question
        COALESCE(tg.tags, '{}'::text[]) AS tags
 FROM questions q
 JOIN users t ON t.id = q.teacher_id
 LEFT JOIN subjects sub ON sub.id = q.subject_id AND sub.deleted_at IS NULL
 LEFT JOIN (SELECT question_id, COUNT(*) AS option_count FROM question_options GROUP BY question_id) oc
        ON oc.question_id = q.id
+LEFT JOIN (SELECT question_id, COUNT(*) AS media_count FROM question_media GROUP BY question_id) mc
+       ON mc.question_id = q.id
 LEFT JOIN (SELECT question_id, array_agg(tag ORDER BY tag) AS tags FROM question_tags GROUP BY question_id) tg
        ON tg.question_id = q.id
 WHERE q.deleted_at IS NULL;
 ```
+
+> **MVP-9:** view được DROP+CREATE lại trong migration `20260702145021_create_media_and_alter_questions_snapshots` để thêm `media_count`.
 
 `tags` là cột `text[]` → map sang `List<string>` (lọc tag bằng `Tags.Contains(slug)` ⇒ `slug = ANY(tags)`).
 
@@ -250,7 +288,7 @@ WHERE q.deleted_at IS NULL;
 
 - [x] `content` format → **Markdown** + editor kiểu GitHub-PR; render ở FE qua `rehype-raw` + `rehype-sanitize` (HTML subset an toàn), không sanitize phía server.
 - [x] `subject_id` → **tùy chọn** lúc tạo (không bắt buộc chọn môn học); active-check chỉ khi có chọn.
-- [ ] Hình ảnh trong câu hỏi: hiện chèn bằng Markdown image (URL external). Upload riêng (`question_attachments`) để dành phase sau.
+- [x] Hình ảnh/audio/video trong câu hỏi: **MVP-9** — upload qua `media_assets` (presigned URL), chèn inline trong Markdown **và** đính kèm first-class qua `question_media` + ảnh cho từng option qua `question_options.media_id`. Xem [15-schema-media.md](./15-schema-media.md).
 - [x] `TrueFalse` options → app **tự seed** "True"/"False"; teacher chỉ chọn đáp án đúng.
 - [x] Full-text search → ILIKE + `pg_trgm` GIN trên `lower(content)` (xem trên); tsvector để dành.
 - [x] Giới hạn tags/câu hỏi → **max 10** (validate ở app, normalize `^[a-z0-9-]{1,50}$`).

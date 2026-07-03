@@ -14,4 +14,7 @@ public interface IQuestionWriteCommand
     string? Explanation { get; }
     List<QuestionOptionInput>? Options { get; }
     List<string>? Tags { get; }
+
+    // Question-level media attachments (MVP-9).
+    List<QuestionMediaInput>? Attachments { get; }
 }

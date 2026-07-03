@@ -13,5 +13,6 @@ public record CreateQuestionCommand(
     QuestionVisibility Visibility,
     string? Explanation,
     List<QuestionOptionInput>? Options,
-    List<string>? Tags
+    List<string>? Tags,
+    List<QuestionMediaInput>? Attachments = null
 ) : IRequest<Guid>, IQuestionWriteCommand;

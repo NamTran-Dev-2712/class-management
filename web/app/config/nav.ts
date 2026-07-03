@@ -8,6 +8,8 @@ import {
     FileText,
     Flag,
     GraduationCap,
+    HardDrive,
+    Image,
     LayoutDashboard,
     Library,
     School,
@@ -44,6 +46,7 @@ export const dashboardNav: Record<Role, NavItem[]> = {
         { labelKey: "nav.auditLogs", to: "/admin/audit-logs", icon: ScrollText },
         { labelKey: "nav.settings", to: "/admin/settings", icon: Settings },
         { labelKey: "nav.payments", to: "/admin/payments", icon: CreditCard },
+        { labelKey: "nav.storage", to: "/admin/media", icon: HardDrive },
     ],
     [Roles.Teacher]: [
         { labelKey: "nav.dashboard", to: "/teacher", icon: LayoutDashboard },
@@ -54,6 +57,7 @@ export const dashboardNav: Record<Role, NavItem[]> = {
             icon: FileQuestion,
         },
         { labelKey: "nav.exams", to: "/teacher/exams", icon: FileText },
+        { labelKey: "nav.media", to: "/teacher/media", icon: Image },
         {
             labelKey: "nav.assignments",
             to: "/teacher/assignments",

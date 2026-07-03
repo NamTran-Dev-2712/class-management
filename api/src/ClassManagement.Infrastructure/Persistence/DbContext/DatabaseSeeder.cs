@@ -157,6 +157,11 @@ public static class DatabaseSeeder
             CREATE TRIGGER trg_subscriptions_updated_at
               BEFORE UPDATE ON subscriptions
               FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+            DROP TRIGGER IF EXISTS trg_media_assets_updated_at ON media_assets;
+            CREATE TRIGGER trg_media_assets_updated_at
+              BEFORE UPDATE ON media_assets
+              FOR EACH ROW EXECUTE FUNCTION set_updated_at();
             """
         );
 }

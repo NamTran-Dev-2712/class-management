@@ -98,6 +98,19 @@ public sealed class RateLimitOptions
     public RateLimitPolicyOptions PaymentWebhook { get; init; } =
         new() { PermitLimit = 120, WindowSeconds = 60 };
 
+    // Requesting a presigned media upload URL (MVP-9) — per-user; tight, the main anti-abuse gate for
+    // large-file spam (each call reserves quota + creates a Pending asset).
+    public RateLimitPolicyOptions MediaPresign { get; init; } =
+        new() { PermitLimit = 20, WindowSeconds = 60 };
+
+    // Confirming / deleting a media asset (MVP-9) — per-user; generous (a batch upload confirms many).
+    public RateLimitPolicyOptions MediaWrite { get; init; } =
+        new() { PermitLimit = 60, WindowSeconds = 60 };
+
+    // Dev-only local bytes upload endpoint (MVP-9, Storage:UseFakeProvider) — per-user.
+    public RateLimitPolicyOptions MediaLocalUpload { get; init; } =
+        new() { PermitLimit = 60, WindowSeconds = 60 };
+
     // Generous per-IP cap for GET list endpoints — output cache absorbs repeated identical reads, but
     // this throttles param-varying spam that would otherwise bypass the cache and hit the database.
     public RateLimitPolicyOptions Read { get; init; } =
@@ -131,6 +144,9 @@ public sealed class RateLimitOptions
         public const string SystemSettingWrite = "systemSettingWrite";
         public const string PaymentCheckout = "paymentCheckout";
         public const string PaymentWebhook = "paymentWebhook";
+        public const string MediaPresign = "mediaPresign";
+        public const string MediaWrite = "mediaWrite";
+        public const string MediaLocalUpload = "mediaLocalUpload";
         public const string Read = "read";
     }
 }

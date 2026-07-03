@@ -1,0 +1,70 @@
+{
+    "nav": {
+        "library": "Media",
+        "adminStorage": "Storage"
+    },
+    "upload": {
+        "title": "Upload media",
+        "description": "The file uploads directly to storage. Only images, audio and video are allowed.",
+        "pick": "Click to choose a file",
+        "uploading": "Uploading…",
+        "hint": "Image, audio or video",
+        "maxHint": "Max size — image {{image}}, audio {{audio}}, video {{video}}."
+    },
+    "errors": {
+        "unsupportedType": "This file type is not supported.",
+        "uploadFailed": "Upload failed. Please try again."
+    },
+    "library": {
+        "title": "Media Library",
+        "subtitle": "Images, audio and video you have uploaded.",
+        "empty": "No media yet. Upload a file to get started.",
+        "uploadButton": "Upload",
+        "preview": "Preview"
+    },
+    "columns": {
+        "media": "Media",
+        "kind": "Type",
+        "contentType": "Format",
+        "size": "Size",
+        "status": "Status",
+        "owner": "Teacher",
+        "assetCount": "Files",
+        "used": "Used",
+        "createdAt": "Uploaded",
+        "actions": "Actions"
+    },
+    "kind": {
+        "all": "All types",
+        "Image": "Image",
+        "Audio": "Audio",
+        "Video": "Video"
+    },
+    "status": {
+        "all": "All statuses",
+        "Pending": "Pending",
+        "Confirmed": "Confirmed"
+    },
+    "actions": {
+        "delete": "Delete",
+        "deleteTitle": "Delete media?",
+        "deleteConfirm": "This media will be removed. It stays available in already-published assignments.",
+        "deleted": "Media deleted."
+    },
+    "usage": {
+        "title": "Storage usage",
+        "used": "{{used}} of {{limit}}",
+        "usedUnlimited": "{{used}} used",
+        "unlimited": "Unlimited",
+        "limitReached": "Storage limit reached",
+        "upgrade": "Upgrade to Pro"
+    },
+    "search": "Search by format…",
+    "admin": {
+        "title": "Media & Storage",
+        "subtitle": "Storage usage by teacher and moderation.",
+        "overviewTab": "By teacher",
+        "listTab": "All media",
+        "empty": "No media uploaded yet."
+    }
+}

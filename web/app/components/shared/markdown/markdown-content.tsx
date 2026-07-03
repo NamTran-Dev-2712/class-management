@@ -13,7 +13,26 @@ import { cn } from "@/lib/utils";
  */
 const sanitizeSchema = {
     ...defaultSchema,
-    tagNames: [...(defaultSchema.tagNames ?? []), "u", "ins", "mark", "sub", "sup"],
+    tagNames: [
+        ...(defaultSchema.tagNames ?? []),
+        "u",
+        "ins",
+        "mark",
+        "sub",
+        "sup",
+        // Media (MVP-9) — HTML5 players for uploaded audio/video.
+        "audio",
+        "video",
+        "source",
+    ],
+    attributes: {
+        ...defaultSchema.attributes,
+        // Only safe, presentational attributes — no `on*` handlers, no `javascript:` URLs (the default
+        // schema's URL sanitization still applies to src/poster).
+        audio: ["controls", "src", "preload", "loop", "muted"],
+        video: ["controls", "src", "poster", "width", "height", "preload", "loop", "muted"],
+        source: ["src", "type"],
+    },
 };
 
 interface MarkdownContentProps {
@@ -36,6 +55,7 @@ export function MarkdownContent({ children, className }: MarkdownContentProps) {
                 "[&_code]:bg-muted [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_pre_code]:bg-transparent [&_pre_code]:p-0",
                 "[&_table]:w-full [&_th]:text-left [&_td]:border [&_th]:border [&_td]:px-2 [&_th]:px-2",
                 "[&_a]:text-primary [&_a]:underline [&_img]:max-w-full [&_img]:rounded-md",
+                "[&_video]:max-w-full [&_video]:rounded-md [&_audio]:w-full",
                 className,
             )}
         >

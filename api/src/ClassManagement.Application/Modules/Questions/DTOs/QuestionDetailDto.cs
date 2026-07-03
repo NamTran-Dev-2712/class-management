@@ -19,6 +19,9 @@ public sealed record QuestionDetailDto
     public string TeacherName { get; init; } = string.Empty;
     public List<string> Tags { get; init; } = [];
     public IReadOnlyList<QuestionOptionDto> Options { get; init; } = [];
+
+    // Question-level media attachments (MVP-9).
+    public IReadOnlyList<QuestionMediaDto> Media { get; init; } = [];
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
 }

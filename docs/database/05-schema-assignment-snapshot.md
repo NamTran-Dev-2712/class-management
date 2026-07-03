@@ -43,6 +43,7 @@ Exam/Question gốc có thể tự do thay đổi → không ảnh hưởng
 | `assignment_snapshots` | Container cho snapshot (1-1 với assignment) |
 | `snapshot_questions` | Bản copy câu hỏi tại thời điểm publish |
 | `snapshot_options` | Bản copy options của câu hỏi |
+| `snapshot_media` | (MVP-9) Bản đóng băng media tham chiếu + guard chống cleanup |
 
 ---
 
@@ -233,6 +234,41 @@ uq_snapshot_options_order               UNIQUE (snapshot_question_id, display_or
 
 ---
 
+## Table: `snapshot_media` (MVP-9)
+
+**Purpose:** Bản đóng băng các media mà một câu hỏi/option đã hiển thị tại thời điểm publish. Hai vai trò: (1) bản ghi bất biến về media + `frozen_url` lúc publish; (2) **cleanup guard** — asset đã soft-delete mà `media_public_id` còn xuất hiện ở đây thì **không** bị xóa vật lý, nên Attempt cũ/đang làm vẫn xem được (BR-9-06 / BR-9-08). Append-only, immutable (RESTRICT).
+
+### Columns
+
+| Column | Type | Nullable | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `id` | `BIGINT` | NO | identity | PK | |
+| `snapshot_question_id` | `BIGINT` | NO | — | FK → snapshot_questions(id) RESTRICT | |
+| `snapshot_option_id` | `BIGINT` | YES | NULL | FK → snapshot_options(id) RESTRICT | Set khi media gắn ở cấp option |
+| `media_public_id` | `UUID` | NO | — | — | ID media gốc (dùng cho cleanup guard) |
+| `frozen_url` | `VARCHAR(1000)` | NO | — | — | URL CDN tại thời điểm publish |
+| `kind` | `TEXT` | NO | — | CHECK (kind IN ('Image', 'Audio', 'Video')) | |
+| `role` | `TEXT` | NO | — | CHECK (role IN ('Inline', 'Attachment')) | |
+| `display_order` | `INT` | NO | — | CHECK (display_order >= 0) | |
+| `snapshot_created_at` | `TIMESTAMPTZ` | NO | `NOW()` | — | |
+
+### Foreign Keys
+| Column | References | On Delete | Lý do |
+|---|---|---|---|
+| `snapshot_question_id` | `snapshot_questions(id)` | RESTRICT | Immutable |
+| `snapshot_option_id` | `snapshot_options(id)` | RESTRICT | Immutable |
+
+### Indexes
+```
+pk_snapshot_media               PRIMARY KEY (id)
+idx_snapshot_media_question     (snapshot_question_id)
+idx_snapshot_media_public_id    (media_public_id)   -- cleanup guard: asset còn được pin?
+```
+
+Nguồn pin lúc publish: `question_media` (attachment) + `question_options.media_id` (ảnh option) + media inline parse từ content/explanation khớp `PublicBaseUrl`. Xem [15-schema-media.md](./15-schema-media.md).
+
+---
+
 ## Snapshot Creation Flow
 
 ```
@@ -246,6 +282,9 @@ uq_snapshot_options_order               UNIQUE (snapshot_question_id, display_or
    b. Nếu question có options (SingleChoice/MultipleChoice/TrueFalse):
       Với mỗi question_option:
       INSERT INTO snapshot_options (snapshot_question_id, original_option_id, content, is_correct, display_order)
+      (MVP-9) nếu option có media_id → INSERT snapshot_media (snapshot_option_id, media_public_id, frozen_url, ...)
+   c. (MVP-9) Với mỗi media của question (question_media attachment + inline parse từ content/explanation):
+      INSERT INTO snapshot_media (snapshot_question_id, media_public_id, frozen_url, kind, role, display_order)
 4. UPDATE assignments SET status = 'Scheduled'/'Open', published_at = NOW(), exam_version_at_publish = exams.version
 5. [Atomic transaction — rollback nếu bất kỳ bước nào fail]
 ```
@@ -262,6 +301,7 @@ users/Teacher (1) ───────────── (*) assignments
 assignments (1) ─────────────── (1) assignment_snapshots   [1-1]
 assignment_snapshots (1) ─────── (*) snapshot_questions    [immutable]
 snapshot_questions (1) ────────── (*) snapshot_options     [immutable]
+snapshot_questions (1) ────────── (*) snapshot_media       [immutable, MVP-9]
 
 questions (1? → 0) ─────────────── (*) snapshot_questions  [SET NULL on delete]
 question_options (1? → 0) ─────── (*) snapshot_options    [SET NULL on delete]

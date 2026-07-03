@@ -1,0 +1,163 @@
+{
+    "info": {
+        "name": "Class Management API — MVP-9 (Media & Rich Content)",
+        "_postman_id": "b1a7e2c0-0090-4000-9000-classmgmt0090",
+        "description": "MVP-9 media flows end-to-end against a local API with Storage:UseFakeProvider = true (default → Local disk backend). Cookie auth via the jar; folder 0 registers/logs in a teacher. Run folders 0→5 in order.\n\nUpload flow = presign → PUT bytes to the presigned URL → confirm. With the Local backend the presigned URL points at the app's own /api/media/local endpoint (an HMAC-token-guarded dev bytes sink), so the whole flow runs inside Postman. In production (R2) the PUT goes straight to the cloud and this step is done by the browser.\n\nIntegration tests (xUnit) cover the same flows in api/tests/ClassManagement.IntegrationTests/Media/ — run `dotnet test --filter Media` (needs Docker). Reuse the 'Class Management — Local' environment (baseUrl, teacherPassword, adminEmail, adminPassword).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        { "key": "mediaPublicId", "value": "" },
+        { "key": "uploadUrl", "value": "" }
+    ],
+    "item": [
+        {
+            "name": "0. Setup (teacher)",
+            "item": [
+                {
+                    "name": "Register Teacher",
+                    "event": [
+                        { "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["pm.environment.set('teacherEmail', 'teacher_' + Date.now() + '@example.com');"] } },
+                        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('created', () => [200,201].includes(pm.response.code));"] } }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"displayName\": \"MVP9 Teacher\",\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\",\n  \"role\": \"Teacher\"\n}" }
+                    }
+                },
+                {
+                    "name": "Login Teacher",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}" }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "1. Upload flow",
+            "item": [
+                {
+                    "name": "Presign (image)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "const d = pm.response.json().data;",
+                        "pm.test('has mediaPublicId + uploadUrl', () => !!d.mediaPublicId && !!d.uploadUrl);",
+                        "pm.collectionVariables.set('mediaPublicId', d.mediaPublicId);",
+                        "pm.collectionVariables.set('uploadUrl', d.uploadUrl);"
+                    ] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/media/presign", "host": ["{{baseUrl}}"], "path": ["teacher", "media", "presign"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"diagram.png\",\n  \"contentType\": \"image/png\",\n  \"byteSize\": 12\n}" }
+                    }
+                },
+                {
+                    "name": "PUT bytes → presigned URL (Local)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "PUT",
+                        "header": [{ "key": "Content-Type", "value": "image/png" }],
+                        "url": { "raw": "{{uploadUrl}}" },
+                        "body": { "mode": "raw", "raw": "PNGDUMMYBYTE" }
+                    },
+                    "description": "Uploads bytes straight to the presigned URL. With Local storage that URL is the app's own token-guarded sink; with R2 the browser PUTs to the cloud and this step is not proxied by the API."
+                },
+                {
+                    "name": "Confirm",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('Confirmed', () => pm.response.json().data.status === 'Confirmed');"
+                    ] } }],
+                    "request": {
+                        "method": "POST",
+                        "url": { "raw": "{{baseUrl}}/teacher/media/{{mediaPublicId}}/confirm", "host": ["{{baseUrl}}"], "path": ["teacher", "media", "{{mediaPublicId}}", "confirm"] }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Library & usage",
+            "item": [
+                {
+                    "name": "My media",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/media?pageSize=24", "host": ["{{baseUrl}}"], "path": ["teacher", "media"], "query": [{ "key": "pageSize", "value": "24" }] } }
+                },
+                {
+                    "name": "Storage usage",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('used > 0', () => pm.response.json().data.usedBytes > 0);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/media/usage", "host": ["{{baseUrl}}"], "path": ["teacher", "media", "usage"] } }
+                }
+            ]
+        },
+        {
+            "name": "3. Validation (negative)",
+            "item": [
+                {
+                    "name": "Presign unsupported MIME → 400",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('400', () => pm.response.code === 400);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/media/presign", "host": ["{{baseUrl}}"], "path": ["teacher", "media", "presign"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"malware.exe\",\n  \"contentType\": \"application/x-msdownload\",\n  \"byteSize\": 1024\n}" }
+                    }
+                },
+                {
+                    "name": "Presign over per-file cap → 400",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('400', () => pm.response.code === 400);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/media/presign", "host": ["{{baseUrl}}"], "path": ["teacher", "media", "presign"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"huge.png\",\n  \"contentType\": \"image/png\",\n  \"byteSize\": 10485760\n}" }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Delete media",
+            "item": [
+                {
+                    "name": "Delete (owner)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/teacher/media/{{mediaPublicId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "media", "{{mediaPublicId}}"] } }
+                }
+            ]
+        },
+        {
+            "name": "5. Admin storage",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "Storage overview (by teacher)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/media/overview", "host": ["{{baseUrl}}"], "path": ["admin", "media", "overview"] } }
+                },
+                {
+                    "name": "All media",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/media?pageSize=20", "host": ["{{baseUrl}}"], "path": ["admin", "media"], "query": [{ "key": "pageSize", "value": "20" }] } }
+                }
+            ]
+        }
+    ]
+}

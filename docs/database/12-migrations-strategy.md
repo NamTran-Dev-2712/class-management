@@ -245,6 +245,32 @@ migration view riêng cho admin:
 > - Lifecycle (Active→PastDue/Cancelled, PastDue→Expired, hết hạn Pending order) chạy bằng Hangfire
 >   recurring `subscription-lifecycle` → `RunSubscriptionLifecycleCommand` (app-layer, idempotent).
 
+### MVP-9: Media Library (as built)
+
+**Đã triển khai** — gộp toàn bộ thay đổi vào **một** migration (giống các MVP trước):
+
+```
+20260702145021_create_media_and_alter_questions_snapshots
+  -- CREATE TABLE media_assets (check kind/provider/status/byte_size, index owner/status/deleted) — doc 15
+  -- CREATE TABLE question_media (bảng nối question ↔ media_assets, RESTRICT) — doc 03
+  -- CREATE TABLE snapshot_media (đóng băng + cleanup guard, RESTRICT) — doc 05
+  -- ALTER question_options ADD media_id (FK media_assets SET NULL) + idx_question_options_media
+  -- ALTER plans ADD max_storage_bytes (+ chk_plans_max_storage_bytes)
+  -- DROP+CREATE vw_questions (thêm media_count) ; CREATE vw_media (raw SQL)
+  -- trigger trg_media_assets_updated_at (thêm ở DatabaseSeeder.ApplyTriggersAsync)
+```
+
+> Ghi chú:
+> - **Storage provider trừu tượng** qua `IStorageProvider` (+ `IStorageProviderResolver`):
+>   `LocalStorageProvider` (dev/test, `Storage:UseFakeProvider=true`) + `R2StorageProvider` (prod, AWS S3
+>   SDK). Secrets từ config/env, **không** DB (BR-9-10) — mirror `IPaymentProvider` (MVP-8).
+> - **Upload đi thẳng client → storage** qua presigned URL; API chỉ presign + confirm, không proxy bytes.
+> - **Quota theo plan** qua `IResourceLimitService.GetMaxStorageBytesAsync` (`plans.max_storage_bytes`;
+>   null/0 = unlimited); per-file cap live từ `system_settings` (`max_image/audio/video_bytes`).
+> - **Snapshot freeze = reference-pin guard**: publish ghi media tham chiếu vào `snapshot_media`; cleanup
+>   job không xóa object còn được pin → Attempt cũ an toàn (BR-9-06).
+> - Cleanup: Hangfire recurring `media-cleanup` → `RunMediaCleanupCommand` (Pending-expired +
+>   soft-deleted-unpinned), xem [14-background-jobs.md](./14-background-jobs.md).
 
 ---
 

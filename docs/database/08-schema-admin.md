@@ -263,6 +263,13 @@ idx_system_settings_public      (key) WHERE is_public = true
 | `notification_cleanup_days` | `90` | Xóa notification archived sau N ngày |
 | `app_name` | `"Class Management"` | Tên app (public) |
 | `maintenance_mode` | `false` | Bật maintenance mode |
+| `subscription_grace_period_days` | `3` | (MVP-8) Ngày PastDue giữ Pro trước khi Expired |
+| `subscription_expiring_notice_days` | `3` | (MVP-8) Ngày trước hết hạn gửi nhắc |
+| `payment_order_timeout_minutes` | `30` | (MVP-8) Phút Pending payment còn hiệu lực |
+| `max_image_bytes` | `5242880` | (MVP-9) Cap 1 file ảnh (bytes, 5 MB) |
+| `max_audio_bytes` | `20971520` | (MVP-9) Cap 1 file audio (bytes, 20 MB) |
+| `max_video_bytes` | `104857600` | (MVP-9) Cap 1 file video (bytes, 100 MB) |
+| `max_storage_bytes_per_teacher` | `524288000` | (MVP-9) Quota media Free-tier per Teacher (bytes, 500 MB; 0 = unlimited) |
 
 ---
 
@@ -364,6 +371,8 @@ Tất cả 13 key đã được nối dây để có tác dụng thật (qua `IS
 | `max_reports_per_day` | `SubmitReport` (daily cap) |
 | `app_name` | `GET /api/public/app-config` (anonymous) → FE brand |
 | `maintenance_mode` | `GET /api/public/app-config` + **maintenance-gate middleware** (503 cho write của non-admin) |
+| `max_image_bytes` / `max_audio_bytes` / `max_video_bytes` | `IMediaPolicy` → `PresignUpload` (cap per-file theo kind) |
+| `max_storage_bytes_per_teacher` | `IMediaPolicy` → `IResourceLimitService` (quota Free-tier, kiểm tại presign) |
 
 `app_name`/`maintenance_mode` là `is_public=true`; FE đọc qua `PublicConfigController` (output-cache
 `PublicConfigRead`, tag `system-settings` nên evict khi admin sửa). Default cho 3 cap per-teacher vẫn **0

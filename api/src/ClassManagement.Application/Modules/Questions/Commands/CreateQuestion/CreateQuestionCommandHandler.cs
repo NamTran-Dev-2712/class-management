@@ -44,6 +44,19 @@ public class CreateQuestionCommandHandler : IRequestHandler<CreateQuestionComman
             subjectId = subject.Id;
         }
 
+        // Resolve any referenced media (option images + attachments) to internal ids, enforcing
+        // owner + Confirmed (BR-9-01/07).
+        var mediaMap = await QuestionMediaResolver.ResolveAsync(
+            _unitOfWork,
+            teacherId,
+            QuestionAssembler.CollectMediaPublicIds(
+                request.Type,
+                request.Options,
+                request.Attachments
+            ),
+            ct
+        );
+
         var entity = new Question
         {
             TeacherId = teacherId,
@@ -56,8 +69,9 @@ public class CreateQuestionCommandHandler : IRequestHandler<CreateQuestionComman
             Explanation = string.IsNullOrWhiteSpace(request.Explanation)
                 ? null
                 : request.Explanation.Trim(),
-            Options = QuestionAssembler.BuildOptions(request.Type, request.Options),
+            Options = QuestionAssembler.BuildOptions(request.Type, request.Options, mediaMap),
             Tags = QuestionAssembler.BuildTags(request.Tags),
+            Media = QuestionAssembler.BuildMedia(request.Attachments, mediaMap),
         };
 
         await _unitOfWork.Questions.AddAsync(entity, ct);

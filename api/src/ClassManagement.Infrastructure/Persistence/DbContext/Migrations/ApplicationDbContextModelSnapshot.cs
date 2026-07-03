@@ -1332,6 +1332,81 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotMedia", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("display_order");
+
+                    b.Property<string>("FrozenUrl")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("frozen_url");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("MediaPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("media_public_id");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("role");
+
+                    b.Property<DateTime>("SnapshotCreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("snapshot_created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("SnapshotOptionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("snapshot_option_id");
+
+                    b.Property<long>("SnapshotQuestionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("snapshot_question_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_snapshot_media");
+
+                    b.HasIndex("MediaPublicId")
+                        .HasDatabaseName("idx_snapshot_media_public_id");
+
+                    b.HasIndex("SnapshotOptionId")
+                        .HasDatabaseName("ix_snapshot_media_snapshot_option_id");
+
+                    b.HasIndex("SnapshotQuestionId")
+                        .HasDatabaseName("idx_snapshot_media_question");
+
+                    b.ToTable("snapshot_media", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_snapshot_media_display_order", "display_order >= 0");
+
+                            t.HasCheckConstraint("chk_snapshot_media_kind", "kind IN ('Image', 'Audio', 'Video')");
+
+                            t.HasCheckConstraint("chk_snapshot_media_role", "role IN ('Inline', 'Attachment')");
+                        });
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotOption", b =>
                 {
                     b.Property<long>("Id")
@@ -2492,6 +2567,221 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.ToView("vw_exams", (string)null);
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Media.Entities.MediaAsset", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ByteSize")
+                        .HasColumnType("bigint")
+                        .HasColumnName("byte_size");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<int?>("DurationSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("duration_seconds");
+
+                    b.Property<int?>("Height")
+                        .HasColumnType("integer")
+                        .HasColumnName("height");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("kind");
+
+                    b.Property<long>("OwnerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_id");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("provider");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Pending")
+                        .HasColumnName("status");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("storage_key");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("url");
+
+                    b.Property<int?>("Width")
+                        .HasColumnType("integer")
+                        .HasColumnName("width");
+
+                    b.HasKey("Id")
+                        .HasName("pk_media_assets");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("ix_media_assets_created_by");
+
+                    b.HasIndex("DeletedAt")
+                        .HasDatabaseName("idx_media_assets_deleted")
+                        .HasFilter("deleted_at IS NOT NULL");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("idx_media_assets_owner")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_media_assets_public_id");
+
+                    b.HasIndex("UpdatedBy")
+                        .HasDatabaseName("ix_media_assets_updated_by");
+
+                    b.HasIndex("Status", "CreatedAt")
+                        .HasDatabaseName("idx_media_assets_status_created");
+
+                    b.ToTable("media_assets", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_media_assets_byte_size", "byte_size > 0");
+
+                            t.HasCheckConstraint("chk_media_assets_dimensions", "(width IS NULL OR width > 0) AND (height IS NULL OR height > 0) AND (duration_seconds IS NULL OR duration_seconds >= 0)");
+
+                            t.HasCheckConstraint("chk_media_assets_kind", "kind IN ('Image', 'Audio', 'Video')");
+
+                            t.HasCheckConstraint("chk_media_assets_provider", "provider IN ('Local', 'R2')");
+
+                            t.HasCheckConstraint("chk_media_assets_status", "status IN ('Pending', 'Confirmed')");
+                        });
+                });
+
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Media.Entities.MediaView", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("ByteSize")
+                        .HasColumnType("bigint")
+                        .HasColumnName("byte_size");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int?>("DurationSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("duration_seconds");
+
+                    b.Property<int?>("Height")
+                        .HasColumnType("integer")
+                        .HasColumnName("height");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<long>("OwnerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_id");
+
+                    b.Property<string>("OwnerName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("owner_name");
+
+                    b.Property<Guid>("OwnerPublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_public_id");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("provider");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("url");
+
+                    b.Property<int?>("Width")
+                        .HasColumnType("integer")
+                        .HasColumnName("width");
+
+                    b.HasKey("Id")
+                        .HasName("pk_media_view");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_media", (string)null);
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.Invoice", b =>
                 {
                     b.Property<long>("Id")
@@ -2829,6 +3119,10 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("max_questions");
 
+                    b.Property<long?>("MaxStorageBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("max_storage_bytes");
+
                     b.Property<int?>("MaxStudentsPerClass")
                         .HasColumnType("integer")
                         .HasColumnName("max_students_per_class");
@@ -2878,6 +3172,8 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                             t.HasCheckConstraint("chk_plans_max_exams", "max_exams IS NULL OR max_exams > 0");
 
                             t.HasCheckConstraint("chk_plans_max_questions", "max_questions IS NULL OR max_questions > 0");
+
+                            t.HasCheckConstraint("chk_plans_max_storage_bytes", "max_storage_bytes IS NULL OR max_storage_bytes > 0");
 
                             t.HasCheckConstraint("chk_plans_max_students", "max_students_per_class IS NULL OR max_students_per_class > 0");
 
@@ -3211,6 +3507,57 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.QuestionMedia", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("display_order");
+
+                    b.Property<long>("MediaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("media_id");
+
+                    b.Property<long>("QuestionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("question_id");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("role");
+
+                    b.HasKey("Id")
+                        .HasName("pk_question_media");
+
+                    b.HasIndex("MediaId")
+                        .HasDatabaseName("idx_question_media_media");
+
+                    b.HasIndex("QuestionId", "DisplayOrder")
+                        .IsUnique()
+                        .HasDatabaseName("uq_question_media_order");
+
+                    b.ToTable("question_media", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_question_media_display_order", "display_order >= 0");
+
+                            t.HasCheckConstraint("chk_question_media_role", "role IN ('Inline', 'Attachment')");
+                        });
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.QuestionOption", b =>
                 {
                     b.Property<long>("Id")
@@ -3242,12 +3589,19 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("is_correct");
 
+                    b.Property<long?>("MediaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("media_id");
+
                     b.Property<long>("QuestionId")
                         .HasColumnType("bigint")
                         .HasColumnName("question_id");
 
                     b.HasKey("Id")
                         .HasName("pk_question_options");
+
+                    b.HasIndex("MediaId")
+                        .HasDatabaseName("idx_question_options_media");
 
                     b.HasIndex("QuestionId", "DisplayOrder")
                         .IsUnique()
@@ -3325,6 +3679,10 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.Property<string>("Explanation")
                         .HasColumnType("text")
                         .HasColumnName("explanation");
+
+                    b.Property<int>("MediaCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("media_count");
 
                     b.Property<int>("OptionCount")
                         .HasColumnType("integer")
@@ -3998,6 +4356,22 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasConstraintName("fk_manual_grades_asp_net_users_updated_by");
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotMedia", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotOption", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotOptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_snapshot_media_snapshot_options_snapshot_option_id");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotQuestion", null)
+                        .WithMany("Media")
+                        .HasForeignKey("SnapshotQuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_snapshot_media_snapshot_questions_snapshot_question_id");
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotOption", b =>
                 {
                     b.HasOne("ClassManagement.Domain.Modules.Questions.Entities.QuestionOption", null)
@@ -4177,6 +4551,28 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasConstraintName("fk_exam_tags_exams_exam_id");
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Media.Entities.MediaAsset", b =>
+                {
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_media_assets_users_created_by");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_media_assets_users_owner_id");
+
+                    b.HasOne("ClassManagement.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_media_assets_users_updated_by");
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Payment.Entities.Invoice", b =>
                 {
                     b.HasOne("ClassManagement.Domain.Modules.Payment.Entities.Payment", null)
@@ -4268,8 +4664,31 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasConstraintName("fk_questions_users_updated_by");
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.QuestionMedia", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Media.Entities.MediaAsset", null)
+                        .WithMany()
+                        .HasForeignKey("MediaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_question_media_media_assets_media_id");
+
+                    b.HasOne("ClassManagement.Domain.Modules.Questions.Entities.Question", null)
+                        .WithMany("Media")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_question_media_questions_question_id");
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.QuestionOption", b =>
                 {
+                    b.HasOne("ClassManagement.Domain.Modules.Media.Entities.MediaAsset", null)
+                        .WithMany()
+                        .HasForeignKey("MediaId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_question_options_media_assets_media_id");
+
                     b.HasOne("ClassManagement.Domain.Modules.Questions.Entities.Question", null)
                         .WithMany("Options")
                         .HasForeignKey("QuestionId")
@@ -4389,6 +4808,8 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotQuestion", b =>
                 {
+                    b.Navigation("Media");
+
                     b.Navigation("Options");
                 });
 
@@ -4406,6 +4827,8 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Questions.Entities.Question", b =>
                 {
+                    b.Navigation("Media");
+
                     b.Navigation("Options");
 
                     b.Navigation("Tags");

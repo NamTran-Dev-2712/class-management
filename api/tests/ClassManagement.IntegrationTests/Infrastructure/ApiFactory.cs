@@ -46,6 +46,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             "SystemSettingWrite",
             "PaymentCheckout",
             "PaymentWebhook",
+            "MediaPresign",
+            "MediaWrite",
+            "MediaLocalUpload",
             "Read",
         ];
         foreach (var policy in policies)
@@ -62,6 +65,14 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         .Build();
 
     private readonly RedisContainer _redis = new RedisBuilder().Build();
+
+    // Per-factory temp folder for the Local storage backend (MVP-9), so uploaded test files don't pollute
+    // the repo and are isolated per run.
+    private readonly string _mediaRoot = Path.Combine(
+        Path.GetTempPath(),
+        "cm-test-media",
+        Guid.NewGuid().ToString("N")
+    );
 
     // Captures password-reset OTPs so tests can drive the reset-password flow.
     public FakeEmailQueueService EmailQueue { get; } = new();
@@ -93,6 +104,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
                         // Hangfire off in tests — email delivery is faked (see EmailQueue)
                         ["Hangfire:Enabled"] = "false",
+
+                        // Media (MVP-9): Local storage backend into an isolated temp folder.
+                        ["Storage:UseFakeProvider"] = "true",
+                        ["Storage:Local:RootPath"] = _mediaRoot,
 
                         // Deterministic client app base for building reset links
                         ["ClientApp:BaseUrl"] = "http://localhost:5173",

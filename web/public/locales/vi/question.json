@@ -78,7 +78,8 @@
             "orderedList": "Danh sách đánh số",
             "code": "Mã nội dòng",
             "codeBlock": "Khối mã",
-            "link": "Liên kết"
+            "link": "Liên kết",
+            "upload": "Tải media lên"
         },
         "options": "Các lựa chọn",
         "markCorrect": "Đánh dấu đáp án đúng",

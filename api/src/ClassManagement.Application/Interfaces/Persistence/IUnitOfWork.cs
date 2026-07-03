@@ -23,6 +23,9 @@ public interface IUnitOfWork
     IPaymentRepository Payments { get; }
     IInvoiceRepository Invoices { get; }
 
+    // Media & rich content (MVP-9)
+    IMediaRepository Media { get; }
+
     // Generic fallback for entities without a dedicated repository.
     IGenericRepository<T> Repository<T>()
         where T : class;

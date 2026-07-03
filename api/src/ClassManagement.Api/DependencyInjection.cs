@@ -179,6 +179,9 @@ public static class DependencyInjection
             AddIpFixedWindow(RateLimitOptions.Policies.SystemSettingWrite, rl.SystemSettingWrite);
             AddUserFixedWindow(RateLimitOptions.Policies.PaymentCheckout, rl.PaymentCheckout);
             AddIpFixedWindow(RateLimitOptions.Policies.PaymentWebhook, rl.PaymentWebhook);
+            AddUserFixedWindow(RateLimitOptions.Policies.MediaPresign, rl.MediaPresign);
+            AddUserFixedWindow(RateLimitOptions.Policies.MediaWrite, rl.MediaWrite);
+            AddUserFixedWindow(RateLimitOptions.Policies.MediaLocalUpload, rl.MediaLocalUpload);
             AddIpFixedWindow(RateLimitOptions.Policies.Read, rl.Read);
         });
 
@@ -361,6 +364,24 @@ public static class DependencyInjection
                 OutputCachePolicies.AdminRevenueRead,
                 b => Shared(b, OutputCacheTags.Payments)
             );
+
+            // Media & rich content (MVP-9)
+            options.AddPolicy(
+                OutputCachePolicies.TeacherMediaRead,
+                b => PerUser(b, OutputCacheTags.Media)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.MediaUsageRead,
+                b => PerUser(b, OutputCacheTags.Media)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminMediaRead,
+                b => Shared(b, OutputCacheTags.Media)
+            );
+            options.AddPolicy(
+                OutputCachePolicies.AdminStorageOverviewRead,
+                b => Shared(b, OutputCacheTags.Media)
+            );
         });
 
         return services;
@@ -413,6 +434,34 @@ public static class DependencyInjection
                 await next();
             }
         );
+
+        // Dev/test local media serving (MVP-9): when the Local storage backend is on, serve confirmed
+        // objects as static files from its RootPath at the Local:PublicBaseUrl path. Production uses R2 +
+        // CDN, so this is skipped there.
+        var storage =
+            app.Configuration.GetSection(
+                    ClassManagement.Infrastructure.Configuration.StorageOptions.SectionName
+                )
+                .Get<ClassManagement.Infrastructure.Configuration.StorageOptions>()
+            ?? new ClassManagement.Infrastructure.Configuration.StorageOptions();
+        if (storage.UseFakeProvider)
+        {
+            var root = Path.IsPathRooted(storage.Local.RootPath)
+                ? storage.Local.RootPath
+                : Path.Combine(app.Environment.ContentRootPath, storage.Local.RootPath);
+            Directory.CreateDirectory(root);
+            var requestPath = new Uri(storage.Local.PublicBaseUrl).AbsolutePath.TrimEnd('/');
+            app.UseStaticFiles(
+                new StaticFileOptions
+                {
+                    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                        root
+                    ),
+                    RequestPath = requestPath,
+                    ServeUnknownFileTypes = false,
+                }
+            );
+        }
 
         app.UseExceptionHandler();
         app.UseCors();

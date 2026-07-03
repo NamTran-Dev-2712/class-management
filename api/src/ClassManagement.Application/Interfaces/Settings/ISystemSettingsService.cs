@@ -9,6 +9,11 @@ namespace ClassManagement.Application.Interfaces.Settings;
 public interface ISystemSettingsService
 {
     Task<int> GetIntAsync(string key, int fallback, CancellationToken cancellationToken = default);
+    Task<long> GetLongAsync(
+        string key,
+        long fallback,
+        CancellationToken cancellationToken = default
+    );
     Task<bool> GetBoolAsync(
         string key,
         bool fallback,
