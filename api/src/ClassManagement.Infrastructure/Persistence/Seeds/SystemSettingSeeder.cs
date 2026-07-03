@@ -115,6 +115,34 @@ public static class SystemSettingSeeder
             false,
             "Minutes a Pending payment order stays valid before it expires."
         ),
+        (
+            SystemSettingKeys.MaxImageBytes,
+            "5242880",
+            Int,
+            false,
+            "Max size (bytes) for a single image upload (default 5 MB)."
+        ),
+        (
+            SystemSettingKeys.MaxAudioBytes,
+            "20971520",
+            Int,
+            false,
+            "Max size (bytes) for a single audio upload (default 20 MB)."
+        ),
+        (
+            SystemSettingKeys.MaxVideoBytes,
+            "104857600",
+            Int,
+            false,
+            "Max size (bytes) for a single video upload (default 100 MB)."
+        ),
+        (
+            SystemSettingKeys.MaxStorageBytesPerTeacher,
+            "524288000",
+            Int,
+            false,
+            "Free-tier total media storage per teacher in bytes (0 = unlimited; default 500 MB)."
+        ),
     ];
 
     public static async Task SeedAsync(ApplicationDbContext context, ILogger logger)

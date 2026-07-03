@@ -34,6 +34,10 @@ public sealed class PlanConfiguration : IEntityTypeConfiguration<PlanEntity>
                     "chk_plans_max_students",
                     "max_students_per_class IS NULL OR max_students_per_class > 0"
                 );
+                t.HasCheckConstraint(
+                    "chk_plans_max_storage_bytes",
+                    "max_storage_bytes IS NULL OR max_storage_bytes > 0"
+                );
             }
         );
 

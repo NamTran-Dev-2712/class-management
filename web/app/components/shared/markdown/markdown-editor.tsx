@@ -4,10 +4,12 @@ import {
     Code,
     Eye,
     Heading2,
+    ImagePlus,
     Italic,
     Link as LinkIcon,
     List,
     ListOrdered,
+    Loader2,
     Pencil,
     Quote,
     Strikethrough,
@@ -38,6 +40,12 @@ export type MarkdownToolbarKey =
 
 export type MarkdownToolbarLabels = Record<MarkdownToolbarKey, string>;
 
+/** A confirmed media asset the upload flow returns for insertion into the editor. */
+export interface EditorMedia {
+    url: string;
+    kind: string; // "Image" | "Audio" | "Video"
+}
+
 interface MarkdownEditorProps {
     value: string;
     onChange: (value: string) => void;
@@ -48,6 +56,16 @@ interface MarkdownEditorProps {
     previewLabel: string;
     emptyLabel: string;
     toolbarLabels: MarkdownToolbarLabels;
+    /** When provided, an Upload button opens this flow and inserts the returned media at the caret. */
+    onUpload?: () => Promise<EditorMedia | null>;
+    uploadLabel?: string;
+}
+
+// Builds the Markdown/HTML snippet for an uploaded media asset by kind (sanitizer allows these tags).
+function buildMediaSnippet(media: EditorMedia, selectedText: string): string {
+    if (media.kind === "Audio") return `<audio controls src="${media.url}"></audio>`;
+    if (media.kind === "Video") return `<video controls src="${media.url}"></video>`;
+    return `![${selectedText || "image"}](${media.url})`;
 }
 
 type Command =
@@ -106,10 +124,34 @@ export function MarkdownEditor({
     previewLabel,
     emptyLabel,
     toolbarLabels,
+    onUpload,
+    uploadLabel,
 }: MarkdownEditorProps) {
     const [mode, setMode] = useState<"write" | "preview">("write");
+    const [uploading, setUploading] = useState(false);
     const ref = useRef<HTMLTextAreaElement>(null);
     const pendingSelection = useRef<[number, number] | null>(null);
+
+    // Upload → insert the returned media snippet at the caret (mirrors the link command's caret restore).
+    const handleUpload = async () => {
+        if (!onUpload) return;
+        const ta = ref.current;
+        const start = ta?.selectionStart ?? value.length;
+        const end = ta?.selectionEnd ?? value.length;
+        const selected = value.slice(start, end);
+        setUploading(true);
+        try {
+            const media = await onUpload();
+            if (!media) return;
+            const snippet = buildMediaSnippet(media, selected);
+            const next = value.slice(0, start) + snippet + value.slice(end);
+            const caret = start + snippet.length;
+            pendingSelection.current = [caret, caret];
+            onChange(next);
+        } finally {
+            setUploading(false);
+        }
+    };
 
     // Restore the caret/selection after a toolbar edit re-renders the controlled textarea.
     useEffect(() => {
@@ -218,6 +260,28 @@ export function MarkdownEditor({
                                 })}
                             </div>
                         ))}
+                        {onUpload ? (
+                            <>
+                                <Separator orientation="vertical" className="mx-1 h-5" />
+                                <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-7"
+                                    disabled={uploading}
+                                    title={uploadLabel}
+                                    aria-label={uploadLabel}
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={handleUpload}
+                                >
+                                    {uploading ? (
+                                        <Loader2 className="size-3.5 animate-spin" />
+                                    ) : (
+                                        <ImagePlus className="size-3.5" />
+                                    )}
+                                </Button>
+                            </>
+                        ) : null}
                     </>
                 ) : null}
             </div>

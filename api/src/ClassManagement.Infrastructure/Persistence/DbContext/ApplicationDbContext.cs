@@ -39,6 +39,11 @@ public sealed class ApplicationDbContext
     public DbSet<AttemptAnswer> AttemptAnswers => Set<AttemptAnswer>();
     public DbSet<ManualGrade> ManualGrades => Set<ManualGrade>();
 
+    // Media & rich content (MVP-9)
+    public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
+    public DbSet<QuestionMedia> QuestionMedia => Set<QuestionMedia>();
+    public DbSet<SnapshotMedia> SnapshotMedia => Set<SnapshotMedia>();
+
     // Premium & payment (MVP-8)
     public DbSet<Plan> Plans => Set<Plan>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();

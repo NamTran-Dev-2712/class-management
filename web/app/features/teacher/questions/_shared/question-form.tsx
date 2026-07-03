@@ -10,6 +10,7 @@ import {
     MarkdownEditor,
     type MarkdownToolbarLabels,
 } from "@/components/shared/markdown/markdown-editor";
+import { useMediaUpload } from "@/components/shared/media/use-media-upload";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -77,6 +78,7 @@ export function QuestionForm({ question }: QuestionFormProps) {
     const update = useUpdateQuestion();
     const { data: subjects } = useActiveSubjects();
     const isEdit = question !== undefined;
+    const { dialog: uploadDialog, openUploadDialog } = useMediaUpload();
 
     const schema = useMemo(() => createQuestionSchema(t), [t]);
     const form = useForm<QuestionFormValues>({
@@ -252,6 +254,8 @@ export function QuestionForm({ question }: QuestionFormProps) {
                                     previewLabel={t("form.preview")}
                                     emptyLabel={t("form.previewEmpty")}
                                     toolbarLabels={toolbarLabels}
+                                    onUpload={openUploadDialog}
+                                    uploadLabel={t("form.toolbar.upload")}
                                 />
                             </FormControl>
                             <FormDescription>{t("form.markdownHint")}</FormDescription>
@@ -343,6 +347,8 @@ export function QuestionForm({ question }: QuestionFormProps) {
                                     previewLabel={t("form.preview")}
                                     emptyLabel={t("form.previewEmpty")}
                                     toolbarLabels={toolbarLabels}
+                                    onUpload={openUploadDialog}
+                                    uploadLabel={t("form.toolbar.upload")}
                                 />
                             </FormControl>
                             <FormDescription>{t("form.explanationHint")}</FormDescription>
@@ -403,6 +409,7 @@ export function QuestionForm({ question }: QuestionFormProps) {
                     </Button>
                 </div>
             </form>
+            {uploadDialog}
         </Form>
     );
 }

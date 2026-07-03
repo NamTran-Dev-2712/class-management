@@ -76,3 +76,22 @@ Job định kỳ `assignment-lifecycle` (đăng ký trong `Program.cs` qua `IRec
   3. Auto-submit các attempt `InProgress` đã qua `deadline_at`.
 - **Phòng thủ nhiều lớp**: ngoài job, mỗi request làm bài còn kiểm tra thời gian phía server (lazy
   check) nên deadline vẫn được tôn trọng kể cả khi Hangfire tắt (vd: trong test).
+
+## 6. Recurring job — Media cleanup (MVP-9)
+
+Job định kỳ `media-cleanup` (đăng ký trong `Program.cs`, gated bởi `Hangfire:Enabled` + `EnableServer`;
+cron từ `Media:CleanupCron`, mặc định mỗi 30 phút).
+
+- Class mỏng `MediaCleanupJob.ExecuteAsync()` đọc tunable từ `MediaOptions` (appsettings) rồi gửi
+  `RunMediaCleanupCommand(PendingConfirmTtlMinutes, BatchSize)` qua MediatR — toàn bộ logic ở Application,
+  không phụ thuộc Options.
+- Mỗi lần chạy (idempotent, giới hạn `Media:CleanupBatchSize`) quét 2 nhóm asset mồ côi:
+  1. **Pending quá hạn**: `status = 'Pending'` và `created_at < now - PendingConfirmTtlMinutes` (presign
+     nhưng không confirm).
+  2. **Đã soft-delete và không còn được pin**: `deleted_at IS NOT NULL` và `public_id` **không** xuất hiện
+     trong `snapshot_media` — tức không assignment đã publish nào còn tham chiếu (BR-9-06).
+- Với mỗi asset: xóa object dưới storage (`IStorageProvider.DeleteAsync`) rồi **hard-delete** row
+  (`ExecuteDeleteAsync`, bỏ qua interceptor soft-delete). Nếu xóa storage lỗi → log + **giữ row** để thử
+  lại lần sau (không bao giờ mồ côi object).
+- Asset soft-delete **vẫn được snapshot pin** thì không bị xóa vật lý → Attempt cũ/đang làm vẫn xem được
+  media qua `frozen_url` (BR-9-08).

@@ -31,6 +31,16 @@ public sealed class SystemSettingsService : ISystemSettingsService
         return TryParse<int>(raw, out var value) ? value : fallback;
     }
 
+    public async Task<long> GetLongAsync(
+        string key,
+        long fallback,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var raw = await GetRawAsync(key, cancellationToken);
+        return TryParse<long>(raw, out var value) ? value : fallback;
+    }
+
     public async Task<bool> GetBoolAsync(
         string key,
         bool fallback,

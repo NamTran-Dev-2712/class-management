@@ -121,4 +121,12 @@ export const queryKeys = {
             [...queryKeys.payments.all, "admin", "list", params] as const,
         revenue: (months: number) => [...queryKeys.payments.all, "revenue", months] as const,
     },
+    media: {
+        all: ["media"] as const,
+        list: (params: unknown) => [...queryKeys.media.all, "list", params] as const,
+        usage: () => [...queryKeys.media.all, "usage"] as const,
+        adminList: (params: unknown) => [...queryKeys.media.all, "admin", "list", params] as const,
+        adminOverview: (params: unknown) =>
+            [...queryKeys.media.all, "admin", "overview", params] as const,
+    },
 } as const;

@@ -27,5 +27,6 @@ public sealed class QuestionView : BaseEntity, IHasPublicId
     public string TeacherName { get; set; } = string.Empty;
 
     public int OptionCount { get; set; }
+    public int MediaCount { get; set; }
     public List<string> Tags { get; set; } = [];
 }

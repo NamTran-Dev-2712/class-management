@@ -16,6 +16,7 @@ public static class PlanSeeder
         int? MaxQuestions,
         int? MaxExams,
         int? MaxStudents,
+        long? MaxStorageBytes,
         int Order,
         string[] Features
     )[] Defaults =
@@ -28,6 +29,7 @@ public static class PlanSeeder
             500,
             50,
             100,
+            524_288_000L, // 500 MB
             0,
             ["maxClasses", "maxQuestions", "maxExams", "communitySupport"]
         ),
@@ -39,6 +41,7 @@ public static class PlanSeeder
             null,
             null,
             null,
+            null, // unlimited storage
             1,
             ["unlimitedClasses", "unlimitedQuestions", "unlimitedExams", "prioritySupport"]
         ),
@@ -50,6 +53,7 @@ public static class PlanSeeder
             null,
             null,
             null,
+            null, // unlimited storage
             2,
             [
                 "unlimitedClasses",
@@ -79,6 +83,7 @@ public static class PlanSeeder
                 MaxQuestions = d.MaxQuestions,
                 MaxExams = d.MaxExams,
                 MaxStudentsPerClass = d.MaxStudents,
+                MaxStorageBytes = d.MaxStorageBytes,
                 IsActive = true,
                 DisplayOrder = d.Order,
                 Features = [.. d.Features],

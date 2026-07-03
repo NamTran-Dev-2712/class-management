@@ -1,0 +1,70 @@
+{
+    "nav": {
+        "library": "Media",
+        "adminStorage": "Lưu trữ"
+    },
+    "upload": {
+        "title": "Tải media lên",
+        "description": "Tệp được tải thẳng lên storage. Chỉ cho phép ảnh, audio và video.",
+        "pick": "Nhấn để chọn tệp",
+        "uploading": "Đang tải lên…",
+        "hint": "Ảnh, audio hoặc video",
+        "maxHint": "Kích thước tối đa — ảnh {{image}}, audio {{audio}}, video {{video}}."
+    },
+    "errors": {
+        "unsupportedType": "Định dạng tệp này không được hỗ trợ.",
+        "uploadFailed": "Tải lên thất bại. Vui lòng thử lại."
+    },
+    "library": {
+        "title": "Thư viện Media",
+        "subtitle": "Ảnh, audio và video bạn đã tải lên.",
+        "empty": "Chưa có media. Tải một tệp lên để bắt đầu.",
+        "uploadButton": "Tải lên",
+        "preview": "Xem trước"
+    },
+    "columns": {
+        "media": "Media",
+        "kind": "Loại",
+        "contentType": "Định dạng",
+        "size": "Dung lượng",
+        "status": "Trạng thái",
+        "owner": "Giáo viên",
+        "assetCount": "Số tệp",
+        "used": "Đã dùng",
+        "createdAt": "Ngày tải",
+        "actions": "Thao tác"
+    },
+    "kind": {
+        "all": "Tất cả loại",
+        "Image": "Ảnh",
+        "Audio": "Audio",
+        "Video": "Video"
+    },
+    "status": {
+        "all": "Tất cả trạng thái",
+        "Pending": "Chờ xác nhận",
+        "Confirmed": "Đã xác nhận"
+    },
+    "actions": {
+        "delete": "Xóa",
+        "deleteTitle": "Xóa media?",
+        "deleteConfirm": "Media này sẽ bị gỡ. Nó vẫn hiển thị trong các bài tập đã publish.",
+        "deleted": "Đã xóa media."
+    },
+    "usage": {
+        "title": "Dung lượng lưu trữ",
+        "used": "{{used}} / {{limit}}",
+        "usedUnlimited": "Đã dùng {{used}}",
+        "unlimited": "Không giới hạn",
+        "limitReached": "Đã đạt giới hạn dung lượng",
+        "upgrade": "Nâng cấp Pro"
+    },
+    "search": "Tìm theo định dạng…",
+    "admin": {
+        "title": "Media & Lưu trữ",
+        "subtitle": "Dung lượng theo giáo viên và kiểm duyệt.",
+        "overviewTab": "Theo giáo viên",
+        "listTab": "Tất cả media",
+        "empty": "Chưa có media nào được tải lên."
+    }
+}

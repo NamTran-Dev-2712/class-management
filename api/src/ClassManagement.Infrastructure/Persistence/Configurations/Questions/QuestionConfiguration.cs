@@ -120,5 +120,10 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .WithOne()
             .HasForeignKey(t => t.QuestionId)
             .OnDelete(DeleteBehavior.Cascade);
+        builder
+            .HasMany(q => q.Media)
+            .WithOne()
+            .HasForeignKey(m => m.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

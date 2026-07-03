@@ -33,6 +33,9 @@ public sealed record TakingQuestionDto
     public decimal Point { get; init; }
     public IReadOnlyList<TakingOptionDto> Options { get; init; } = [];
 
+    // Frozen question-level media attachments (MVP-9). Inline media is already embedded in Content.
+    public IReadOnlyList<TakingMediaDto> Media { get; init; } = [];
+
     // The student's current draft answer (restored on reload).
     public IReadOnlyList<Guid> SelectedOptionIds { get; init; } = [];
     public string? TextAnswer { get; init; }
@@ -42,5 +45,18 @@ public sealed record TakingOptionDto
 {
     public Guid PublicId { get; init; }
     public string Content { get; init; } = string.Empty;
+    public int DisplayOrder { get; init; }
+
+    // Frozen per-option image (MVP-9, T9-04). Null when the option has no image.
+    public string? MediaUrl { get; init; }
+    public string? MediaKind { get; init; }
+}
+
+/// <summary>A frozen media attachment shown during an attempt (MVP-9).</summary>
+public sealed record TakingMediaDto
+{
+    public Guid MediaPublicId { get; init; }
+    public string Url { get; init; } = string.Empty;
+    public string Kind { get; init; } = string.Empty;
     public int DisplayOrder { get; init; }
 }

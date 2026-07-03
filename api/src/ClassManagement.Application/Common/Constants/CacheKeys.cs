@@ -58,6 +58,12 @@ public static class OutputCachePolicies
     public const string AdminSubscriptionsRead = "admin-subscriptions-read";
     public const string AdminPaymentsRead = "admin-payments-read";
     public const string AdminRevenueRead = "admin-revenue-read";
+
+    // Media & rich content (MVP-9)
+    public const string TeacherMediaRead = "teacher-media-read";
+    public const string MediaUsageRead = "media-usage-read";
+    public const string AdminMediaRead = "admin-media-read";
+    public const string AdminStorageOverviewRead = "admin-storage-overview-read";
 }
 
 /// <summary>
@@ -85,4 +91,7 @@ public static class OutputCacheTags
     public const string Subscriptions = "subscriptions";
     public const string Payments = "payments";
     public const string Invoices = "invoices";
+
+    // Media & rich content (MVP-9)
+    public const string Media = "media";
 }

@@ -31,6 +31,32 @@ internal static class QuestionDetailLoader
             ct
         );
 
+        // Question-level media attachments (MVP-9).
+        var mediaRepo = unitOfWork.Repository<QuestionMedia>();
+        var attachments = await mediaRepo.ToListAsync(
+            mediaRepo.Query().Where(m => m.QuestionId == view.Id).OrderBy(m => m.DisplayOrder),
+            ct
+        );
+
+        // Resolve all referenced media (attachments + option images) to public id / URL / kind in one
+        // pass. A soft-deleted asset drops out of the map → its reference simply renders empty.
+        var mediaIds = attachments
+            .Select(a => a.MediaId)
+            .Concat(options.Where(o => o.MediaId.HasValue).Select(o => o.MediaId!.Value))
+            .Distinct()
+            .ToList();
+
+        var mediaMap = new Dictionary<long, MediaAsset>();
+        if (mediaIds.Count > 0)
+        {
+            var assetRepo = unitOfWork.Repository<MediaAsset>();
+            var assets = await assetRepo.ToListAsync(
+                assetRepo.Query().Where(a => mediaIds.Contains(a.Id)),
+                ct
+            );
+            mediaMap = assets.ToDictionary(a => a.Id);
+        }
+
         return new QuestionDetailDto
         {
             PublicId = view.PublicId,
@@ -52,10 +78,32 @@ internal static class QuestionDetailLoader
                     Content = o.Content,
                     IsCorrect = o.IsCorrect,
                     DisplayOrder = o.DisplayOrder,
+                    MediaPublicId = LookupPublicId(o.MediaId, mediaMap),
+                    MediaUrl = Lookup(o.MediaId, mediaMap)?.Url,
+                    MediaKind = Lookup(o.MediaId, mediaMap)?.Kind.ToString(),
                 }),
+            ],
+            Media =
+            [
+                .. attachments
+                    .Where(a => mediaMap.ContainsKey(a.MediaId))
+                    .Select(a => new QuestionMediaDto
+                    {
+                        MediaPublicId = mediaMap[a.MediaId].PublicId,
+                        Url = mediaMap[a.MediaId].Url,
+                        Kind = mediaMap[a.MediaId].Kind.ToString(),
+                        Role = a.Role.ToString(),
+                        DisplayOrder = a.DisplayOrder,
+                    }),
             ],
             CreatedAt = view.CreatedAt,
             UpdatedAt = view.UpdatedAt,
         };
     }
+
+    private static MediaAsset? Lookup(long? id, IReadOnlyDictionary<long, MediaAsset> map) =>
+        id is { } value && map.TryGetValue(value, out var asset) ? asset : null;
+
+    private static Guid? LookupPublicId(long? id, IReadOnlyDictionary<long, MediaAsset> map) =>
+        Lookup(id, map)?.PublicId;
 }

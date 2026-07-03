@@ -6,6 +6,7 @@ using ClassManagement.Infrastructure;
 using ClassManagement.Infrastructure.Configuration;
 using ClassManagement.Infrastructure.Persistence.DbContext;
 using ClassManagement.Infrastructure.Services.Assignments.Jobs;
+using ClassManagement.Infrastructure.Services.Media.Jobs;
 using ClassManagement.Infrastructure.Services.Notifications.Jobs;
 using ClassManagement.Infrastructure.Services.Payment.Jobs;
 using Hangfire;
@@ -75,6 +76,17 @@ if (hangfireOptions.Enabled)
             "subscription-lifecycle",
             job => job.ExecuteAsync(),
             subscriptionOptions.LifecycleSweepCron
+        );
+
+        // Media cleanup sweep (MVP-9): delete storage objects for Pending-expired + soft-deleted-unpinned
+        // assets. Config-driven cron; handler is idempotent and respects the snapshot pin guard.
+        var mediaOptions =
+            app.Configuration.GetSection(MediaOptions.SectionName).Get<MediaOptions>()
+            ?? new MediaOptions();
+        recurringJobs.AddOrUpdate<MediaCleanupJob>(
+            "media-cleanup",
+            job => job.ExecuteAsync(),
+            mediaOptions.CleanupCron
         );
     }
 }

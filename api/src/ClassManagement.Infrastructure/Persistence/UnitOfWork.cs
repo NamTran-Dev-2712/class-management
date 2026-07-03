@@ -23,7 +23,8 @@ public class UnitOfWork : IUnitOfWork
         IPlanRepository plans,
         ISubscriptionRepository subscriptions,
         IPaymentRepository payments,
-        IInvoiceRepository invoices
+        IInvoiceRepository invoices,
+        IMediaRepository media
     )
     {
         _context = context;
@@ -43,6 +44,7 @@ public class UnitOfWork : IUnitOfWork
         Subscriptions = subscriptions;
         Payments = payments;
         Invoices = invoices;
+        Media = media;
     }
 
     public ISubjectRepository Subjects { get; }
@@ -61,6 +63,7 @@ public class UnitOfWork : IUnitOfWork
     public ISubscriptionRepository Subscriptions { get; }
     public IPaymentRepository Payments { get; }
     public IInvoiceRepository Invoices { get; }
+    public IMediaRepository Media { get; }
 
     public IGenericRepository<T> Repository<T>()
         where T : class

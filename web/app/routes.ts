@@ -34,6 +34,7 @@ export default [
             route("reports", "features/admin/reports/reports.page.tsx"),
             route("settings", "features/admin/settings/settings.page.tsx"),
             route("payments", "features/admin/payments/payments.page.tsx"),
+            route("media", "features/admin/media/admin-media.page.tsx"),
         ]),
     ]),
     layout("layouts/teacher.layout.tsx", [
@@ -88,6 +89,7 @@ export default [
                 "subscription/return",
                 "features/teacher/subscription/subscription-return.page.tsx",
             ),
+            route("media", "features/teacher/media/media.page.tsx"),
         ]),
     ]),
     layout("layouts/student.layout.tsx", [

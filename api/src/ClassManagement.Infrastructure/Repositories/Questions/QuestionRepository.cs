@@ -20,7 +20,7 @@ public sealed class QuestionRepository : IQuestionRepository
     {
         var query = _context.Questions.AsQueryable();
         if (includeChildren)
-            query = query.Include(q => q.Options).Include(q => q.Tags);
+            query = query.Include(q => q.Options).Include(q => q.Tags).Include(q => q.Media);
 
         return query.FirstOrDefaultAsync(q => q.PublicId == publicId, cancellationToken);
     }

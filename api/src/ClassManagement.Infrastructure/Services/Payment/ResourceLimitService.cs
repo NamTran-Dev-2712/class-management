@@ -9,6 +9,7 @@ public sealed class ResourceLimitService : IResourceLimitService
     private readonly IClassroomPolicy _classroomPolicy;
     private readonly IQuestionPolicy _questionPolicy;
     private readonly IExamPolicy _examPolicy;
+    private readonly IMediaPolicy _mediaPolicy;
 
     private EffectiveResourceLimits? _cached;
     private long _cachedTeacherId;
@@ -17,13 +18,15 @@ public sealed class ResourceLimitService : IResourceLimitService
         IUnitOfWork unitOfWork,
         IClassroomPolicy classroomPolicy,
         IQuestionPolicy questionPolicy,
-        IExamPolicy examPolicy
+        IExamPolicy examPolicy,
+        IMediaPolicy mediaPolicy
     )
     {
         _unitOfWork = unitOfWork;
         _classroomPolicy = classroomPolicy;
         _questionPolicy = questionPolicy;
         _examPolicy = examPolicy;
+        _mediaPolicy = mediaPolicy;
     }
 
     public async Task<EffectiveResourceLimits> GetEffectiveLimitsAsync(
@@ -50,7 +53,8 @@ public sealed class ResourceLimitService : IResourceLimitService
                     IsPro: plan.PriceVnd > 0,
                     MaxClasses: plan.MaxClasses ?? 0,
                     MaxQuestions: plan.MaxQuestions ?? 0,
-                    MaxExams: plan.MaxExams ?? 0
+                    MaxExams: plan.MaxExams ?? 0,
+                    MaxStorageBytes: plan.MaxStorageBytes ?? 0
                 );
             }
         }
@@ -62,7 +66,8 @@ public sealed class ResourceLimitService : IResourceLimitService
             IsPro: false,
             MaxClasses: await _classroomPolicy.GetMaxClassesPerTeacherAsync(cancellationToken),
             MaxQuestions: await _questionPolicy.GetMaxQuestionsPerTeacherAsync(cancellationToken),
-            MaxExams: await _examPolicy.GetMaxExamsPerTeacherAsync(cancellationToken)
+            MaxExams: await _examPolicy.GetMaxExamsPerTeacherAsync(cancellationToken),
+            MaxStorageBytes: await _mediaPolicy.GetFreeStorageQuotaBytesAsync(cancellationToken)
         );
     }
 
@@ -80,4 +85,9 @@ public sealed class ResourceLimitService : IResourceLimitService
         long teacherId,
         CancellationToken cancellationToken = default
     ) => (await GetEffectiveLimitsAsync(teacherId, cancellationToken)).MaxExams;
+
+    public async Task<long> GetMaxStorageBytesAsync(
+        long teacherId,
+        CancellationToken cancellationToken = default
+    ) => (await GetEffectiveLimitsAsync(teacherId, cancellationToken)).MaxStorageBytes;
 }

@@ -79,6 +79,32 @@ public class GetAttemptForTakingQueryHandler
             .ToDictionary(g => g.Key, g => g.ToList());
         var optionPublicIdById = options.ToDictionary(o => o.Id, o => o.PublicId);
 
+        // Frozen media (MVP-9): question-level attachments + per-option images.
+        var smRepo = _unitOfWork.Repository<SnapshotMedia>();
+        var snapshotMedia = await smRepo.ToListAsync(
+            smRepo
+                .Query()
+                .Where(m => questionIds.Contains(m.SnapshotQuestionId))
+                .Select(m => new MediaRow(
+                    m.SnapshotQuestionId,
+                    m.SnapshotOptionId,
+                    m.MediaPublicId,
+                    m.FrozenUrl,
+                    m.Kind.ToString(),
+                    m.Role.ToString(),
+                    m.DisplayOrder
+                )),
+            ct
+        );
+        var attachmentsByQuestion = snapshotMedia
+            .Where(m => m.SnapshotOptionId == null && m.Role == "Attachment")
+            .GroupBy(m => m.SnapshotQuestionId)
+            .ToDictionary(g => g.Key, g => g.OrderBy(m => m.DisplayOrder).ToList());
+        var mediaByOption = snapshotMedia
+            .Where(m => m.SnapshotOptionId != null)
+            .GroupBy(m => m.SnapshotOptionId!.Value)
+            .ToDictionary(g => g.Key, g => g.First());
+
         var answerByQuestion = attempt.Answers.ToDictionary(a => a.SnapshotQuestionId);
 
         var takingQuestions = new List<TakingQuestionDto>();
@@ -118,8 +144,24 @@ public class GetAttemptForTakingQueryHandler
                             PublicId = o.PublicId,
                             Content = o.Content,
                             DisplayOrder = o.DisplayOrder,
+                            MediaUrl = mediaByOption.TryGetValue(o.Id, out var om) ? om.Url : null,
+                            MediaKind = mediaByOption.TryGetValue(o.Id, out var ok)
+                                ? ok.Kind
+                                : null,
                         }),
                     ],
+                    Media = attachmentsByQuestion.TryGetValue(qId, out var atts)
+                        ?
+                        [
+                            .. atts.Select(m => new TakingMediaDto
+                            {
+                                MediaPublicId = m.MediaPublicId,
+                                Url = m.Url,
+                                Kind = m.Kind,
+                                DisplayOrder = m.DisplayOrder,
+                            }),
+                        ]
+                        : [],
                     SelectedOptionIds = selectedPublicIds,
                     TextAnswer = answer?.TextAnswer,
                 }
@@ -181,6 +223,16 @@ public class GetAttemptForTakingQueryHandler
         long Id,
         Guid PublicId,
         string Content,
+        int DisplayOrder
+    );
+
+    private readonly record struct MediaRow(
+        long SnapshotQuestionId,
+        long? SnapshotOptionId,
+        Guid MediaPublicId,
+        string Url,
+        string Kind,
+        string Role,
         int DisplayOrder
     );
 }

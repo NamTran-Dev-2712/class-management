@@ -75,12 +75,64 @@ public class PublishAssignmentCommandHandler : IRequestHandler<PublishAssignment
                 .Where(o => questionIds.Contains(o.QuestionId))
                 .OrderBy(o => o.QuestionId)
                 .ThenBy(o => o.DisplayOrder)
-                .Select(o => new OptionRef(o.QuestionId, o.Content, o.IsCorrect, o.DisplayOrder)),
+                .Select(o => new OptionRef(
+                    o.QuestionId,
+                    o.Content,
+                    o.IsCorrect,
+                    o.DisplayOrder,
+                    o.MediaId
+                )),
             ct
         );
         var optionsByQuestion = options
             .GroupBy(o => o.QuestionId)
             .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Question-level media attachments to freeze (MVP-9).
+        var questionMediaRepo = _unitOfWork.Repository<QuestionMedia>();
+        var questionMedia = await questionMediaRepo.ToListAsync(
+            questionMediaRepo
+                .Query()
+                .Where(m => questionIds.Contains(m.QuestionId))
+                .Select(m => new QuestionMediaRef(m.QuestionId, m.MediaId, m.Role, m.DisplayOrder)),
+            ct
+        );
+        var questionMediaByQuestion = questionMedia
+            .GroupBy(m => m.QuestionId)
+            .ToDictionary(g => g.Key, g => g.OrderBy(m => m.DisplayOrder).ToList());
+
+        // Resolve the media assets referenced by attachments + option images (by internal id) and any
+        // inline media in content/explanation (by public id), so we can freeze public_id + URL + kind.
+        var explicitMediaIds = questionMedia
+            .Select(m => m.MediaId)
+            .Concat(options.Where(o => o.MediaId.HasValue).Select(o => o.MediaId!.Value))
+            .Distinct()
+            .ToList();
+
+        var assetRepo = _unitOfWork.Repository<MediaAsset>();
+        var assetsById =
+            explicitMediaIds.Count == 0
+                ? new Dictionary<long, MediaAsset>()
+                : (
+                    await assetRepo.ToListAsync(
+                        assetRepo.Query().Where(a => explicitMediaIds.Contains(a.Id)),
+                        ct
+                    )
+                ).ToDictionary(a => a.Id);
+
+        var inlinePublicIds = MediaReferenceParser.ExtractPublicIds([
+            .. questions.Select(q => q.Content),
+            .. questions.Select(q => q.Explanation),
+        ]);
+        var assetsByPublicId =
+            inlinePublicIds.Count == 0
+                ? new Dictionary<Guid, MediaAsset>()
+                : (
+                    await assetRepo.ToListAsync(
+                        assetRepo.Query().Where(a => inlinePublicIds.Contains(a.PublicId)),
+                        ct
+                    )
+                ).ToDictionary(a => a.PublicId);
 
         var now = DateTime.UtcNow;
 
@@ -90,6 +142,15 @@ public class PublishAssignmentCommandHandler : IRequestHandler<PublishAssignment
             TotalPoint = examQuestions.Sum(eq => eq.Point),
             SnapshotCreatedAt = now,
         };
+
+        // Track the built rows so we can freeze their media once the snapshot ids are generated (MVP-9).
+        var builtQuestions =
+            new List<(
+                SnapshotQuestion Sq,
+                string Content,
+                string? Explanation,
+                List<(SnapshotOption So, long? MediaId)> Options
+            )>();
 
         var displayOrder = 1;
         foreach (var eq in examQuestions)
@@ -106,23 +167,25 @@ public class PublishAssignmentCommandHandler : IRequestHandler<PublishAssignment
                 SnapshotCreatedAt = now,
             };
 
+            var builtOptions = new List<(SnapshotOption, long?)>();
             if (optionsByQuestion.TryGetValue(eq.QuestionId, out var qOptions))
             {
                 foreach (var opt in qOptions)
                 {
-                    snapshotQuestion.Options.Add(
-                        new SnapshotOption
-                        {
-                            Content = opt.Content,
-                            IsCorrect = opt.IsCorrect,
-                            DisplayOrder = opt.DisplayOrder,
-                            SnapshotCreatedAt = now,
-                        }
-                    );
+                    var snapshotOption = new SnapshotOption
+                    {
+                        Content = opt.Content,
+                        IsCorrect = opt.IsCorrect,
+                        DisplayOrder = opt.DisplayOrder,
+                        SnapshotCreatedAt = now,
+                    };
+                    snapshotQuestion.Options.Add(snapshotOption);
+                    builtOptions.Add((snapshotOption, opt.MediaId));
                 }
             }
 
             snapshot.Questions.Add(snapshotQuestion);
+            builtQuestions.Add((snapshotQuestion, q.Content, q.Explanation, builtOptions));
         }
 
         assignment.Snapshot = snapshot;
@@ -133,27 +196,7 @@ public class PublishAssignmentCommandHandler : IRequestHandler<PublishAssignment
                 ? AssignmentStatus.Scheduled
                 : AssignmentStatus.Open;
 
-        _unitOfWork.Assignments.Update(assignment);
-
-        await _auditLogger.LogAsync(
-            new AuditEntry
-            {
-                Action = AuditActions.AssignmentPublished,
-                TargetType = AuditTargetTypes.Assignment,
-                TargetId = assignment.Id,
-                TargetPublicId = assignment.PublicId,
-                Metadata = new Dictionary<string, object?>
-                {
-                    ["status"] = assignment.Status.ToString(),
-                    ["total_questions"] = snapshot.TotalQuestions,
-                },
-            },
-            ct
-        );
-
-        // Fan out "new assignment" to every approved student of the class (BR risk: batch insert, does
-        // not block the teacher). Skipped for a Scheduled assignment that opens later? No — students are
-        // told it exists; due-soon reminders come from the lifecycle job.
+        // Fan out "new assignment" to every approved student of the class.
         var memberRepo = _unitOfWork.Repository<ClassMembership>();
         var studentIds = await memberRepo.ToListAsync(
             memberRepo
@@ -165,27 +208,140 @@ public class PublishAssignmentCommandHandler : IRequestHandler<PublishAssignment
             ct
         );
 
-        await _notifications.NotifyManyAsync(
-            studentIds,
-            new NotificationContent
+        // Two-phase, one transaction: (1) persist the snapshot so questions/options get ids, then
+        // (2) freeze their media references + stage audit/notifications and commit together (BR-9-06).
+        await _unitOfWork.ExecuteInTransactionAsync(
+            async token =>
             {
-                EventType = NotificationEventType.AssignmentCreated,
-                Title = "New assignment",
-                Body = $"A new assignment \"{assignment.Title}\" is available.",
-                Link = $"/student/assignments/{assignment.PublicId}",
-                ReferenceId = assignment.PublicId.ToString(),
-                Payload = new Dictionary<string, object?>
-                {
-                    ["assignmentTitle"] = assignment.Title,
-                    ["assignmentPublicId"] = assignment.PublicId.ToString(),
-                },
+                _unitOfWork.Assignments.Update(assignment);
+                await _unitOfWork.SaveChangesAsync(token);
+
+                var snapshotMedia = BuildSnapshotMedia(
+                    builtQuestions,
+                    questionMediaByQuestion,
+                    assetsById,
+                    assetsByPublicId,
+                    now
+                );
+                if (snapshotMedia.Count > 0)
+                    await _unitOfWork
+                        .Repository<SnapshotMedia>()
+                        .AddRangeAsync(snapshotMedia, token);
+
+                await _auditLogger.LogAsync(
+                    new AuditEntry
+                    {
+                        Action = AuditActions.AssignmentPublished,
+                        TargetType = AuditTargetTypes.Assignment,
+                        TargetId = assignment.Id,
+                        TargetPublicId = assignment.PublicId,
+                        Metadata = new Dictionary<string, object?>
+                        {
+                            ["status"] = assignment.Status.ToString(),
+                            ["total_questions"] = snapshot.TotalQuestions,
+                        },
+                    },
+                    token
+                );
+
+                await _notifications.NotifyManyAsync(
+                    studentIds,
+                    new NotificationContent
+                    {
+                        EventType = NotificationEventType.AssignmentCreated,
+                        Title = "New assignment",
+                        Body = $"A new assignment \"{assignment.Title}\" is available.",
+                        Link = $"/student/assignments/{assignment.PublicId}",
+                        ReferenceId = assignment.PublicId.ToString(),
+                        Payload = new Dictionary<string, object?>
+                        {
+                            ["assignmentTitle"] = assignment.Title,
+                            ["assignmentPublicId"] = assignment.PublicId.ToString(),
+                        },
+                    },
+                    token
+                );
+
+                await _unitOfWork.SaveChangesAsync(token);
             },
             ct
         );
-
-        // One atomic SaveChanges — snapshot + questions + options + the status flip commit together.
-        await _unitOfWork.SaveChangesAsync(ct);
     }
+
+    // Builds the frozen media rows for a published snapshot (MVP-9): question-level attachments,
+    // per-option images, and inline media parsed from content/explanation. Runs after the snapshot save
+    // so SnapshotQuestion/SnapshotOption ids are available.
+    private static List<SnapshotMedia> BuildSnapshotMedia(
+        List<(
+            SnapshotQuestion Sq,
+            string Content,
+            string? Explanation,
+            List<(SnapshotOption So, long? MediaId)> Options
+        )> builtQuestions,
+        Dictionary<long, List<QuestionMediaRef>> questionMediaByQuestion,
+        Dictionary<long, MediaAsset> assetsById,
+        Dictionary<Guid, MediaAsset> assetsByPublicId,
+        DateTime now
+    )
+    {
+        var rows = new List<SnapshotMedia>();
+
+        foreach (var (sq, content, explanation, builtOptions) in builtQuestions)
+        {
+            // Question-level attachments.
+            if (
+                sq.OriginalQuestionId is long qid
+                && questionMediaByQuestion.TryGetValue(qid, out var attachments)
+            )
+            {
+                foreach (var a in attachments)
+                {
+                    if (!assetsById.TryGetValue(a.MediaId, out var asset))
+                        continue;
+                    rows.Add(Freeze(sq.Id, null, asset, a.Role, a.DisplayOrder, now));
+                }
+            }
+
+            // Per-option images.
+            foreach (var (so, mediaId) in builtOptions)
+            {
+                if (mediaId is not long mid || !assetsById.TryGetValue(mid, out var asset))
+                    continue;
+                rows.Add(Freeze(sq.Id, so.Id, asset, MediaRole.Attachment, so.DisplayOrder, now));
+            }
+
+            // Inline media in content/explanation.
+            var order = 0;
+            foreach (var pid in MediaReferenceParser.ExtractPublicIds(content, explanation))
+            {
+                if (!assetsByPublicId.TryGetValue(pid, out var asset))
+                    continue;
+                rows.Add(Freeze(sq.Id, null, asset, MediaRole.Inline, order++, now));
+            }
+        }
+
+        return rows;
+    }
+
+    private static SnapshotMedia Freeze(
+        long snapshotQuestionId,
+        long? snapshotOptionId,
+        MediaAsset asset,
+        MediaRole role,
+        int displayOrder,
+        DateTime now
+    ) =>
+        new()
+        {
+            SnapshotQuestionId = snapshotQuestionId,
+            SnapshotOptionId = snapshotOptionId,
+            MediaPublicId = asset.PublicId,
+            FrozenUrl = asset.Url,
+            Kind = asset.Kind,
+            Role = role,
+            DisplayOrder = displayOrder,
+            SnapshotCreatedAt = now,
+        };
 
     private async Task<int?> GetExamVersionAsync(long examId, CancellationToken ct)
     {
@@ -214,6 +370,14 @@ public class PublishAssignmentCommandHandler : IRequestHandler<PublishAssignment
         long QuestionId,
         string Content,
         bool IsCorrect,
+        int DisplayOrder,
+        long? MediaId
+    );
+
+    private readonly record struct QuestionMediaRef(
+        long QuestionId,
+        long MediaId,
+        MediaRole Role,
         int DisplayOrder
     );
 }

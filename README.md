@@ -52,6 +52,7 @@ Vietnamese)** from the database to the UI.
 | Realtime | **SignalR** (push notifications) |
 | Email | **Resend** |
 | PDF / Export | **QuestPDF** (invoices) + RFC-4180 CSV export |
+| Media storage | **Cloudflare R2** via **AWS S3 SDK** (presigned uploads; Local disk in dev) |
 | API docs | **Scalar** (OpenAPI) at `/scalar/v1` |
 
 ### Frontend (`web/`)
@@ -142,6 +143,10 @@ The platform is shipped as a sequence of end-to-end MVPs:
 - 💳 **Premium & Payment** — subscription plans with plan-based resource limits, **MoMo / VnPay** gateway
   integration (plus a fake provider for offline dev), idempotent webhooks, immutable invoices with on-the-fly
   **PDF generation**, and a subscription lifecycle job.
+- 🖼️ **Media & Rich Content** — teachers upload **images / audio / video** via **presigned URLs** (client →
+  storage, never through the API), embed them in questions, and see per-plan **storage quotas**; media is
+  **frozen into assignment snapshots** on publish (deleting the original never breaks a live attempt), with a
+  cleanup job for orphans. Swappable storage provider (**Cloudflare R2** in prod, Local disk in dev).
 
 > Each MVP is specified in [`docs/mvp/`](docs/mvp/) and documented schema-by-schema in
 > [`docs/database/`](docs/database/).
@@ -280,7 +285,7 @@ fullstack_class_management/
 
 ## 🗺️ Roadmap
 
-The project is built MVP-by-MVP; **MVP-1 through MVP-8 are complete end-to-end**:
+The project is built MVP-by-MVP; **MVP-1 through MVP-9 are complete end-to-end**:
 
 - ✅ MVP-1 — Authentication
 - ✅ MVP-2 — Classroom Management
@@ -290,6 +295,7 @@ The project is built MVP-by-MVP; **MVP-1 through MVP-8 are complete end-to-end**
 - ✅ MVP-6 — Manual Grading & Reports
 - ✅ MVP-7 — Admin, Moderation & Realtime
 - ✅ MVP-8 — Premium & Payment
+- ✅ MVP-9 — Media & Rich Content Library
 
 Future directions are tracked in [`docs/mvp/ROADMAP-FUTURE.md`](docs/mvp/ROADMAP-FUTURE.md).
 

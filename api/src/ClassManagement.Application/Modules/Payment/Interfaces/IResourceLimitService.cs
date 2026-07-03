@@ -12,6 +12,12 @@ public interface IResourceLimitService
     Task<int> GetMaxClassesAsync(long teacherId, CancellationToken cancellationToken = default);
     Task<int> GetMaxQuestionsAsync(long teacherId, CancellationToken cancellationToken = default);
     Task<int> GetMaxExamsAsync(long teacherId, CancellationToken cancellationToken = default);
+
+    /// <summary>Total media storage cap in bytes for a teacher; <c>0</c> = unlimited (MVP-9).</summary>
+    Task<long> GetMaxStorageBytesAsync(
+        long teacherId,
+        CancellationToken cancellationToken = default
+    );
 }
 
 /// <summary>The caps in force for a teacher right now. 0 = unlimited. <c>IsPro</c> drives upgrade UI.</summary>
@@ -20,5 +26,6 @@ public sealed record EffectiveResourceLimits(
     bool IsPro,
     int MaxClasses,
     int MaxQuestions,
-    int MaxExams
+    int MaxExams,
+    long MaxStorageBytes
 );

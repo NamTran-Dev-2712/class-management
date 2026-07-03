@@ -226,6 +226,20 @@ public static class DependencyInjection
             Services.Payment.QuestPdfInvoiceService
         >();
 
+        // Media & rich content (MVP-9). Storage provider abstraction — concrete adapters registered by
+        // type so the resolver injects them directly; only the resolver is bound to the interface. The
+        // Local backend also serves as the dev-only bytes sink (ILocalUploadStore).
+        services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.SectionName));
+        services.Configure<MediaOptions>(configuration.GetSection(MediaOptions.SectionName));
+        services.AddScoped<IMediaRepository, MediaRepository>();
+        services.AddScoped<IMediaPolicy, Services.Media.MediaPolicy>();
+        services.AddScoped<Services.Media.LocalStorageProvider>();
+        services.AddScoped<Services.Media.R2StorageProvider>();
+        services.AddScoped<ILocalUploadStore>(sp =>
+            sp.GetRequiredService<Services.Media.LocalStorageProvider>()
+        );
+        services.AddScoped<IStorageProviderResolver, Services.Media.StorageProviderResolver>();
+
         // Password-reset / email / client-app options
         services.Configure<PasswordResetOptions>(
             configuration.GetSection(PasswordResetOptions.SectionName)

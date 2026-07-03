@@ -25,6 +25,9 @@ public sealed class Plan : BaseEntity, IHasPublicId
     public int? MaxExams { get; set; }
     public int? MaxStudentsPerClass { get; set; }
 
+    // Total media storage cap in bytes (MVP-9). NULL = unlimited (e.g. Pro).
+    public long? MaxStorageBytes { get; set; }
+
     public bool IsActive { get; set; } = true;
     public int DisplayOrder { get; set; }
 

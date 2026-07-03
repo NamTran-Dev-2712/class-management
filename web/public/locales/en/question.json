@@ -78,7 +78,8 @@
             "orderedList": "Numbered list",
             "code": "Inline code",
             "codeBlock": "Code block",
-            "link": "Link"
+            "link": "Link",
+            "upload": "Upload media"
         },
         "options": "Answer options",
         "markCorrect": "Mark as correct",

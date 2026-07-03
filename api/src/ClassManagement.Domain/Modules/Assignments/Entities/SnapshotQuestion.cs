@@ -20,4 +20,7 @@ public sealed class SnapshotQuestion : BaseEntity, IHasPublicId
     public DateTime SnapshotCreatedAt { get; set; }
 
     public ICollection<SnapshotOption> Options { get; set; } = [];
+
+    // Frozen media references captured at publish (MVP-9); immutable like the rest of the snapshot.
+    public ICollection<SnapshotMedia> Media { get; set; } = [];
 }
