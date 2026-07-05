@@ -43,6 +43,12 @@ public static class AuditActions
     public const string AttemptSubmitted = "attempt.submitted";
     public const string AttemptAutoSubmitted = "attempt.auto_submitted";
 
+    // Attempt moderation / proctoring (MVP-10)
+    public const string AttemptForceSubmitted = "attempt.force_submitted";
+    public const string AttemptFlagged = "attempt.flagged";
+    public const string AttemptUnflagged = "attempt.unflagged";
+    public const string AttemptUnlocked = "attempt.unlocked";
+
     // Grade
     public const string GradeManualGraded = "grade.manual_graded";
     public const string GradeManualGradeUpdated = "grade.manual_grade_updated";
@@ -97,6 +103,10 @@ public static class AuditActions
         AttemptStarted,
         AttemptSubmitted,
         AttemptAutoSubmitted,
+        AttemptForceSubmitted,
+        AttemptFlagged,
+        AttemptUnflagged,
+        AttemptUnlocked,
         GradeManualGraded,
         GradeManualGradeUpdated,
         GradePublished,

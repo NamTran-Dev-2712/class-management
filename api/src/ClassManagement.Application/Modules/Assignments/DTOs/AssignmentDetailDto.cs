@@ -23,6 +23,13 @@ public sealed record AssignmentDetailDto
     public bool ShuffleOptions { get; init; }
     public bool ShowAnswersAfterGrade { get; init; }
 
+    // Proctoring config (MVP-10).
+    public bool RequireFullscreen { get; init; }
+    public bool DetectTabSwitch { get; init; }
+    public bool BlockCopyPaste { get; init; }
+    public int MaxViolations { get; init; }
+    public string ViolationAction { get; init; } = string.Empty;
+
     public DateTime? PublishedAt { get; init; }
     public DateTime? ClosedAt { get; init; }
     public int? ExamVersionAtPublish { get; init; }

@@ -73,6 +73,11 @@ Exam/Question gốc có thể tự do thay đổi → không ảnh hưởng
 | `shuffle_questions` | `BOOLEAN` | NO | `false` | — | Random thứ tự câu hỏi per-attempt |
 | `shuffle_options` | `BOOLEAN` | NO | `false` | — | Random thứ tự options per-attempt |
 | `show_answers_after_grade` | `BOOLEAN` | NO | `false` | — | Hiện đáp án đúng sau khi chấm |
+| `require_fullscreen` | `BOOLEAN` | NO | `false` | — | (MVP-10) Bắt buộc fullscreen khi làm bài |
+| `detect_tab_switch` | `BOOLEAN` | NO | `false` | — | (MVP-10) Ghi vi phạm khi chuyển tab / mất focus |
+| `block_copy_paste` | `BOOLEAN` | NO | `false` | — | (MVP-10) Chặn copy/cut/paste/right-click trên vùng làm bài |
+| `max_violations` | `INT` | NO | `0` | CHECK (max_violations >= 0) | (MVP-10) Ngưỡng vi phạm; `0` = không giới hạn / chỉ log |
+| `violation_action` | `TEXT` | NO | `'WarnOnly'` | CHECK (violation_action IN ('WarnOnly', 'AutoSubmit', 'LockAttempt')) | (MVP-10) Hành động khi vượt ngưỡng (enum PascalCase) |
 | `status` | `TEXT` | NO | `'Draft'` | CHECK (status IN ('Draft', 'Scheduled', 'Open', 'Closed', 'Archived')) | State machine |
 | `published_at` | `TIMESTAMPTZ` | YES | NULL | — | Khi nào Assignment được publish |
 | `closed_at` | `TIMESTAMPTZ` | YES | NULL | — | Khi nào Assignment đóng (manual hoặc auto) |

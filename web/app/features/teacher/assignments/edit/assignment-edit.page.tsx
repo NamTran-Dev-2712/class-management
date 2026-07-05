@@ -37,6 +37,7 @@ import {
     usePublishAssignment,
     useTeacherAssignment,
 } from "../_shared/assignments.hook";
+import { useAttemptModeration } from "../_shared/grading.hook";
 import { usePublishGrades } from "../_shared/grading.hook";
 import type { Route } from "./+types/assignment-edit.page";
 
@@ -314,6 +315,19 @@ function AttemptsRoster({
         pageSize: params.pageSize,
         status: status === "all" ? undefined : status,
     });
+    const moderate = useAttemptModeration();
+    const runModeration = (
+        attemptId: string,
+        action: "force-submit" | "flag" | "unflag" | "unlock",
+    ) =>
+        moderate.mutate(
+            { attemptId, action },
+            {
+                onSuccess: () => toast.success(t(`proctoring.moderation.${action}Done`)),
+                onError: (err) =>
+                    toast.error(err instanceof ApiError ? err.message : t("toast.error")),
+            },
+        );
     const fmt = (iso: string | null) =>
         iso
             ? new Intl.DateTimeFormat(locale, { dateStyle: "short", timeStyle: "short" }).format(
@@ -355,6 +369,7 @@ function AttemptsRoster({
                                 <TableHead>{t("roster.student")}</TableHead>
                                 <TableHead>{t("roster.attempt")}</TableHead>
                                 <TableHead>{t("roster.status")}</TableHead>
+                                <TableHead>{t("roster.violations")}</TableHead>
                                 <TableHead>{t("roster.submittedAt")}</TableHead>
                                 <TableHead className="text-right">{t("roster.score")}</TableHead>
                                 <TableHead className="text-right">{t("roster.actions")}</TableHead>
@@ -370,6 +385,25 @@ function AttemptsRoster({
                                             {t(`attemptStatus.${a.status}`)}
                                         </Badge>
                                     </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-1.5">
+                                            <Badge
+                                                variant={
+                                                    a.violationCount > 0 ? "destructive" : "outline"
+                                                }
+                                            >
+                                                {a.violationCount}
+                                            </Badge>
+                                            {a.isFlagged ? (
+                                                <Badge variant="destructive">
+                                                    {t("roster.flagged")}
+                                                </Badge>
+                                            ) : null}
+                                            {a.isLocked ? (
+                                                <Lock className="text-destructive size-3.5" />
+                                            ) : null}
+                                        </div>
+                                    </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {fmt(a.submittedAt)}
                                     </TableCell>
@@ -378,15 +412,56 @@ function AttemptsRoster({
                                         {a.totalPoint != null ? ` / ${a.totalPoint}` : ""}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {GRADABLE_STATUSES.includes(a.status) ? (
+                                        <div className="flex items-center justify-end gap-1">
+                                            {a.status === "InProgress" ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    disabled={moderate.isPending}
+                                                    onClick={() =>
+                                                        runModeration(a.publicId, "force-submit")
+                                                    }
+                                                >
+                                                    {t("proctoring.moderation.forceSubmit")}
+                                                </Button>
+                                            ) : null}
+                                            {a.isLocked ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    disabled={moderate.isPending}
+                                                    onClick={() =>
+                                                        runModeration(a.publicId, "unlock")
+                                                    }
+                                                >
+                                                    {t("proctoring.moderation.unlock")}
+                                                </Button>
+                                            ) : null}
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() => onGrade(a.publicId)}
+                                                disabled={moderate.isPending}
+                                                onClick={() =>
+                                                    runModeration(
+                                                        a.publicId,
+                                                        a.isFlagged ? "unflag" : "flag",
+                                                    )
+                                                }
                                             >
-                                                {t("roster.grade")}
+                                                {a.isFlagged
+                                                    ? t("proctoring.moderation.unflag")
+                                                    : t("proctoring.moderation.flag")}
                                             </Button>
-                                        ) : null}
+                                            {GRADABLE_STATUSES.includes(a.status) ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => onGrade(a.publicId)}
+                                                >
+                                                    {t("roster.grade")}
+                                                </Button>
+                                            ) : null}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}

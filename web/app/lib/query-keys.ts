@@ -80,6 +80,8 @@ export const queryKeys = {
         grading: (attemptId: string) =>
             [...queryKeys.assignments.all, "grading", attemptId] as const,
         report: (publicId: string) => [...queryKeys.assignments.all, "report", publicId] as const,
+        attemptEvents: (attemptId: string) =>
+            [...queryKeys.assignments.all, "events", attemptId] as const,
     },
     auditLogs: {
         all: ["audit-logs"] as const,

@@ -22,4 +22,7 @@ public interface IAssignmentPolicy
 
     /// <summary>Soft cap on rows in a CSV grade export.</summary>
     int MaxExportRows { get; }
+
+    /// <summary>Absolute upper bound for an assignment's MaxViolations (MVP-10, write validator).</summary>
+    int MaxViolationsCap { get; }
 }

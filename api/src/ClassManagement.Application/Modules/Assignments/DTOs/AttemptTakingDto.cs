@@ -21,6 +21,27 @@ public sealed record AttemptTakingDto
 
     public decimal? TotalPoint { get; init; }
     public IReadOnlyList<TakingQuestionDto> Questions { get; init; } = [];
+
+    // Proctoring (MVP-10). The client enables lockdown from Proctoring and seeds its violation counter
+    // from ViolationCount (so a reload never resets it). IsLocked → show the lock screen.
+    public ProctoringConfigDto Proctoring { get; init; } = new();
+    public int ViolationCount { get; init; }
+    public bool IsLocked { get; init; }
+}
+
+/// <summary>Proctoring rules the student's browser must enforce for this attempt (MVP-10).</summary>
+public sealed record ProctoringConfigDto
+{
+    public bool RequireFullscreen { get; init; }
+    public bool DetectTabSwitch { get; init; }
+    public bool BlockCopyPaste { get; init; }
+
+    /// <summary>Violation threshold; <c>0</c> = unlimited / log-only.</summary>
+    public int MaxViolations { get; init; }
+    public string ViolationAction { get; init; } = string.Empty;
+
+    /// <summary>True when any signal must be monitored/sent for this attempt.</summary>
+    public bool Enabled => RequireFullscreen || DetectTabSwitch || BlockCopyPaste;
 }
 
 /// <summary>One question as shown to the student (options carry no correctness).</summary>

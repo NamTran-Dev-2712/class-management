@@ -147,6 +147,11 @@ The platform is shipped as a sequence of end-to-end MVPs:
   storage, never through the API), embed them in questions, and see per-plan **storage quotas**; media is
   **frozen into assignment snapshots** on publish (deleting the original never breaks a live attempt), with a
   cleanup job for orphans. Swappable storage provider (**Cloudflare R2** in prod, Local disk in dev).
+- 🛡️ **Secure Exam & Anti-Cheat Proctoring** — optional per-assignment **browser lockdown** (fullscreen,
+  tab-switch / focus-loss detection, copy-paste & right-click blocking) with a **server-authoritative
+  violation log** (`attempt_events`). Exceeding the configured threshold auto-submits or locks the attempt
+  via the shared grading path; teachers review a per-attempt event **timeline** and can force-submit / flag /
+  unlock (all audited). Best-effort by design — default off, fully backward compatible.
 
 > Each MVP is specified in [`docs/mvp/`](docs/mvp/) and documented schema-by-schema in
 > [`docs/database/`](docs/database/).
@@ -285,7 +290,7 @@ fullstack_class_management/
 
 ## 🗺️ Roadmap
 
-The project is built MVP-by-MVP; **MVP-1 through MVP-9 are complete end-to-end**:
+The project is built MVP-by-MVP; **MVP-1 through MVP-10 are complete end-to-end**:
 
 - ✅ MVP-1 — Authentication
 - ✅ MVP-2 — Classroom Management
@@ -296,6 +301,7 @@ The project is built MVP-by-MVP; **MVP-1 through MVP-9 are complete end-to-end**
 - ✅ MVP-7 — Admin, Moderation & Realtime
 - ✅ MVP-8 — Premium & Payment
 - ✅ MVP-9 — Media & Rich Content Library
+- ✅ MVP-10 — Secure Exam & Anti-Cheat Proctoring (Browser Lockdown)
 
 Future directions are tracked in [`docs/mvp/ROADMAP-FUTURE.md`](docs/mvp/ROADMAP-FUTURE.md).
 

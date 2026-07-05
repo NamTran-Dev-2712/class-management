@@ -127,4 +127,24 @@ public class StudentAssignmentsController : BaseApiController
         await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
         return ApiOk("Attempt.Submitted");
     }
+
+    // Proctoring events (MVP-10): the browser reports integrity signals in batches (like auto-save). The
+    // server owns violation_count + threshold. Not cached; per-user rate limit for shared-NAT classrooms.
+    [HttpPost("attempts/{attemptId:guid}/events")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AttemptEvents)]
+    public async Task<IActionResult> RecordEvents(
+        Guid attemptId,
+        RecordAttemptEventsCommand command,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await _mediator.Send(
+            command with
+            {
+                AttemptId = attemptId,
+            },
+            cancellationToken
+        );
+        return ApiOk(result);
+    }
 }

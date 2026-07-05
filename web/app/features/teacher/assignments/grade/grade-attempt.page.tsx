@@ -17,7 +17,7 @@ import type {
     AttemptGrading,
     GradingQuestion,
 } from "@/services/assignment/dtos/queries/assignment-detail";
-import { useAttemptGrading, useGradeAttempt } from "../_shared/grading.hook";
+import { useAttemptEvents, useAttemptGrading, useGradeAttempt } from "../_shared/grading.hook";
 import type { Route } from "./+types/grade-attempt.page";
 
 export function meta(_: Route.MetaArgs) {
@@ -139,6 +139,8 @@ function GradeAttemptView({
                 </div>
                 <Badge variant="outline">{t(`attemptStatus.${grading.status}`)}</Badge>
             </div>
+
+            <ProctoringTimeline attemptId={attemptId} t={t} />
 
             {grading.questions.length === 0 ? (
                 <p className="text-muted-foreground py-8 text-center text-sm">
@@ -283,6 +285,47 @@ function QuestionCard({
                         </p>
                     </div>
                 )}
+            </CardContent>
+        </Card>
+    );
+}
+
+// Proctoring event timeline (MVP-10). Only renders when the attempt has recorded events.
+function ProctoringTimeline({
+    attemptId,
+    t,
+}: {
+    attemptId: string;
+    t: (k: string, o?: Record<string, unknown>) => string;
+}) {
+    const { i18n } = useTranslation("assignment");
+    const { data: events, isLoading } = useAttemptEvents(attemptId);
+
+    if (isLoading || !events || events.length === 0) return null;
+
+    const fmt = (iso: string) =>
+        new Intl.DateTimeFormat(i18n.language, { dateStyle: "short", timeStyle: "medium" }).format(
+            new Date(iso),
+        );
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-base">
+                    {t("proctoring.timeline.title", { count: events.length })}
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ul className="space-y-1.5 text-sm">
+                    {events.map((e, i) => (
+                        <li key={i} className="flex items-center justify-between gap-3">
+                            <Badge variant="outline">{t(`eventType.${e.eventType}`)}</Badge>
+                            <span className="text-muted-foreground text-xs tabular-nums">
+                                {fmt(e.occurredAt)}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
             </CardContent>
         </Card>
     );

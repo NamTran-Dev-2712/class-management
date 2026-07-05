@@ -26,6 +26,16 @@ export function createAssignmentSchema(t: TFunction) {
             shuffleQuestions: z.boolean(),
             shuffleOptions: z.boolean(),
             showAnswersAfterGrade: z.boolean(),
+            // Proctoring (MVP-10).
+            requireFullscreen: z.boolean(),
+            detectTabSwitch: z.boolean(),
+            blockCopyPaste: z.boolean(),
+            maxViolations: z.coerce
+                .number()
+                .int()
+                .min(0, t("form.validation.maxViolations"))
+                .max(100, t("form.validation.maxViolations")),
+            violationAction: z.enum(["WarnOnly", "AutoSubmit", "LockAttempt"]),
         })
         .refine((v) => !v.opensAt || !v.closesAt || new Date(v.closesAt) > new Date(v.opensAt), {
             message: t("form.validation.timeWindow"),

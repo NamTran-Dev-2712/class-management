@@ -45,6 +45,17 @@ public abstract class AssignmentWriteValidator<T> : AbstractValidator<T>
             .WithMessage("Validation.Assignment.TimeWindowInvalid")
             .When(x => x.OpensAt.HasValue && x.ClosesAt.HasValue);
 
+        // Proctoring (MVP-10). 0 = unlimited / log-only.
+        RuleFor(x => x.MaxViolations)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("Validation.Assignment.MaxViolationsInvalid")
+            .LessThanOrEqualTo(policy.MaxViolationsCap)
+            .WithMessage("Validation.Assignment.MaxViolationsInvalid");
+
+        RuleFor(x => x.ViolationAction)
+            .IsInEnum()
+            .WithMessage("Validation.Assignment.ViolationActionInvalid");
+
         // BR-5-04: time limit must fit inside the open→close window (when all three set).
         RuleFor(x => x)
             .Must(cmd =>

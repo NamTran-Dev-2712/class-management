@@ -85,6 +85,11 @@ export function AssignmentForm({ assignment }: AssignmentFormProps) {
             shuffleQuestions: assignment?.shuffleQuestions ?? false,
             shuffleOptions: assignment?.shuffleOptions ?? false,
             showAnswersAfterGrade: assignment?.showAnswersAfterGrade ?? false,
+            requireFullscreen: assignment?.requireFullscreen ?? false,
+            detectTabSwitch: assignment?.detectTabSwitch ?? false,
+            blockCopyPaste: assignment?.blockCopyPaste ?? false,
+            maxViolations: assignment?.maxViolations ?? 0,
+            violationAction: assignment?.violationAction ?? "WarnOnly",
         },
     });
 
@@ -111,6 +116,11 @@ export function AssignmentForm({ assignment }: AssignmentFormProps) {
             shuffleQuestions: values.shuffleQuestions,
             shuffleOptions: values.shuffleOptions,
             showAnswersAfterGrade: values.showAnswersAfterGrade,
+            requireFullscreen: values.requireFullscreen,
+            detectTabSwitch: values.detectTabSwitch,
+            blockCopyPaste: values.blockCopyPaste,
+            maxViolations: values.maxViolations,
+            violationAction: values.violationAction,
         };
 
         if (isEdit) {
@@ -401,6 +411,96 @@ export function AssignmentForm({ assignment }: AssignmentFormProps) {
                             hint={t("form.showAnswersHint")}
                         />
 
+                        {/* Proctoring / anti-cheat (MVP-10). */}
+                        <div className="space-y-4 rounded-md border p-4">
+                            <div className="space-y-0.5">
+                                <h3 className="text-sm font-semibold">
+                                    {t("proctoring.sectionTitle")}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {t("proctoring.sectionHint")}
+                                </p>
+                            </div>
+                            <ToggleField
+                                control={form.control}
+                                name="requireFullscreen"
+                                label={t("proctoring.requireFullscreen")}
+                                hint={t("proctoring.requireFullscreenHint")}
+                            />
+                            <ToggleField
+                                control={form.control}
+                                name="detectTabSwitch"
+                                label={t("proctoring.detectTabSwitch")}
+                                hint={t("proctoring.detectTabSwitchHint")}
+                            />
+                            <ToggleField
+                                control={form.control}
+                                name="blockCopyPaste"
+                                label={t("proctoring.blockCopyPaste")}
+                                hint={t("proctoring.blockCopyPasteHint")}
+                            />
+                            <div className="grid gap-5 sm:grid-cols-2">
+                                <FormField
+                                    control={form.control}
+                                    name="maxViolations"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t("proctoring.maxViolations")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    min={0}
+                                                    max={100}
+                                                    value={field.value}
+                                                    onChange={(e) =>
+                                                        field.onChange(Number(e.target.value))
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                {t("proctoring.maxViolationsHint")}
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="violationAction"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t("proctoring.violationAction")}</FormLabel>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="WarnOnly">
+                                                        {t("violationAction.WarnOnly")}
+                                                    </SelectItem>
+                                                    <SelectItem value="AutoSubmit">
+                                                        {t("violationAction.AutoSubmit")}
+                                                    </SelectItem>
+                                                    <SelectItem value="LockAttempt">
+                                                        {t("violationAction.LockAttempt")}
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormDescription>
+                                                {t("proctoring.violationActionHint")}
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+
                         <div className="flex justify-end gap-2">
                             <Button
                                 type="button"
@@ -430,7 +530,14 @@ function ToggleField({
 }: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     control: any;
-    name: "allowLate" | "shuffleQuestions" | "shuffleOptions" | "showAnswersAfterGrade";
+    name:
+        | "allowLate"
+        | "shuffleQuestions"
+        | "shuffleOptions"
+        | "showAnswersAfterGrade"
+        | "requireFullscreen"
+        | "detectTabSwitch"
+        | "blockCopyPaste";
     label: string;
     hint: string;
 }) {

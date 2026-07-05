@@ -33,5 +33,15 @@ public sealed class Attempt : AuditableEntity, IHasPublicId
     public string? IpAddress { get; set; }
     public string? UserAgent { get; set; }
 
+    // Proctoring integrity state (MVP-10). Server is authoritative for the counter (BR-10-03).
+    public int ViolationCount { get; set; }
+    public bool IsFlagged { get; set; }
+
+    // Set when ViolationAction=LockAttempt trips the threshold; blocks further student writes until a
+    // teacher/admin unlocks or force-submits (BR-10-05). Not a new attempt status (BR-10-06).
+    public bool IsLocked { get; set; }
+    public DateTime? LastEventAt { get; set; }
+
     public ICollection<AttemptAnswer> Answers { get; set; } = [];
+    public ICollection<AttemptEvent> Events { get; set; } = [];
 }

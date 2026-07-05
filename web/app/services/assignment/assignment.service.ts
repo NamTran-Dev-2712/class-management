@@ -3,6 +3,7 @@ import type { Paginated } from "@/types/global/paginated";
 import type {
     CreateAssignmentRequest,
     GradeAttemptRequest,
+    RecordProctorEventsRequest,
     SaveAttemptAnswersRequest,
     UpdateAssignmentRequest,
 } from "./dtos/commands/assignment-commands";
@@ -10,9 +11,11 @@ import type {
     AssignmentDetail,
     AssignmentPreview,
     AssignmentReport,
+    AttemptEventItem,
     AttemptGrading,
     AttemptResult,
     AttemptTaking,
+    RecordEventsResult,
     StudentAssignmentDetail,
 } from "./dtos/queries/assignment-detail";
 import type {
@@ -50,6 +53,14 @@ export const teacherAssignmentService = {
     grade: (attemptId: string, payload: GradeAttemptRequest) =>
         http.post<null>(`${TEACHER}/attempts/${attemptId}/grade`, payload),
     releaseGrades: (publicId: string) => http.post<null>(`${TEACHER}/${publicId}/release-grades`),
+    // Proctoring (MVP-10): event timeline + attempt moderation.
+    attemptEvents: (attemptId: string) =>
+        http.get<AttemptEventItem[]>(`${TEACHER}/attempts/${attemptId}/events`),
+    forceSubmit: (attemptId: string) =>
+        http.post<null>(`${TEACHER}/attempts/${attemptId}/force-submit`),
+    flag: (attemptId: string) => http.post<null>(`${TEACHER}/attempts/${attemptId}/flag`),
+    unflag: (attemptId: string) => http.post<null>(`${TEACHER}/attempts/${attemptId}/unflag`),
+    unlock: (attemptId: string) => http.post<null>(`${TEACHER}/attempts/${attemptId}/unlock`),
     // Raw blob download (CSV file, not the ApiResponse envelope).
     exportGrades: async (publicId: string) => {
         const res = await apiClient.get<Blob>(`${TEACHER}/${publicId}/export`, {
@@ -75,6 +86,9 @@ export const studentAssignmentService = {
     submit: (attemptId: string) => http.post<null>(`${STUDENT}/attempts/${attemptId}/submit`),
     result: (attemptId: string) =>
         http.get<AttemptResult>(`${STUDENT}/attempts/${attemptId}/result`),
+    // Proctoring (MVP-10): report a batch of integrity events for an in-progress attempt.
+    recordEvents: (attemptId: string, payload: RecordProctorEventsRequest) =>
+        http.post<RecordEventsResult>(`${STUDENT}/attempts/${attemptId}/events`, payload),
 };
 
 /** Admin read-only assignment overview. */

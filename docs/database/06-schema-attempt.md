@@ -12,6 +12,7 @@
 |---|---|
 | `attempts` | Một lần Student thực hiện Assignment |
 | `attempt_answers` | Câu trả lời cho từng câu hỏi trong Attempt |
+| `attempt_events` | (MVP-10) Nhật ký sự kiện liêm chính append-only của Attempt |
 
 ---
 
@@ -39,6 +40,10 @@
 | `total_score` | `NUMERIC(8,2)` | YES | NULL | CHECK (total_score >= 0) | = total_auto_score + total_manual_score (denormalized) |
 | `ip_address` | `TEXT` | YES | NULL | — | IP khi start attempt (audit) |
 | `user_agent` | `TEXT` | YES | NULL | — | Browser/device info (audit) |
+| `violation_count` | `INT` | NO | `0` | — | (MVP-10) Số vi phạm liêm chính, server tính (BR-10-03) |
+| `is_flagged` | `BOOLEAN` | NO | `false` | — | (MVP-10) Đánh dấu để Teacher rà soát (auto khi vượt ngưỡng hoặc thủ công) |
+| `is_locked` | `BOOLEAN` | NO | `false` | — | (MVP-10) Khoá bởi ViolationAction=LockAttempt; chặn student write cho tới khi Teacher unlock/force-submit |
+| `last_event_at` | `TIMESTAMPTZ` | YES | NULL | — | (MVP-10) Thời điểm attempt_event gần nhất |
 | `created_at` | `TIMESTAMPTZ` | NO | `NOW()` | — | = started_at |
 | `updated_at` | `TIMESTAMPTZ` | NO | `NOW()` | — | Auto-update trigger |
 
@@ -70,6 +75,7 @@ idx_attempts_assignment_status      (assignment_id, status)              -- Teac
 idx_attempts_student_assignment     (student_id, assignment_id)          -- Student xem attempts của mình
 idx_attempts_deadline               (deadline_at) WHERE status = 'InProgress'   -- Background job: auto-submit
 idx_attempts_need_grading           (assignment_id) WHERE status = 'NeedManualGrading'  -- Teacher pending grading
+idx_attempts_flagged                (assignment_id) WHERE is_flagged = true     -- (MVP-10) Teacher rà soát attempt bị flag
 ```
 
 ### State Machine
@@ -219,6 +225,41 @@ Client auto-save every 30s:
 
 ---
 
+## Table: `attempt_events` (MVP-10)
+
+**Purpose:** Append-only nhật ký các tín hiệu liêm chính do trình duyệt phát hiện trong khi làm bài (chuyển tab, mất focus, thoát fullscreen, copy/paste, right-click…). Là **bằng chứng** — không sửa/xoá (BR-10-02). Client chỉ phát tín hiệu; server ghi nhận và tăng `attempts.violation_count` (server authoritative, BR-10-03).
+
+### Columns
+
+| Column | Type | Nullable | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `id` | `BIGINT` | NO | identity | PK | |
+| `attempt_id` | `BIGINT` | NO | — | FK → attempts(id) CASCADE | Attempt sở hữu sự kiện |
+| `event_type` | `TEXT` | NO | — | CHECK (event_type IN ('TabSwitch', 'FocusLoss', 'FullscreenExit', 'CopyAttempt', 'PasteAttempt', 'ContextMenu', 'DevToolsOpen', 'ReloadAttempt', 'InactivityTimeout')) | Loại sự kiện (PascalCase) |
+| `occurred_at` | `TIMESTAMPTZ` | NO | — | — | Thời điểm client báo sự kiện |
+| `metadata` | `JSONB` | YES | NULL | — | Ngữ cảnh tuỳ chọn (vd thời lượng ẩn tab, tổ hợp phím) |
+| `created_at` | `TIMESTAMPTZ` | NO | `NOW()` | — | Thời điểm server nhận (authoritative) |
+
+Không có `public_id`, `updated_at`, `deleted_at` — append-only (dùng `BaseEntity`).
+
+### Foreign Keys
+| Column | References | On Delete | Lý do |
+|---|---|---|---|
+| `attempt_id` | `attempts(id)` | CASCADE | Xóa attempt → xóa hết events |
+
+### Indexes
+```
+pk_attempt_events                   PRIMARY KEY (id)
+idx_attempt_events_attempt          (attempt_id, occurred_at)   -- Timeline: events của 1 attempt, cũ → mới
+```
+
+### Notes
+- `event_type` là hằng số trong `AttemptEventTypes` (Domain) — đồng bộ với CHECK constraint ở trên.
+- Mỗi event tăng `violation_count` lên 1 (mô hình phẳng, MVP-10). Khi `violation_count > max_violations` (và `max_violations > 0`) → áp `violation_action` qua đường grading chung (`AttemptGrading.FinalizeAsync`) hoặc set `is_locked` (BR-10-05).
+- `DevToolsOpen` là tín hiệu best-effort độ tin cậy thấp — chỉ log, không dùng làm căn cứ kỷ luật duy nhất (BR-10-09).
+
+---
+
 ## Relationships Diagram
 
 ```
@@ -228,6 +269,7 @@ users/Student (1) ──────────── (*) attempts
 attempts (1) ─────────────────── (*) attempt_answers   [CASCADE]
 snapshot_questions (1) ─────── (*) attempt_answers
 
+attempts (1) ─────────────────── (*) attempt_events    [CASCADE, MVP-10]
 attempts (1) ─────────────────── (*) manual_grades     [MVP-7]
 ```
 
@@ -276,3 +318,20 @@ Migration `20260617173525_create_assignments_attempts_and_views`. Authoritative 
   race; the partial unique index `uq_attempts_one_in_progress` is the DB backstop for one InProgress
   attempt per (assignment, student).
 - The teacher roster + student history read from the `vw_attempts` view (see 05).
+
+## Implementation notes (MVP-10, as built)
+
+Migration `20260703145724_add_proctoring_to_assignments_attempts`. Adds proctoring config to `assignments`
+(`require_fullscreen`/`detect_tab_switch`/`block_copy_paste`/`max_violations`/`violation_action`), integrity
+state to `attempts` (`violation_count`/`is_flagged`/`is_locked`/`last_event_at`), the append-only
+`attempt_events` table, and **recreates `vw_attempts`** to surface `violation_count`/`is_flagged`/`is_locked`
+for the teacher roster.
+
+- **All config defaults OFF / `0`** → an assignment with no proctoring behaves exactly like MVP-5
+  (backward compatible, BR-10-01).
+- **Server-authoritative counter**: the record-events endpoint reuses the `SaveAttemptAnswers` guard chain
+  (owner + `InProgress` + not-past-deadline) plus an `is_locked` reject, appends `attempt_events`, bumps
+  `violation_count`, and — when `violation_count > max_violations > 0` — applies `violation_action`
+  (`AutoSubmit` via the shared `AttemptGrading.FinalizeAsync`, `LockAttempt` via `is_locked`); no new attempt
+  status (BR-10-06).
+- **`attempt_events` is CASCADE from `attempts`** and never soft-deleted (evidence, BR-10-02).

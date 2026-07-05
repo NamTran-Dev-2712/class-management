@@ -52,6 +52,8 @@ internal static class AttemptResultLoader
             StartedAt = attempt.StartedAt,
             SubmittedAt = attempt.SubmittedAt,
             AutoSubmitted = attempt.AutoSubmitted,
+            ViolationCount = attempt.ViolationCount,
+            IsFlagged = attempt.IsFlagged,
             TotalPoint = info.TotalPoint,
             ScoreReleased = released,
             ShowAnswers = showAnswers,

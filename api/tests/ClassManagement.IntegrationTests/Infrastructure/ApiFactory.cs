@@ -40,6 +40,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             "AttemptStart",
             "AttemptSave",
             "AttemptSubmit",
+            "AttemptEvents",
             "ReportWrite",
             "AdminAction",
             "NotificationWrite",

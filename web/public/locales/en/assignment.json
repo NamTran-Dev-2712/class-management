@@ -94,12 +94,66 @@
             "titleLength": "Title must be 3–300 characters.",
             "descriptionMax": "Description must not exceed 1000 characters.",
             "maxAttempts": "Attempts must be between 1 and 100.",
+            "maxViolations": "Max violations must be between 0 and 100.",
             "timeWindow": "The close time must be after the open time."
         }
     },
     "scorePolicy": {
         "Highest": "Highest attempt",
         "Latest": "Latest attempt"
+    },
+    "violationAction": {
+        "WarnOnly": "Warn only (log)",
+        "AutoSubmit": "Auto-submit attempt",
+        "LockAttempt": "Lock attempt"
+    },
+    "proctoring": {
+        "sectionTitle": "Proctoring (anti-cheat)",
+        "sectionHint": "Optional browser lockdown. Best-effort: it raises the bar and creates an audit trail, but is not foolproof. All settings default off.",
+        "requireFullscreen": "Require fullscreen",
+        "requireFullscreenHint": "Students take the exam in fullscreen; leaving it is logged.",
+        "detectTabSwitch": "Detect tab switch / focus loss",
+        "detectTabSwitchHint": "Log a violation when the student switches tab or window.",
+        "blockCopyPaste": "Block copy / paste / right-click",
+        "blockCopyPasteHint": "Prevent copying the questions or pasting answers.",
+        "maxViolations": "Max violations",
+        "maxViolationsHint": "0 = unlimited (only log). When exceeded, the action below applies.",
+        "violationAction": "When exceeded",
+        "violationActionHint": "What happens once the violation limit is passed.",
+        "monitoredTitle": "This attempt is being monitored",
+        "monitoredBody": "Suspicious actions are logged. Violations: {{count}} / {{max}}.",
+        "monitoredBodyLog": "Suspicious actions are logged. Violations: {{count}}.",
+        "fullscreenPrompt": "You left fullscreen. Please return to fullscreen.",
+        "enterFullscreen": "Enter fullscreen",
+        "violationWarning": "Warning: violation recorded ({{count}} / {{max}}).",
+        "violationLogged": "A proctoring event was recorded.",
+        "autoSubmitted": "Violation limit reached — your attempt was submitted automatically.",
+        "lockedTitle": "Attempt locked",
+        "lockedBody": "This attempt was locked due to proctoring violations. Please contact your teacher.",
+        "moderation": {
+            "forceSubmit": "Force submit",
+            "unlock": "Unlock",
+            "flag": "Flag",
+            "unflag": "Unflag",
+            "force-submitDone": "Attempt submitted.",
+            "flagDone": "Attempt flagged.",
+            "unflagDone": "Flag removed.",
+            "unlockDone": "Attempt unlocked."
+        },
+        "timeline": {
+            "title": "Proctoring timeline ({{count}})"
+        }
+    },
+    "eventType": {
+        "TabSwitch": "Tab switch",
+        "FocusLoss": "Focus loss",
+        "FullscreenExit": "Fullscreen exit",
+        "CopyAttempt": "Copy attempt",
+        "PasteAttempt": "Paste attempt",
+        "ContextMenu": "Right-click",
+        "DevToolsOpen": "DevTools shortcut",
+        "ReloadAttempt": "Page reload",
+        "InactivityTimeout": "Inactivity"
     },
     "gradePublishPolicy": {
         "Immediate": "Immediately after submit",
@@ -121,6 +175,8 @@
         "student": "Student",
         "attempt": "Attempt",
         "status": "Status",
+        "violations": "Violations",
+        "flagged": "Flagged",
         "submittedAt": "Submitted",
         "score": "Score",
         "actions": "Actions",
@@ -244,6 +300,7 @@
     "result": {
         "title": "Result",
         "autoSubmitted": "This attempt was submitted automatically (time limit reached).",
+        "violations": "{{count}} proctoring violation(s) were recorded during this attempt.",
         "pending": "Your score will be available later.",
         "manualPending": "Some questions need manual grading by your teacher.",
         "waitingPublish": "Your score will be available once your teacher publishes grades.",

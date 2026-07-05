@@ -1,0 +1,356 @@
+{
+    "info": {
+        "name": "Class Management API — MVP-10 (Anti-Cheat Proctoring)",
+        "_postman_id": "b1a7e2c0-0100-4000-9000-classmgmt0100",
+        "description": "MVP-10 browser-lockdown proctoring, server side. Cookie auth via the jar. Run folders 1→7 in order.\n\nThe browser-only lockdown signals (fullscreen, tab-switch detection, copy/paste blocking) are DOM events and are manual in a browser — this collection exercises the SERVER contract: proctoring config on the assignment, the record-events endpoint (server-authoritative violation_count + threshold action LockAttempt/AutoSubmit), the teacher/admin event timeline, and moderation (force-submit / flag / unflag / unlock).\n\nThe demo assignment uses maxViolations=1 + ViolationAction=LockAttempt so 2 events trip the lock; the teacher then unlocks + force-submits. Integration tests (xUnit) cover the same flows in api/tests/ClassManagement.IntegrationTests/Assignments/ProctoringTests.cs — run `dotnet test --filter Proctoring` (needs Docker). Reuse the 'Class Management — Local' environment (baseUrl, teacherPassword, studentPassword, adminEmail, adminPassword).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        { "key": "subjectId", "value": "" },
+        { "key": "singleQuestionId", "value": "" },
+        { "key": "examId", "value": "" },
+        { "key": "classId", "value": "" },
+        { "key": "inviteCode", "value": "" },
+        { "key": "assignmentId", "value": "" },
+        { "key": "attemptId", "value": "" },
+        { "key": "memberId", "value": "" }
+    ],
+    "item": [
+        {
+            "name": "1. Setup (Teacher, proctored assignment)",
+            "item": [
+                {
+                    "name": "Register Teacher",
+                    "event": [
+                        { "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["pm.environment.set('teacherEmail', 'teacher_' + Date.now() + '@example.com');"] } },
+                        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('created', () => [200,201].includes(pm.response.code));"] } }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"displayName\": \"MVP10 Teacher\",\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\",\n  \"role\": \"Teacher\"\n}" }
+                    }
+                },
+                {
+                    "name": "Login Teacher",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "Get active subject",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "const items = pm.response.json().data.items;",
+                        "if (items && items.length) pm.collectionVariables.set('subjectId', items[0].publicId);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/subjects?pageSize=1&isActive=true&sortBy=name", "host": ["{{baseUrl}}"], "path": ["subjects"], "query": [{ "key": "pageSize", "value": "1" }, { "key": "isActive", "value": "true" }, { "key": "sortBy", "value": "name" }] } }
+                },
+                {
+                    "name": "Create SingleChoice question",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('created', () => [200,201].includes(pm.response.code));",
+                        "pm.collectionVariables.set('singleQuestionId', pm.response.json().data.publicId);"
+                    ] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/questions", "host": ["{{baseUrl}}"], "path": ["teacher", "questions"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"type\": \"SingleChoice\",\n  \"content\": \"What is 2 + 2?\",\n  \"difficulty\": \"Easy\",\n  \"suggestedPoint\": 4.0,\n  \"visibility\": \"Private\",\n  \"explanation\": null,\n  \"options\": [\n    { \"content\": \"4\", \"isCorrect\": true },\n    { \"content\": \"5\", \"isCorrect\": false }\n  ],\n  \"tags\": []\n}" }
+                    }
+                },
+                {
+                    "name": "Create exam",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('created', () => [200,201].includes(pm.response.code));",
+                        "pm.collectionVariables.set('examId', pm.response.json().data.publicId);"
+                    ] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/exams", "host": ["{{baseUrl}}"], "path": ["teacher", "exams"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"title\": \"MVP10 Exam\",\n  \"description\": \"Proctoring demo\",\n  \"visibility\": \"Private\",\n  \"tags\": []\n}" }
+                    }
+                },
+                {
+                    "name": "Save exam questions",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "PUT",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/exams/{{examId}}/questions", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{examId}}", "questions"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"questions\": [\n    { \"questionId\": \"{{singleQuestionId}}\", \"point\": 4.0 }\n  ]\n}" }
+                    }
+                },
+                {
+                    "name": "Create class",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('created', () => [200,201].includes(pm.response.code));",
+                        "pm.collectionVariables.set('classId', pm.response.json().data.publicId);"
+                    ] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/classes", "host": ["{{baseUrl}}"], "path": ["teacher", "classes"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"name\": \"MVP10 Class\",\n  \"subjectName\": null,\n  \"description\": null\n}" }
+                    }
+                },
+                {
+                    "name": "Get class (capture invite code)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('inviteCode', pm.response.json().data.inviteCode);"] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}"] } }
+                },
+                {
+                    "name": "Create assignment (proctored: LockAttempt, maxViolations=1)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('created', () => [200,201].includes(pm.response.code));",
+                        "pm.collectionVariables.set('assignmentId', pm.response.json().data.publicId);"
+                    ] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/teacher/assignments", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"examId\": \"{{examId}}\",\n  \"classId\": \"{{classId}}\",\n  \"title\": \"MVP10 Proctored Assignment\",\n  \"description\": null,\n  \"opensAt\": null,\n  \"closesAt\": null,\n  \"timeLimitMinutes\": null,\n  \"maxAttempts\": 1,\n  \"scorePolicy\": \"Highest\",\n  \"allowLate\": false,\n  \"gradePublishPolicy\": \"Immediate\",\n  \"shuffleQuestions\": false,\n  \"shuffleOptions\": false,\n  \"showAnswersAfterGrade\": true,\n  \"requireFullscreen\": true,\n  \"detectTabSwitch\": true,\n  \"blockCopyPaste\": true,\n  \"maxViolations\": 1,\n  \"violationAction\": \"LockAttempt\"\n}" }
+                    }
+                },
+                {
+                    "name": "Publish assignment",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}/publish", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}", "publish"] } }
+                }
+            ]
+        },
+        {
+            "name": "2. Student — Join",
+            "item": [
+                {
+                    "name": "Register Student",
+                    "event": [
+                        { "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["pm.environment.set('studentEmail', 'student_' + Date.now() + '@example.com');"] } },
+                        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('created', () => [200,201].includes(pm.response.code));"] } }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"displayName\": \"MVP10 Student\",\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\",\n  \"role\": \"Student\"\n}" }
+                    }
+                },
+                {
+                    "name": "Login Student",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "Join class (by invite code)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('ok', () => [200,201].includes(pm.response.code));"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/student/classes/join", "host": ["{{baseUrl}}"], "path": ["student", "classes", "join"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"inviteCode\": \"{{inviteCode}}\"\n}" }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Teacher — Approve member",
+            "item": [
+                {
+                    "name": "Login Teacher",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "List pending members (capture id)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "const items = pm.response.json().data.items;",
+                        "if (items && items.length) pm.collectionVariables.set('memberId', items[0].publicId);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members?status=Pending&pageSize=50", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members"], "query": [{ "key": "status", "value": "Pending" }, { "key": "pageSize", "value": "50" }] } }
+                },
+                {
+                    "name": "Approve member",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/teacher/classes/{{classId}}/members/{{memberId}}/approve", "host": ["{{baseUrl}}"], "path": ["teacher", "classes", "{{classId}}", "members", "{{memberId}}", "approve"] } }
+                }
+            ]
+        },
+        {
+            "name": "4. Student — Take & trip the lock",
+            "item": [
+                {
+                    "name": "Login Student",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "Start attempt",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.collectionVariables.set('attemptId', pm.response.json().data.attemptId);"
+                    ] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/student/assignments/{{assignmentId}}/attempts", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "{{assignmentId}}", "attempts"] } }
+                },
+                {
+                    "name": "Get taking (proctoring config exposed)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "const d = pm.response.json().data;",
+                        "pm.test('proctoring enabled', () => d.proctoring && d.proctoring.detectTabSwitch === true);",
+                        "pm.test('maxViolations = 1', () => d.proctoring.maxViolations === 1);",
+                        "pm.test('counter starts at 0', () => d.violationCount === 0 && d.isLocked === false);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/student/assignments/attempts/{{attemptId}}/taking", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts", "{{attemptId}}", "taking"] } }
+                },
+                {
+                    "name": "Record events (2 tab switches → exceed → LockAttempt)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "const d = pm.response.json().data;",
+                        "pm.test('violationCount = 2', () => d.violationCount === 2);",
+                        "pm.test('thresholdExceeded', () => d.thresholdExceeded === true);",
+                        "pm.test('locked', () => d.locked === true);"
+                    ] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/student/assignments/attempts/{{attemptId}}/events", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts", "{{attemptId}}", "events"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"events\": [\n    { \"eventType\": \"TabSwitch\" },\n    { \"eventType\": \"FullscreenExit\" }\n  ]\n}" }
+                    }
+                },
+                {
+                    "name": "Record events while locked → 400",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('400', () => pm.response.code === 400);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/student/assignments/attempts/{{attemptId}}/events", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts", "{{attemptId}}", "events"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"events\": [\n    { \"eventType\": \"CopyAttempt\" }\n  ]\n}" }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Teacher — Review timeline & moderation",
+            "item": [
+                {
+                    "name": "Login Teacher",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "List attempts (violation + flag + lock surfaced)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "const a = pm.response.json().data.items[0];",
+                        "pm.test('violationCount = 2', () => a.violationCount === 2);",
+                        "pm.test('flagged', () => a.isFlagged === true);",
+                        "pm.test('locked', () => a.isLocked === true);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/assignments/{{assignmentId}}/attempts?pageSize=20", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "{{assignmentId}}", "attempts"], "query": [{ "key": "pageSize", "value": "20" }] } }
+                },
+                {
+                    "name": "Get attempt event timeline",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('has events', () => pm.response.json().data.length >= 2);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teacher/assignments/attempts/{{attemptId}}/events", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "attempts", "{{attemptId}}", "events"] } }
+                },
+                {
+                    "name": "Unlock attempt",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/teacher/assignments/attempts/{{attemptId}}/unlock", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "attempts", "{{attemptId}}", "unlock"] } }
+                },
+                {
+                    "name": "Force-submit attempt",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/teacher/assignments/attempts/{{attemptId}}/force-submit", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "attempts", "{{attemptId}}", "force-submit"] } }
+                },
+                {
+                    "name": "Force-submit again (not in progress) → 400",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('400', () => pm.response.code === 400);"] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/teacher/assignments/attempts/{{attemptId}}/force-submit", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "attempts", "{{attemptId}}", "force-submit"] } }
+                },
+                {
+                    "name": "Unflag attempt",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/teacher/assignments/attempts/{{attemptId}}/unflag", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "attempts", "{{attemptId}}", "unflag"] } }
+                },
+                {
+                    "name": "Flag attempt",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200', () => pm.response.code === 200);"] } }],
+                    "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/teacher/assignments/attempts/{{attemptId}}/flag", "host": ["{{baseUrl}}"], "path": ["teacher", "assignments", "attempts", "{{attemptId}}", "flag"] } }
+                }
+            ]
+        },
+        {
+            "name": "6. Student — Negative (events after submit)",
+            "item": [
+                {
+                    "name": "Login Student",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "Record events after submit → 400",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('400', () => pm.response.code === 400);"] } }],
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/student/assignments/attempts/{{attemptId}}/events", "host": ["{{baseUrl}}"], "path": ["student", "assignments", "attempts", "{{attemptId}}", "events"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"events\": [\n    { \"eventType\": \"TabSwitch\" }\n  ]\n}" }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "7. Admin — Read-only timeline",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+                        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" }
+                    }
+                },
+                {
+                    "name": "Get attempt event timeline (admin)",
+                    "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                        "pm.test('200', () => pm.response.code === 200);",
+                        "pm.test('has events', () => pm.response.json().data.length >= 2);"
+                    ] } }],
+                    "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/assignments/attempts/{{attemptId}}/events", "host": ["{{baseUrl}}"], "path": ["admin", "assignments", "attempts", "{{attemptId}}", "events"] } }
+                }
+            ]
+        }
+    ]
+}

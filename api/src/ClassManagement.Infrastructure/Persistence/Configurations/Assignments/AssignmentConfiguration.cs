@@ -42,6 +42,12 @@ public sealed class AssignmentConfiguration : IEntityTypeConfiguration<Assignmen
                     "chk_assignments_status",
                     "status IN ('Draft', 'Scheduled', 'Open', 'Closed', 'Archived')"
                 );
+                // Proctoring config (MVP-10).
+                t.HasCheckConstraint("chk_assignments_max_violations", "max_violations >= 0");
+                t.HasCheckConstraint(
+                    "chk_assignments_violation_action",
+                    "violation_action IN ('WarnOnly', 'AutoSubmit', 'LockAttempt')"
+                );
             }
         );
 
@@ -60,6 +66,13 @@ public sealed class AssignmentConfiguration : IEntityTypeConfiguration<Assignmen
         builder.Property(a => a.ScorePolicy).HasConversion<string>().HasMaxLength(10);
         builder.Property(a => a.GradePublishPolicy).HasConversion<string>().HasMaxLength(20);
         builder.Property(a => a.Status).HasConversion<string>().HasMaxLength(10);
+
+        // Proctoring config (MVP-10) — all default OFF to preserve MVP-5 behavior.
+        builder.Property(a => a.RequireFullscreen).HasDefaultValue(false);
+        builder.Property(a => a.DetectTabSwitch).HasDefaultValue(false);
+        builder.Property(a => a.BlockCopyPaste).HasDefaultValue(false);
+        builder.Property(a => a.MaxViolations).HasDefaultValue(0);
+        builder.Property(a => a.ViolationAction).HasConversion<string>().HasMaxLength(12);
 
         builder.Property(a => a.CreatedAt).HasDefaultValueSql("now()");
         builder.Property(a => a.UpdatedAt).HasDefaultValueSql("now()");

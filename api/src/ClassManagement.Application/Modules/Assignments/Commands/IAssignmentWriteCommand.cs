@@ -16,4 +16,11 @@ public interface IAssignmentWriteCommand
     bool ShuffleQuestions { get; }
     bool ShuffleOptions { get; }
     bool ShowAnswersAfterGrade { get; }
+
+    // Proctoring config (MVP-10). Default OFF preserves MVP-5 behavior.
+    bool RequireFullscreen { get; }
+    bool DetectTabSwitch { get; }
+    bool BlockCopyPaste { get; }
+    int MaxViolations { get; }
+    ViolationAction ViolationAction { get; }
 }
