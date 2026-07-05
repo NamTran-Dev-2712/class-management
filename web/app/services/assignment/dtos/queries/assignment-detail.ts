@@ -1,3 +1,4 @@
+import type { ViolationAction } from "../commands/assignment-commands";
 import type {
     AssignmentStatus,
     AttemptStatus,
@@ -38,6 +39,12 @@ export interface AssignmentDetail {
     shuffleQuestions: boolean;
     shuffleOptions: boolean;
     showAnswersAfterGrade: boolean;
+    // Proctoring config (MVP-10).
+    requireFullscreen: boolean;
+    detectTabSwitch: boolean;
+    blockCopyPaste: boolean;
+    maxViolations: number;
+    violationAction: ViolationAction;
     publishedAt: string | null;
     closedAt: string | null;
     examVersionAtPublish: number | null;
@@ -121,6 +128,16 @@ export interface TakingQuestion {
     textAnswer: string | null;
 }
 
+/** Proctoring rules the browser must enforce for an attempt (mirrors backend ProctoringConfigDto). */
+export interface ProctoringConfig {
+    requireFullscreen: boolean;
+    detectTabSwitch: boolean;
+    blockCopyPaste: boolean;
+    maxViolations: number;
+    violationAction: ViolationAction;
+    enabled: boolean;
+}
+
 /** Live test-taking session (mirrors backend AttemptTakingDto). */
 export interface AttemptTaking {
     publicId: string;
@@ -133,6 +150,28 @@ export interface AttemptTaking {
     remainingSeconds: number | null;
     totalPoint: number | null;
     questions: TakingQuestion[];
+    // Proctoring (MVP-10).
+    proctoring: ProctoringConfig;
+    violationCount: number;
+    isLocked: boolean;
+}
+
+/** Server response after recording proctoring events (mirrors backend RecordEventsResultDto). */
+export interface RecordEventsResult {
+    violationCount: number;
+    maxViolations: number;
+    action: ViolationAction;
+    thresholdExceeded: boolean;
+    submitted: boolean;
+    locked: boolean;
+}
+
+/** One proctoring event on the teacher/admin timeline (mirrors backend AttemptEventDto). */
+export interface AttemptEventItem {
+    eventType: string;
+    occurredAt: string;
+    createdAt: string;
+    metadata: Record<string, unknown> | null;
 }
 
 export interface AttemptAnswerOption {
@@ -167,6 +206,8 @@ export interface AttemptResult {
     startedAt: string;
     submittedAt: string | null;
     autoSubmitted: boolean;
+    violationCount: number;
+    isFlagged: boolean;
     totalPoint: number | null;
     scoreReleased: boolean;
     showAnswers: boolean;

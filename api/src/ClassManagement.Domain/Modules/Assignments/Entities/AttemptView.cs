@@ -15,6 +15,11 @@ public sealed class AttemptView : BaseEntity, IHasPublicId
     public DateTime? DeadlineAt { get; set; }
     public bool AutoSubmitted { get; set; }
 
+    // Proctoring integrity summary (MVP-10) — surfaced on the teacher roster.
+    public int ViolationCount { get; set; }
+    public bool IsFlagged { get; set; }
+    public bool IsLocked { get; set; }
+
     public decimal? TotalAutoScore { get; set; }
     public decimal? TotalManualScore { get; set; }
     public decimal? TotalScore { get; set; }

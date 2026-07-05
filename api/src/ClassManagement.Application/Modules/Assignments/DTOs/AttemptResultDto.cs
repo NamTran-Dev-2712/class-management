@@ -17,6 +17,10 @@ public sealed record AttemptResultDto
     public DateTime? SubmittedAt { get; init; }
     public bool AutoSubmitted { get; init; }
 
+    // Proctoring integrity summary (MVP-10) — always visible to the attempt owner (not score-gated).
+    public int ViolationCount { get; init; }
+    public bool IsFlagged { get; init; }
+
     public decimal? TotalPoint { get; init; }
     public bool ScoreReleased { get; init; }
 

@@ -35,4 +35,7 @@ public sealed class AssignmentOptions
 
     /// <summary>Soft cap on rows in a CSV grade export (MVP-6 §12 risk: large export → timeout).</summary>
     public int MaxExportRows { get; init; } = 500;
+
+    /// <summary>Upper bound a teacher may configure for MaxViolations (MVP-10 proctoring).</summary>
+    public int MaxViolationsCap { get; init; } = 100;
 }

@@ -24,6 +24,14 @@ public sealed class AssignmentView : BaseEntity, IHasPublicId
     public bool ShuffleQuestions { get; set; }
     public bool ShuffleOptions { get; set; }
     public bool ShowAnswersAfterGrade { get; set; }
+
+    // Proctoring config (MVP-10). ViolationAction exposed as plain string.
+    public bool RequireFullscreen { get; set; }
+    public bool DetectTabSwitch { get; set; }
+    public bool BlockCopyPaste { get; set; }
+    public int MaxViolations { get; set; }
+    public string ViolationAction { get; set; } = string.Empty;
+
     public DateTime? PublishedAt { get; set; }
     public DateTime? ClosedAt { get; set; }
     public DateTime? GradesReleasedAt { get; set; }

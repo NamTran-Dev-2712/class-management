@@ -23,6 +23,7 @@ public sealed class AssignmentPolicy : IAssignmentPolicy
     public int LifecycleBatchSize => _options.LifecycleBatchSize;
     public int ReportHistogramBuckets => _options.ReportHistogramBuckets;
     public int MaxExportRows => _options.MaxExportRows;
+    public int MaxViolationsCap => _options.MaxViolationsCap;
 
     public Task<int> GetMaxAttemptsPerAssignmentAsync(
         CancellationToken cancellationToken = default

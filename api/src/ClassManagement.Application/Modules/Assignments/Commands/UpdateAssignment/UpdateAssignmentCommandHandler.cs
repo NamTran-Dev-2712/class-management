@@ -37,6 +37,11 @@ public class UpdateAssignmentCommandHandler : IRequestHandler<UpdateAssignmentCo
         assignment.ShuffleQuestions = request.ShuffleQuestions;
         assignment.ShuffleOptions = request.ShuffleOptions;
         assignment.ShowAnswersAfterGrade = request.ShowAnswersAfterGrade;
+        assignment.RequireFullscreen = request.RequireFullscreen;
+        assignment.DetectTabSwitch = request.DetectTabSwitch;
+        assignment.BlockCopyPaste = request.BlockCopyPaste;
+        assignment.MaxViolations = request.MaxViolations;
+        assignment.ViolationAction = request.ViolationAction;
 
         _unitOfWork.Assignments.Update(assignment);
         await _unitOfWork.SaveChangesAsync(ct);

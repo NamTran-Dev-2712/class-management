@@ -34,7 +34,12 @@ public class GetAttemptForTakingQueryHandler
                         a.PublicId,
                         a.Title,
                         a.TotalPoint,
-                        a.ShuffleOptions
+                        a.ShuffleOptions,
+                        a.RequireFullscreen,
+                        a.DetectTabSwitch,
+                        a.BlockCopyPaste,
+                        a.MaxViolations,
+                        a.ViolationAction
                     ))
                     .Take(1),
                 ct
@@ -187,6 +192,16 @@ public class GetAttemptForTakingQueryHandler
             RemainingSeconds = remainingSeconds,
             TotalPoint = assignmentInfo.TotalPoint,
             Questions = takingQuestions,
+            ViolationCount = attempt.ViolationCount,
+            IsLocked = attempt.IsLocked,
+            Proctoring = new ProctoringConfigDto
+            {
+                RequireFullscreen = assignmentInfo.RequireFullscreen,
+                DetectTabSwitch = assignmentInfo.DetectTabSwitch,
+                BlockCopyPaste = assignmentInfo.BlockCopyPaste,
+                MaxViolations = assignmentInfo.MaxViolations,
+                ViolationAction = assignmentInfo.ViolationAction,
+            },
         };
     }
 
@@ -207,7 +222,12 @@ public class GetAttemptForTakingQueryHandler
         Guid PublicId,
         string Title,
         decimal? TotalPoint,
-        bool ShuffleOptions
+        bool ShuffleOptions,
+        bool RequireFullscreen,
+        bool DetectTabSwitch,
+        bool BlockCopyPaste,
+        int MaxViolations,
+        string ViolationAction
     );
 
     private readonly record struct QuestionRow(

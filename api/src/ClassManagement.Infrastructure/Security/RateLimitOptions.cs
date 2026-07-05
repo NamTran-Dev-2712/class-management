@@ -64,6 +64,12 @@ public sealed class RateLimitOptions
     public RateLimitPolicyOptions AttemptSubmit { get; init; } =
         new() { PermitLimit = 10, WindowSeconds = 60 };
 
+    // Recording proctoring events (MVP-10) — partitioned per-user; generous because the client sends
+    // batched signals (debounced like auto-save). The server counts + thresholds, so this only caps
+    // abusive floods; per-user keeps shared-NAT classrooms from colliding.
+    public RateLimitPolicyOptions AttemptEvents { get; init; } =
+        new() { PermitLimit = 60, WindowSeconds = 60 };
+
     // Manual grading / publish-grades (MVP-6, per-IP teacher writes) — bursty (grade many attempts).
     public RateLimitPolicyOptions GradeWrite { get; init; } =
         new() { PermitLimit = 60, WindowSeconds = 60 };
@@ -136,6 +142,7 @@ public sealed class RateLimitOptions
         public const string AttemptStart = "attemptStart";
         public const string AttemptSave = "attemptSave";
         public const string AttemptSubmit = "attemptSubmit";
+        public const string AttemptEvents = "attemptEvents";
         public const string GradeWrite = "gradeWrite";
         public const string Export = "export";
         public const string ReportWrite = "reportWrite";

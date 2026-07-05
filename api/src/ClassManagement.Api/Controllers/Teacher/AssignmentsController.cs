@@ -101,6 +101,21 @@ public class TeacherAssignmentsController : BaseApiController
         return ApiOk(result);
     }
 
+    // Proctoring event timeline for one attempt (MVP-10, T10-05). Time-sensitive evidence; not cached.
+    [HttpGet("attempts/{attemptId:guid}/events")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    public async Task<IActionResult> GetAttemptEvents(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await _mediator.Send(
+            new GetAttemptEventsQuery(attemptId, OwnerScoped: true),
+            cancellationToken
+        );
+        return ApiOk(result);
+    }
+
     // Full per-question breakdown of one attempt for manual grading (T6-03). Not cached (edit workflow).
     [HttpGet("attempts/{attemptId:guid}/grading")]
     [EnableRateLimiting(RateLimitOptions.Policies.Read)]
@@ -236,6 +251,71 @@ public class TeacherAssignmentsController : BaseApiController
         await _mediator.Send(command with { AttemptId = attemptId }, cancellationToken);
         await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
         return ApiOk("Attempt.Graded");
+    }
+
+    // ── Proctoring moderation (MVP-10) ───────────────────────────────────────────────────────
+
+    // Force-submit an in-progress attempt (T10; e.g. after review). Uses the shared finalize path.
+    [HttpPost("attempts/{attemptId:guid}/force-submit")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AssignmentWrite)]
+    public async Task<IActionResult> ForceSubmitAttempt(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(
+            new ForceSubmitAttemptCommand(attemptId, OwnerScoped: true),
+            cancellationToken
+        );
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Attempt.ForceSubmitted");
+    }
+
+    // Flag / unflag an attempt for integrity review (T10-06).
+    [HttpPost("attempts/{attemptId:guid}/flag")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AssignmentWrite)]
+    public async Task<IActionResult> FlagAttempt(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(
+            new SetAttemptFlagCommand(attemptId, Flagged: true, OwnerScoped: true),
+            cancellationToken
+        );
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Attempt.Flagged");
+    }
+
+    [HttpPost("attempts/{attemptId:guid}/unflag")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AssignmentWrite)]
+    public async Task<IActionResult> UnflagAttempt(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(
+            new SetAttemptFlagCommand(attemptId, Flagged: false, OwnerScoped: true),
+            cancellationToken
+        );
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Attempt.Unflagged");
+    }
+
+    // Unlock an attempt locked by ViolationAction=LockAttempt so the student can resume.
+    [HttpPost("attempts/{attemptId:guid}/unlock")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AssignmentWrite)]
+    public async Task<IActionResult> UnlockAttempt(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(
+            new UnlockAttemptCommand(attemptId, OwnerScoped: true),
+            cancellationToken
+        );
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Attempt.Unlocked");
     }
 
     // Publish grades to students (T6-07, Manual policy). Sets grades_released_at.

@@ -60,6 +60,83 @@ public class AdminAssignmentsController : BaseApiController
         return ApiOk(result);
     }
 
+    // Proctoring event timeline for any attempt, read-only (MVP-10, A10-01). Time-sensitive; not cached.
+    [HttpGet("attempts/{attemptId:guid}/events")]
+    [EnableRateLimiting(RateLimitOptions.Policies.Read)]
+    public async Task<IActionResult> GetAttemptEvents(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await _mediator.Send(
+            new GetAttemptEventsQuery(attemptId, OwnerScoped: false),
+            cancellationToken
+        );
+        return ApiOk(result);
+    }
+
+    // ── Proctoring moderation (MVP-10, any attempt) ──────────────────────────────────────────
+
+    [HttpPost("attempts/{attemptId:guid}/force-submit")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AdminAction)]
+    public async Task<IActionResult> ForceSubmitAttempt(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(
+            new ForceSubmitAttemptCommand(attemptId, OwnerScoped: false),
+            cancellationToken
+        );
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Attempt.ForceSubmitted");
+    }
+
+    [HttpPost("attempts/{attemptId:guid}/flag")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AdminAction)]
+    public async Task<IActionResult> FlagAttempt(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(
+            new SetAttemptFlagCommand(attemptId, Flagged: true, OwnerScoped: false),
+            cancellationToken
+        );
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Attempt.Flagged");
+    }
+
+    [HttpPost("attempts/{attemptId:guid}/unflag")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AdminAction)]
+    public async Task<IActionResult> UnflagAttempt(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(
+            new SetAttemptFlagCommand(attemptId, Flagged: false, OwnerScoped: false),
+            cancellationToken
+        );
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Attempt.Unflagged");
+    }
+
+    [HttpPost("attempts/{attemptId:guid}/unlock")]
+    [EnableRateLimiting(RateLimitOptions.Policies.AdminAction)]
+    public async Task<IActionResult> UnlockAttempt(
+        Guid attemptId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(
+            new UnlockAttemptCommand(attemptId, OwnerScoped: false),
+            cancellationToken
+        );
+        await EvictCacheAsync(OutputCacheTags.Assignments, cancellationToken);
+        return ApiOk("Attempt.Unlocked");
+    }
+
     // Emergency force-close (A7-07): closes the assignment + auto-submits any in-progress attempts.
     [HttpPost("{publicId:guid}/force-close")]
     [EnableRateLimiting(RateLimitOptions.Policies.AdminAction)]

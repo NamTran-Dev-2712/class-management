@@ -101,7 +101,7 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
 
                     b.ToTable("audit_logs", null, t =>
                         {
-                            t.HasCheckConstraint("chk_audit_logs_action", "action IN ('user.login', 'user.logout', 'user.login_failed', 'user.password_changed', 'user.password_reset_requested', 'user.password_reset_completed', 'user.role_changed', 'user.locked', 'user.unlocked', 'user.deleted', 'question.created', 'question.updated', 'question.correct_answer_changed', 'question.deleted', 'question.visibility_changed', 'exam.created', 'exam.updated', 'exam.deleted', 'exam.visibility_changed', 'assignment.published', 'assignment.closed', 'assignment.archived', 'attempt.started', 'attempt.submitted', 'attempt.auto_submitted', 'grade.manual_graded', 'grade.manual_grade_updated', 'grade.published', 'report.created', 'report.reviewed', 'report.resolved', 'report.rejected', 'admin.system_settings_changed', 'admin.assignment_force_closed', 'subscription.created', 'subscription.cancelled', 'subscription.reactivated', 'subscription.manual_set', 'subscription.expired', 'payment.created', 'payment.completed', 'payment.failed', 'invoice.issued')");
+                            t.HasCheckConstraint("chk_audit_logs_action", "action IN ('user.login', 'user.logout', 'user.login_failed', 'user.password_changed', 'user.password_reset_requested', 'user.password_reset_completed', 'user.role_changed', 'user.locked', 'user.unlocked', 'user.deleted', 'question.created', 'question.updated', 'question.correct_answer_changed', 'question.deleted', 'question.visibility_changed', 'exam.created', 'exam.updated', 'exam.deleted', 'exam.visibility_changed', 'assignment.published', 'assignment.closed', 'assignment.archived', 'attempt.started', 'attempt.submitted', 'attempt.auto_submitted', 'attempt.force_submitted', 'attempt.flagged', 'attempt.unflagged', 'attempt.unlocked', 'grade.manual_graded', 'grade.manual_grade_updated', 'grade.published', 'report.created', 'report.reviewed', 'report.resolved', 'report.rejected', 'admin.system_settings_changed', 'admin.assignment_force_closed', 'subscription.created', 'subscription.cancelled', 'subscription.reactivated', 'subscription.manual_set', 'subscription.expired', 'payment.created', 'payment.completed', 'payment.failed', 'invoice.issued')");
 
                             t.HasCheckConstraint("chk_audit_logs_actor_role", "actor_role IS NULL OR actor_role IN ('Student', 'Teacher', 'Admin', 'System')");
 
@@ -565,6 +565,12 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("allow_late");
 
+                    b.Property<bool>("BlockCopyPaste")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("block_copy_paste");
+
                     b.Property<long>("ClassId")
                         .HasColumnType("bigint")
                         .HasColumnName("class_id");
@@ -596,6 +602,12 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("description");
 
+                    b.Property<bool>("DetectTabSwitch")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("detect_tab_switch");
+
                     b.Property<long>("ExamId")
                         .HasColumnType("bigint")
                         .HasColumnName("exam_id");
@@ -620,6 +632,12 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasDefaultValue(1)
                         .HasColumnName("max_attempts");
 
+                    b.Property<int>("MaxViolations")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("max_violations");
+
                     b.Property<DateTime?>("OpensAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("opens_at");
@@ -633,6 +651,12 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.Property<DateTime?>("PublishedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("published_at");
+
+                    b.Property<bool>("RequireFullscreen")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("require_fullscreen");
 
                     b.Property<string>("ScorePolicy")
                         .IsRequired()
@@ -681,6 +705,12 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("updated_by");
 
+                    b.Property<string>("ViolationAction")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)")
+                        .HasColumnName("violation_action");
+
                     b.HasKey("Id")
                         .HasName("pk_assignments");
 
@@ -722,6 +752,8 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
 
                             t.HasCheckConstraint("chk_assignments_max_attempts", "max_attempts >= 1 AND max_attempts <= 100");
 
+                            t.HasCheckConstraint("chk_assignments_max_violations", "max_violations >= 0");
+
                             t.HasCheckConstraint("chk_assignments_score_policy", "score_policy IN ('Highest', 'Latest')");
 
                             t.HasCheckConstraint("chk_assignments_status", "status IN ('Draft', 'Scheduled', 'Open', 'Closed', 'Archived')");
@@ -729,6 +761,8 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                             t.HasCheckConstraint("chk_assignments_time_limit", "time_limit_minutes IS NULL OR (time_limit_minutes > 0 AND time_limit_minutes <= 1440)");
 
                             t.HasCheckConstraint("chk_assignments_title_length", "length(title) >= 3 AND length(title) <= 300");
+
+                            t.HasCheckConstraint("chk_assignments_violation_action", "violation_action IN ('WarnOnly', 'AutoSubmit', 'LockAttempt')");
 
                             t.HasCheckConstraint("chk_assignments_window", "opens_at IS NULL OR closes_at IS NULL OR closes_at > opens_at");
                         });
@@ -794,6 +828,10 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("attempt_count");
 
+                    b.Property<bool>("BlockCopyPaste")
+                        .HasColumnType("boolean")
+                        .HasColumnName("block_copy_paste");
+
                     b.Property<long>("ClassId")
                         .HasColumnType("bigint")
                         .HasColumnName("class_id");
@@ -822,6 +860,10 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
+
+                    b.Property<bool>("DetectTabSwitch")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detect_tab_switch");
 
                     b.Property<long>("ExamId")
                         .HasColumnType("bigint")
@@ -853,6 +895,10 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("max_attempts");
 
+                    b.Property<int>("MaxViolations")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_violations");
+
                     b.Property<DateTime?>("OpensAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("opens_at");
@@ -864,6 +910,10 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.Property<DateTime?>("PublishedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("published_at");
+
+                    b.Property<bool>("RequireFullscreen")
+                        .HasColumnType("boolean")
+                        .HasColumnName("require_fullscreen");
 
                     b.Property<string>("ScorePolicy")
                         .IsRequired()
@@ -925,6 +975,11 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("ViolationAction")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("violation_action");
+
                     b.HasKey("Id")
                         .HasName("pk_assignment_view");
 
@@ -973,6 +1028,22 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.Property<string>("IpAddress")
                         .HasColumnType("text")
                         .HasColumnName("ip_address");
+
+                    b.Property<bool>("IsFlagged")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_flagged");
+
+                    b.Property<bool>("IsLocked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_locked");
+
+                    b.Property<DateTime?>("LastEventAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_event_at");
 
                     b.Property<Guid>("PublicId")
                         .ValueGeneratedOnAdd()
@@ -1031,8 +1102,18 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasColumnType("text")
                         .HasColumnName("user_agent");
 
+                    b.Property<int>("ViolationCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("violation_count");
+
                     b.HasKey("Id")
                         .HasName("pk_attempts");
+
+                    b.HasIndex("AssignmentId")
+                        .HasDatabaseName("idx_attempts_flagged")
+                        .HasFilter("is_flagged = true");
 
                     b.HasIndex("CreatedBy")
                         .HasDatabaseName("ix_attempts_created_by");
@@ -1171,6 +1252,51 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AttemptEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AttemptId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("attempt_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_attempt_events");
+
+                    b.HasIndex("AttemptId", "OccurredAt")
+                        .HasDatabaseName("idx_attempt_events_attempt");
+
+                    b.ToTable("attempt_events", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_attempt_events_type", "event_type IN ('TabSwitch', 'FocusLoss', 'FullscreenExit', 'CopyAttempt', 'PasteAttempt', 'ContextMenu', 'DevToolsOpen', 'ReloadAttempt', 'InactivityTimeout')");
+                        });
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AttemptView", b =>
                 {
                     b.Property<long>("Id")
@@ -1205,6 +1331,14 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.Property<DateTime?>("DeadlineAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deadline_at");
+
+                    b.Property<bool>("IsFlagged")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_flagged");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
 
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
@@ -1251,6 +1385,10 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                     b.Property<decimal?>("TotalScore")
                         .HasColumnType("numeric")
                         .HasColumnName("total_score");
+
+                    b.Property<int>("ViolationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("violation_count");
 
                     b.HasKey("Id")
                         .HasName("pk_attempt_view");
@@ -4327,6 +4465,16 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
                         .HasConstraintName("fk_attempt_answers_asp_net_users_updated_by");
                 });
 
+            modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.AttemptEvent", b =>
+                {
+                    b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.Attempt", null)
+                        .WithMany("Events")
+                        .HasForeignKey("AttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_attempt_events_attempts_attempt_id");
+                });
+
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.ManualGrade", b =>
                 {
                     b.HasOne("ClassManagement.Domain.Modules.Assignments.Entities.Attempt", null)
@@ -4804,6 +4952,8 @@ namespace ClassManagement.Infrastructure.Persistence.DbContext.Migrations
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.Attempt", b =>
                 {
                     b.Navigation("Answers");
+
+                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("ClassManagement.Domain.Modules.Assignments.Entities.SnapshotQuestion", b =>

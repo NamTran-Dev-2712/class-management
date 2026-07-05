@@ -1,4 +1,4 @@
-import { AlertTriangle, Clock, Loader2, Send } from "lucide-react";
+import { AlertTriangle, Clock, Loader2, Lock, Maximize, Send, ShieldAlert } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
@@ -24,6 +24,7 @@ import {
     useSubmitAttempt,
 } from "../_shared/assignments.hook";
 import type { Route } from "./+types/attempt.page";
+import { useProctoring } from "./use-proctoring";
 
 export function meta(_: Route.MetaArgs) {
     return [{ title: "Attempt · Class Management" }];
@@ -59,10 +60,13 @@ function TakingView({
     onSubmitted: () => void;
 }) {
     const { t } = useTranslation("assignment");
+    const navigate = useNavigate();
     const save = useSaveAttemptAnswers();
     const submit = useSubmitAttempt();
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [locked, setLocked] = useState(taking.isLocked);
     const submittedRef = useRef(false);
+    const proctoring = taking.proctoring;
 
     const [answers, setAnswers] = useState<AnswerState>(() => {
         const init: AnswerState = {};
@@ -124,6 +128,48 @@ function TakingView({
     );
     const lowTime = remaining !== null && remaining <= 300;
 
+    // Proctoring / browser lockdown (MVP-10). Server owns the counter + threshold decisions.
+    const { violationCount, isFullscreen, requestFullscreen } = useProctoring({
+        attemptId: taking.publicId,
+        config: proctoring,
+        initialViolationCount: taking.violationCount,
+        active: !locked,
+        onAutoSubmit: () => {
+            submittedRef.current = true;
+            toast.warning(t("proctoring.autoSubmitted"));
+            onSubmitted();
+        },
+        onLocked: () => setLocked(true),
+        onViolation: (count) =>
+            toast.warning(
+                proctoring.maxViolations > 0
+                    ? t("proctoring.violationWarning", {
+                          count,
+                          max: proctoring.maxViolations,
+                      })
+                    : t("proctoring.violationLogged"),
+            ),
+    });
+
+    // Best-effort auto-enter fullscreen on mount when required (may be blocked without a gesture).
+    useEffect(() => {
+        if (proctoring.requireFullscreen) requestFullscreen();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    if (locked) {
+        return (
+            <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 text-center">
+                <Lock className="text-destructive size-12" />
+                <h2 className="text-xl font-semibold">{t("proctoring.lockedTitle")}</h2>
+                <p className="text-muted-foreground text-sm">{t("proctoring.lockedBody")}</p>
+                <Button variant="outline" onClick={() => navigate("/student/assignments")}>
+                    {t("result.backToList")}
+                </Button>
+            </div>
+        );
+    }
+
     const setAnswer = (qid: string, value: AnswerValue) => {
         dirtyRef.current = true;
         setAnswers((prev) => ({ ...prev, [qid]: value }));
@@ -149,6 +195,36 @@ function TakingView({
                     </div>
                 ) : null}
             </div>
+
+            {proctoring.enabled ? (
+                <div className="space-y-2">
+                    <div className="border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200 flex items-start gap-2 rounded-md border p-3 text-xs">
+                        <ShieldAlert className="mt-0.5 size-4 shrink-0" />
+                        <div className="space-y-0.5">
+                            <p className="font-medium">{t("proctoring.monitoredTitle")}</p>
+                            <p>
+                                {proctoring.maxViolations > 0
+                                    ? t("proctoring.monitoredBody", {
+                                          count: violationCount,
+                                          max: proctoring.maxViolations,
+                                      })
+                                    : t("proctoring.monitoredBodyLog", { count: violationCount })}
+                            </p>
+                        </div>
+                    </div>
+                    {proctoring.requireFullscreen && !isFullscreen ? (
+                        <div className="flex items-center justify-between gap-2 rounded-md border p-3 text-xs">
+                            <span className="text-muted-foreground">
+                                {t("proctoring.fullscreenPrompt")}
+                            </span>
+                            <Button size="sm" variant="outline" onClick={requestFullscreen}>
+                                <Maximize className="size-4" />
+                                {t("proctoring.enterFullscreen")}
+                            </Button>
+                        </div>
+                    ) : null}
+                </div>
+            ) : null}
 
             {taking.questions.map((q) => (
                 <QuestionCard
@@ -303,6 +379,12 @@ function AttemptResultView({ attemptId }: { attemptId: string }) {
                         <p className="text-destructive flex items-center gap-2">
                             <AlertTriangle className="size-4" />
                             {t("result.autoSubmitted")}
+                        </p>
+                    ) : null}
+                    {result.violationCount > 0 ? (
+                        <p className="text-muted-foreground flex items-center gap-2 text-xs">
+                            <ShieldAlert className="size-4" />
+                            {t("result.violations", { count: result.violationCount })}
                         </p>
                     ) : null}
                     {result.scoreReleased ? (

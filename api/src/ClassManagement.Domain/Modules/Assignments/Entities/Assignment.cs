@@ -33,6 +33,15 @@ public sealed class Assignment : AuditableEntity, IHasPublicId, ISoftDeletable
     public bool ShuffleOptions { get; set; }
     public bool ShowAnswersAfterGrade { get; set; }
 
+    // Proctoring / anti-cheat config (MVP-10). All default OFF → backward compatible with MVP-5.
+    public bool RequireFullscreen { get; set; }
+    public bool DetectTabSwitch { get; set; }
+    public bool BlockCopyPaste { get; set; }
+
+    // 0 = unlimited / log-only (never auto-submit or lock, BR-10-05).
+    public int MaxViolations { get; set; }
+    public ViolationAction ViolationAction { get; set; } = ViolationAction.WarnOnly;
+
     public AssignmentStatus Status { get; set; } = AssignmentStatus.Draft;
     public DateTime? PublishedAt { get; set; }
     public DateTime? ClosedAt { get; set; }

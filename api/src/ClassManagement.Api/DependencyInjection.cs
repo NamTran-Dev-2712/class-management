@@ -169,6 +169,7 @@ public static class DependencyInjection
             AddUserFixedWindow(RateLimitOptions.Policies.AttemptStart, rl.AttemptStart);
             AddUserFixedWindow(RateLimitOptions.Policies.AttemptSave, rl.AttemptSave);
             AddUserFixedWindow(RateLimitOptions.Policies.AttemptSubmit, rl.AttemptSubmit);
+            AddUserFixedWindow(RateLimitOptions.Policies.AttemptEvents, rl.AttemptEvents);
             AddIpFixedWindow(RateLimitOptions.Policies.GradeWrite, rl.GradeWrite);
             AddIpFixedWindow(RateLimitOptions.Policies.Export, rl.Export);
             // Admin & moderation (MVP-7): report submit + notification writes are per-user (shared NAT),

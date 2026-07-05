@@ -78,6 +78,10 @@ export interface AttemptListItem {
     totalManualScore: number | null;
     totalScore: number | null;
     totalPoint: number | null;
+    // Proctoring integrity summary (MVP-10).
+    violationCount: number;
+    isFlagged: boolean;
+    isLocked: boolean;
     assignmentPublicId: string;
     assignmentTitle: string;
     studentPublicId: string;

@@ -17,5 +17,10 @@ public record CreateAssignmentCommand(
     GradePublishPolicy GradePublishPolicy,
     bool ShuffleQuestions,
     bool ShuffleOptions,
-    bool ShowAnswersAfterGrade
+    bool ShowAnswersAfterGrade,
+    bool RequireFullscreen,
+    bool DetectTabSwitch,
+    bool BlockCopyPaste,
+    int MaxViolations,
+    ViolationAction ViolationAction
 ) : IRequest<Guid>, IAssignmentWriteCommand;

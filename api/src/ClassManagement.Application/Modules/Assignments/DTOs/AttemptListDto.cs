@@ -16,6 +16,11 @@ public sealed record AttemptListDto
     public decimal? TotalScore { get; init; }
     public decimal? TotalPoint { get; init; }
 
+    // Proctoring integrity summary (MVP-10).
+    public int ViolationCount { get; init; }
+    public bool IsFlagged { get; init; }
+    public bool IsLocked { get; init; }
+
     public Guid AssignmentPublicId { get; init; }
     public string AssignmentTitle { get; init; } = string.Empty;
     public Guid StudentPublicId { get; init; }

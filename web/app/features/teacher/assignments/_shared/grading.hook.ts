@@ -42,3 +42,38 @@ export function usePublishGrades() {
         },
     });
 }
+
+// ── Proctoring (MVP-10) ──────────────────────────────────────────────────────────────────────
+
+/** Proctoring event timeline for one attempt. */
+export function useAttemptEvents(attemptId: string | undefined, enabled = true) {
+    return useQuery({
+        queryKey: queryKeys.assignments.attemptEvents(attemptId ?? ""),
+        queryFn: () => teacherAssignmentService.attemptEvents(attemptId!),
+        enabled: !!attemptId && enabled,
+    });
+}
+
+type AttemptModerationAction = "force-submit" | "flag" | "unflag" | "unlock";
+
+/** Teacher attempt moderation (force-submit / flag / unflag / unlock); invalidates the roster. */
+export function useAttemptModeration() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (input: { attemptId: string; action: AttemptModerationAction }) => {
+            switch (input.action) {
+                case "force-submit":
+                    return teacherAssignmentService.forceSubmit(input.attemptId);
+                case "flag":
+                    return teacherAssignmentService.flag(input.attemptId);
+                case "unflag":
+                    return teacherAssignmentService.unflag(input.attemptId);
+                case "unlock":
+                    return teacherAssignmentService.unlock(input.attemptId);
+            }
+        },
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: queryKeys.assignments.all });
+        },
+    });
+}

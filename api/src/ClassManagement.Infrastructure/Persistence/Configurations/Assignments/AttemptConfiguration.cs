@@ -46,6 +46,11 @@ public sealed class AttemptConfiguration : IEntityTypeConfiguration<Attempt>
         builder.Property(a => a.StartedAt).HasDefaultValueSql("now()");
         builder.Property(a => a.AutoSubmitted).HasDefaultValue(false);
 
+        // Proctoring integrity state (MVP-10) — server-authoritative counter (BR-10-03).
+        builder.Property(a => a.ViolationCount).HasDefaultValue(0);
+        builder.Property(a => a.IsFlagged).HasDefaultValue(false);
+        builder.Property(a => a.IsLocked).HasDefaultValue(false);
+
         builder
             .Property(a => a.QuestionOrder)
             .HasColumnType("jsonb")
@@ -109,8 +114,20 @@ public sealed class AttemptConfiguration : IEntityTypeConfiguration<Attempt>
             .HasDatabaseName("idx_attempts_deadline")
             .HasFilter("status = 'InProgress'");
 
+        // Flagged-attempt lookup for teacher review (MVP-10).
+        builder
+            .HasIndex(a => a.AssignmentId)
+            .HasDatabaseName("idx_attempts_flagged")
+            .HasFilter("is_flagged = true");
+
         builder
             .HasMany(a => a.Answers)
+            .WithOne()
+            .HasForeignKey(x => x.AttemptId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasMany(a => a.Events)
             .WithOne()
             .HasForeignKey(x => x.AttemptId)
             .OnDelete(DeleteBehavior.Cascade);

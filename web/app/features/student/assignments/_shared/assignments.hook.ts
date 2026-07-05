@@ -2,7 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
 import { studentAssignmentService } from "@/services/assignment/assignment.service";
-import type { SaveAttemptAnswersRequest } from "@/services/assignment/dtos/commands/assignment-commands";
+import type {
+    RecordProctorEventsRequest,
+    SaveAttemptAnswersRequest,
+} from "@/services/assignment/dtos/commands/assignment-commands";
 import type {
     AttemptListQuery,
     StudentAssignmentListQuery,
@@ -76,5 +79,13 @@ export function useSubmitAttempt() {
     return useMutation({
         mutationFn: (attemptId: string) => studentAssignmentService.submit(attemptId),
         onSuccess: invalidate,
+    });
+}
+
+// Fire-and-forget proctoring event reporting (MVP-10); the caller reacts to the returned result.
+export function useRecordProctorEvents() {
+    return useMutation({
+        mutationFn: (input: { attemptId: string; payload: RecordProctorEventsRequest }) =>
+            studentAssignmentService.recordEvents(input.attemptId, input.payload),
     });
 }

@@ -44,7 +44,12 @@ internal static class AssignmentsApi
         bool shuffleQuestions = false,
         bool shuffleOptions = false,
         bool showAnswersAfterGrade = false,
-        string? description = null
+        string? description = null,
+        bool requireFullscreen = false,
+        bool detectTabSwitch = false,
+        bool blockCopyPaste = false,
+        int maxViolations = 0,
+        string violationAction = "WarnOnly"
     ) =>
         new
         {
@@ -62,6 +67,11 @@ internal static class AssignmentsApi
             shuffleQuestions,
             shuffleOptions,
             showAnswersAfterGrade,
+            requireFullscreen,
+            detectTabSwitch,
+            blockCopyPaste,
+            maxViolations,
+            violationAction,
         };
 
     public static Task<HttpResponseMessage> CreateRawAsync(HttpClient teacher, object payload) =>
@@ -155,6 +165,65 @@ internal static class AssignmentsApi
         HttpClient student,
         string attemptId
     ) => student.GetAsync($"/api/student/assignments/attempts/{attemptId}/result");
+
+    // ── MVP-10: proctoring events / moderation ───────────────────────────────────────────────
+
+    public static Task<HttpResponseMessage> RecordEventsRawAsync(
+        HttpClient student,
+        string attemptId,
+        object events
+    ) =>
+        student.PostAsJsonAsync(
+            $"/api/student/assignments/attempts/{attemptId}/events",
+            new { events }
+        );
+
+    // Sends `count` TabSwitch events in one batch and returns the parsed RecordEventsResultDto.
+    public static async Task<JsonElement> RecordTabSwitchesAsync(
+        HttpClient student,
+        string attemptId,
+        int count
+    )
+    {
+        var events = Enumerable
+            .Range(0, count)
+            .Select(_ => new { eventType = "TabSwitch", occurredAt = (DateTime?)null })
+            .ToArray();
+        var resp = await RecordEventsRawAsync(student, attemptId, events);
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        return await AuthHelper.ReadDataAsync(resp);
+    }
+
+    public static async Task<JsonElement> GetAttemptEventsAsync(
+        HttpClient teacher,
+        string attemptId
+    )
+    {
+        var resp = await teacher.GetAsync($"/api/teacher/assignments/attempts/{attemptId}/events");
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        return await AuthHelper.ReadDataAsync(resp);
+    }
+
+    public static Task<HttpResponseMessage> ForceSubmitRawAsync(
+        HttpClient client,
+        string attemptId,
+        bool admin = false
+    ) =>
+        client.PostAsync(
+            admin
+                ? $"/api/admin/assignments/attempts/{attemptId}/force-submit"
+                : $"/api/teacher/assignments/attempts/{attemptId}/force-submit",
+            null
+        );
+
+    public static Task<HttpResponseMessage> FlagRawAsync(HttpClient teacher, string attemptId) =>
+        teacher.PostAsync($"/api/teacher/assignments/attempts/{attemptId}/flag", null);
+
+    public static Task<HttpResponseMessage> UnflagRawAsync(HttpClient teacher, string attemptId) =>
+        teacher.PostAsync($"/api/teacher/assignments/attempts/{attemptId}/unflag", null);
+
+    public static Task<HttpResponseMessage> UnlockRawAsync(HttpClient teacher, string attemptId) =>
+        teacher.PostAsync($"/api/teacher/assignments/attempts/{attemptId}/unlock", null);
 
     // ── MVP-6: grading / reports ─────────────────────────────────────────────────────────────
 

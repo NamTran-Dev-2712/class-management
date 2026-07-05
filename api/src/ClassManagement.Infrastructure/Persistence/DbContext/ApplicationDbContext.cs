@@ -37,6 +37,7 @@ public sealed class ApplicationDbContext
     public DbSet<SnapshotOption> SnapshotOptions => Set<SnapshotOption>();
     public DbSet<Attempt> Attempts => Set<Attempt>();
     public DbSet<AttemptAnswer> AttemptAnswers => Set<AttemptAnswer>();
+    public DbSet<AttemptEvent> AttemptEvents => Set<AttemptEvent>();
     public DbSet<ManualGrade> ManualGrades => Set<ManualGrade>();
 
     // Media & rich content (MVP-9)

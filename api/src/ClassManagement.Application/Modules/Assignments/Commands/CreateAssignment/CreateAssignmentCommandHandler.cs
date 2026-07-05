@@ -62,6 +62,11 @@ public class CreateAssignmentCommandHandler : IRequestHandler<CreateAssignmentCo
             ShuffleQuestions = request.ShuffleQuestions,
             ShuffleOptions = request.ShuffleOptions,
             ShowAnswersAfterGrade = request.ShowAnswersAfterGrade,
+            RequireFullscreen = request.RequireFullscreen,
+            DetectTabSwitch = request.DetectTabSwitch,
+            BlockCopyPaste = request.BlockCopyPaste,
+            MaxViolations = request.MaxViolations,
+            ViolationAction = request.ViolationAction,
             Status = AssignmentStatus.Draft,
         };
 

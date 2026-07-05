@@ -274,6 +274,31 @@ migration view riêng cho admin:
 
 ---
 
+### MVP-10: Anti-Cheat Proctoring (as built)
+
+**Đã triển khai** — một migration:
+
+```
+20260703145724_add_proctoring_to_assignments_attempts
+  -- ALTER assignments ADD require_fullscreen/detect_tab_switch/block_copy_paste (bool, default false)
+  --                       max_violations (int, default 0, chk >= 0)
+  --                       violation_action (text, default 'WarnOnly', chk IN WarnOnly/AutoSubmit/LockAttempt) — doc 05
+  -- ALTER attempts ADD violation_count (int, default 0) / is_flagged / is_locked (bool, default false)
+  --                    last_event_at (timestamptz null) + idx_attempts_flagged (partial WHERE is_flagged) — doc 06
+  -- CREATE TABLE attempt_events (append-only, CASCADE, chk event_type, idx (attempt_id, occurred_at)) — doc 06
+  -- DROP+CREATE vw_attempts (thêm violation_count/is_flagged/is_locked) (raw SQL)
+```
+
+> Ghi chú:
+> - **Mặc định tắt toàn bộ** → assignment không bật proctoring hành xử y hệt MVP-5 (BR-10-01).
+> - **Server authoritative**: endpoint ghi event tái dùng guard chain của `SaveAttemptAnswers` (owner +
+>   `InProgress` + chưa quá deadline) + reject khi `is_locked`; tăng `violation_count`; vượt ngưỡng →
+>   `violation_action` qua `AttemptGrading.FinalizeAsync` (AutoSubmit) hoặc set `is_locked` (BR-10-05). Không
+>   thêm trạng thái Attempt mới (BR-10-06).
+> - `attempt_events` là bằng chứng append-only (BR-10-02), CASCADE từ `attempts`.
+
+---
+
 ## 4. Down Migrations (Rollback)
 
 **Nguyên tắc**: Mọi migration phải có `Down()` viết đầy đủ.

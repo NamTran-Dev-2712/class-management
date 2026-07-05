@@ -94,12 +94,66 @@
             "titleLength": "Tiêu đề phải từ 3–300 ký tự.",
             "descriptionMax": "Mô tả không được vượt quá 1000 ký tự.",
             "maxAttempts": "Số lần làm phải từ 1 đến 100.",
+            "maxViolations": "Số vi phạm tối đa phải từ 0 đến 100.",
             "timeWindow": "Thời gian đóng phải sau thời gian mở."
         }
     },
     "scorePolicy": {
         "Highest": "Lần làm điểm cao nhất",
         "Latest": "Lần làm gần nhất"
+    },
+    "violationAction": {
+        "WarnOnly": "Chỉ cảnh báo (ghi log)",
+        "AutoSubmit": "Tự động nộp bài",
+        "LockAttempt": "Khoá lượt làm bài"
+    },
+    "proctoring": {
+        "sectionTitle": "Giám sát (chống gian lận)",
+        "sectionHint": "Khoá trình duyệt tuỳ chọn. Chỉ ở mức best-effort: nâng rào cản và tạo nhật ký, không tuyệt đối. Mặc định tắt toàn bộ.",
+        "requireFullscreen": "Bắt buộc toàn màn hình",
+        "requireFullscreenHint": "Học sinh làm bài ở chế độ toàn màn hình; thoát ra sẽ bị ghi log.",
+        "detectTabSwitch": "Phát hiện chuyển tab / mất focus",
+        "detectTabSwitchHint": "Ghi vi phạm khi học sinh chuyển tab hoặc cửa sổ.",
+        "blockCopyPaste": "Chặn copy / paste / chuột phải",
+        "blockCopyPasteHint": "Ngăn sao chép đề hoặc dán đáp án.",
+        "maxViolations": "Số vi phạm tối đa",
+        "maxViolationsHint": "0 = không giới hạn (chỉ log). Khi vượt, áp dụng hành động bên dưới.",
+        "violationAction": "Khi vượt ngưỡng",
+        "violationActionHint": "Điều gì xảy ra khi vượt quá số vi phạm cho phép.",
+        "monitoredTitle": "Lượt làm bài này đang được giám sát",
+        "monitoredBody": "Các hành vi nghi vấn được ghi lại. Vi phạm: {{count}} / {{max}}.",
+        "monitoredBodyLog": "Các hành vi nghi vấn được ghi lại. Vi phạm: {{count}}.",
+        "fullscreenPrompt": "Bạn đã thoát toàn màn hình. Vui lòng quay lại toàn màn hình.",
+        "enterFullscreen": "Vào toàn màn hình",
+        "violationWarning": "Cảnh báo: đã ghi nhận vi phạm ({{count}} / {{max}}).",
+        "violationLogged": "Đã ghi nhận một sự kiện giám sát.",
+        "autoSubmitted": "Đã vượt số vi phạm — bài của bạn được nộp tự động.",
+        "lockedTitle": "Lượt làm bài đã bị khoá",
+        "lockedBody": "Lượt làm bài bị khoá do vi phạm giám sát. Vui lòng liên hệ giáo viên.",
+        "moderation": {
+            "forceSubmit": "Buộc nộp",
+            "unlock": "Mở khoá",
+            "flag": "Đánh dấu",
+            "unflag": "Bỏ đánh dấu",
+            "force-submitDone": "Đã nộp lượt làm bài.",
+            "flagDone": "Đã đánh dấu lượt làm bài.",
+            "unflagDone": "Đã bỏ đánh dấu.",
+            "unlockDone": "Đã mở khoá lượt làm bài."
+        },
+        "timeline": {
+            "title": "Nhật ký giám sát ({{count}})"
+        }
+    },
+    "eventType": {
+        "TabSwitch": "Chuyển tab",
+        "FocusLoss": "Mất focus",
+        "FullscreenExit": "Thoát toàn màn hình",
+        "CopyAttempt": "Thử sao chép",
+        "PasteAttempt": "Thử dán",
+        "ContextMenu": "Chuột phải",
+        "DevToolsOpen": "Phím tắt DevTools",
+        "ReloadAttempt": "Tải lại trang",
+        "InactivityTimeout": "Không hoạt động"
     },
     "gradePublishPolicy": {
         "Immediate": "Ngay sau khi nộp",
@@ -121,6 +175,8 @@
         "student": "Học sinh",
         "attempt": "Lượt",
         "status": "Trạng thái",
+        "violations": "Vi phạm",
+        "flagged": "Đã đánh dấu",
         "submittedAt": "Đã nộp",
         "score": "Điểm",
         "actions": "Thao tác",
@@ -244,6 +300,7 @@
     "result": {
         "title": "Kết quả",
         "autoSubmitted": "Lượt này được nộp tự động (đã hết thời gian).",
+        "violations": "Đã ghi nhận {{count}} vi phạm giám sát trong lượt làm bài này.",
         "pending": "Điểm của bạn sẽ có sau.",
         "manualPending": "Một số câu cần giáo viên chấm thủ công.",
         "waitingPublish": "Điểm của bạn sẽ có sau khi giáo viên công bố.",

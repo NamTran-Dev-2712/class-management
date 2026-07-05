@@ -179,6 +179,11 @@
   "Validation.Assignment.ClassRequired": "A class is required.",
   "Validation.Attempt.AnswersNull": "The answers list is required.",
   "Validation.Attempt.TextTooLong": "The answer must not exceed 50000 characters.",
+  "Validation.Attempt.EventsRequired": "The events list is required.",
+  "Validation.Attempt.EventsBatchTooLarge": "Too many events in one request.",
+  "Validation.Attempt.EventTypeInvalid": "Unknown proctoring event type.",
+  "Validation.Assignment.MaxViolationsInvalid": "The maximum violations value is invalid.",
+  "Validation.Assignment.ViolationActionInvalid": "The violation action is invalid.",
 
   "Assignment.Created": "Assignment created successfully.",
   "Assignment.Updated": "Assignment updated successfully.",
@@ -209,6 +214,11 @@
   "Attempt.DeadlinePassed": "The time limit for this attempt has passed.",
   "Attempt.QuestionNotInAttempt": "That question is not part of this attempt.",
   "Attempt.OptionNotInQuestion": "A selected option does not belong to the question.",
+  "Attempt.Locked": "This attempt is locked. Please contact your teacher.",
+  "Attempt.ForceSubmitted": "Attempt submitted.",
+  "Attempt.Flagged": "Attempt flagged.",
+  "Attempt.Unflagged": "Attempt flag removed.",
+  "Attempt.Unlocked": "Attempt unlocked.",
 
   "Attempt.Graded": "Attempt graded.",
   "Assignment.GradesReleased": "Grades published successfully.",
